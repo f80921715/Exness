@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" :class="{ 'dark': $store.theme.dark }" x-data>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tesla EV Orders - EXNESS</title>
+    <link rel="icon" type="image/png" href="../assets/images/title-logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="../assets/js/tailwindcss.js"></script>
+    <script>
+        if (!localStorage.getItem('theme')) localStorage.setItem('theme', 'dark');
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: { 500: '#FFD100', 600: '#E5BC00' } }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="../assets/js/lucide.min.js"></script>
+    <script src="../assets/js/icons.js"></script>
+    <script defer src="../assets/js/alpine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="../assets/js/supabase-client.js" defer></script>
+    <script src="../assets/js/supabase-dashboard.js" defer></script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('theme', {
+                dark: localStorage.getItem('theme') === 'dark',
+                toggle(trigger) {
+                    if (window.toggleDashboardTheme) {
+                        window.toggleDashboardTheme(trigger);
+                    } else {
+                        this.dark = !this.dark;
+                        localStorage.setItem('theme', this.dark ? 'dark' : 'light');
+                        document.documentElement.classList.toggle('dark', this.dark);
+                    }
+                }
+            });
+        });
+    </script>
+    <script src="../assets/js/fast-nav.js" defer></script>
+</head>
+<body class="bg-gray-50 dark:bg-[#0c0c0c] text-gray-900 dark:text-gray-100 font-sans antialiased min-h-screen flex transition-colors">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white dark:bg-[#141414] border-r border-gray-200 dark:border-gray-800 flex flex-col justify-between hidden lg:flex">
+        <div>
+            <div class="h-16 px-6 flex items-center border-b border-gray-100 dark:border-gray-800">
+                <a href="../index.html"><img src="../assets/images/exness-logo.png" alt="Logo" class="h-8 w-auto brightness-0 dark:invert"></a>
+            </div>
+            <nav class="p-4 space-y-1.5 text-sm font-medium">
+                <a href="index.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span></a>
+                <a href="trades.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="trending-up" class="w-5 h-5"></i><span>Live Trading</span></a>
+                <a href="investments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="pie-chart" class="w-5 h-5"></i><span>Investment Plans</span></a>
+                <a href="cars.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-primary-500 text-white font-semibold shadow-md"><i data-lucide="car" class="w-5 h-5"></i><span>Tesla EV Orders</span></a>
+                <a href="deposit.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="arrow-down-circle" class="w-5 h-5"></i><span>Deposit Crypto</span></a>
+                <a href="withdraw.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="arrow-up-circle" class="w-5 h-5"></i><span>Withdraw Profits</span></a>
+                <a href="transactions.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="history" class="w-5 h-5"></i><span>Transactions</span></a>
+                <a href="profile.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="shield" class="w-5 h-5"></i><span>Profile & Security</span></a>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-gray-100 dark:border-gray-800">
+            <a href="javascript:void(0)" data-logout-link class="flex items-center space-x-3 px-3.5 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 rounded-xl transition"><i data-lucide="log-out" class="w-5 h-5"></i><span>Log out</span></a>
+        </div>
+    </aside>
+
+    <!-- Content -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="relative min-h-16 bg-white dark:bg-[#141414] border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+            <h1 class="hidden sm:block text-base font-bold">Electric Vehicle Orders &amp; Dispatch Tracking</h1>
+            <span class="sm:hidden absolute left-1/2 -translate-x-1/2 text-base font-bold tracking-tight">EV Orders</span>
+            <div class="flex items-center space-x-3 ml-auto">
+                <button @click="$store.theme.toggle($event)" class="theme-btn p-2 text-gray-400 hover:text-white rounded-full">
+                    <span x-show="!$store.theme.dark"><i data-lucide="sun" class="w-5 h-5"></i></span>
+                    <span x-show="$store.theme.dark"><i data-lucide="moon" class="w-5 h-5"></i></span>
+                </button>
+            </div>
+        </header>
+
+        <main class="p-6 sm:p-8 space-y-8 flex-1 max-w-5xl mx-auto w-full">
+            <!-- Active Order Card -->
+            <div data-active-car-card hidden class="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-gray-100 dark:border-gray-800">
+                    <div class="flex items-center space-x-5">
+                        <img src="../dash/cars/3/69ad796b5849c.jpg" alt="Model X Plaid" class="w-28 h-20 object-cover rounded-2xl border border-gray-200 dark:border-gray-700 shadow-md">
+                        <div>
+                            <span data-car-order-number class="text-xs font-bold text-green-500 bg-green-500/20 px-2.5 py-0.5 rounded-full uppercase">Order #TSLA-90281</span>
+                            <h2 data-car-model class="text-2xl font-black mt-1">Tesla Model X Plaid</h2>
+                            <p class="text-xs text-gray-500">2024 Solid Black &bull; Tri Motor All-Wheel Drive (1,020 HP)</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-gray-500">Agreed Price</div>
+                        <div data-car-price class="text-2xl font-black text-gray-900 dark:text-white">$94,990.00</div>
+                        <div class="text-xs text-green-500 font-bold mt-0.5">$250 Earnest Deposit Paid</div>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="my-8">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">Delivery Dispatch Timeline</h4>
+                    <div class="relative flex items-center justify-between">
+                        <div class="absolute left-0 top-1/2 -translate-y-1/2 w-3/4 h-1 bg-primary-500"></div>
+                        <div class="absolute left-3/4 top-1/2 -translate-y-1/2 w-1/4 h-1 bg-gray-200 dark:bg-gray-800"></div>
+
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold shadow"><i data-lucide="check" class="w-4 h-4"></i></div>
+                            <span class="text-[11px] font-bold mt-2">Reserved</span>
+                        </div>
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold shadow"><i data-lucide="check" class="w-4 h-4"></i></div>
+                            <span class="text-[11px] font-bold mt-2">Built</span>
+                        </div>
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center text-xs font-bold shadow animate-pulse"><i data-lucide="truck" class="w-4 h-4"></i></div>
+                            <span class="text-[11px] font-bold text-primary-500 mt-2">In Transit</span>
+                        </div>
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-400 flex items-center justify-center text-xs font-bold"><i data-lucide="home" class="w-4 h-4"></i></div>
+                            <span class="text-[11px] font-bold text-gray-400 mt-2">Handover</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t border-gray-100 dark:border-gray-800 text-xs">
+                    <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl space-y-1">
+                        <div class="text-gray-400">Carrier Information</div>
+                        <div class="font-bold text-gray-900 dark:text-white">Precision Auto Logistics &bull; Tracking #PAL-771920</div>
+                        <div class="text-[11px] text-gray-500">Estimated Delivery Date: September 24, 2026</div>
+                    </div>
+                    <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl space-y-1">
+                        <div class="text-gray-400">Remaining Balance Settlement</div>
+                        <div class="font-bold text-gray-900 dark:text-white">$94,740.00 (Due upon arrival)</div>
+                        <div class="text-[11px] text-primary-500 font-semibold">Allocation VIN: <code data-car-vin class="font-mono font-bold">5YJSA1E28PF993810</code></div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="!window.brokerAccount || !window.brokerAccount.getData() || !window.brokerAccount.getData().activeCarOrder" class="rounded-3xl border border-gray-200 bg-white p-8 sm:p-12 text-center shadow-sm dark:border-gray-800 dark:bg-[#141414]">
+                <i data-lucide="car" class="mx-auto mb-4 h-12 w-12 text-primary-500"></i>
+                <h2 class="text-xl font-bold">Reserve Your Tesla EV</h2>
+                <p class="mt-2 text-xs sm:text-sm text-gray-500 max-w-md mx-auto">Lock in delivery allocation with an earnest $250 deposit. Settle balance via investment returns or crypto deposit.</p>
+                <button type="button" @click="window.brokerAccount.orderCar({ model: 'Tesla Model X Plaid', price: 94990, deposit: 250, color: 'Solid Black' })" class="mt-6 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-xl shadow-lg transition">
+                    Reserve Model X Plaid ($250 Deposit)
+                </button>
+            </div>
+
+            <!-- Browse More CTA -->
+            <div class="text-center p-8 bg-gray-100 dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-gray-800">
+                <h3 class="text-lg font-bold mb-2">Want to Add Another Vehicle?</h3>
+                <p class="text-xs text-gray-500 mb-4">Browse our current available stock for Model 3, Model Y, and Cybertruck.</p>
+                <a href="../cars.html" class="inline-flex items-center px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-xl transition">
+                    Browse Public EV Inventory
+                </a>
+            </div>
+        </main>
+        <nav class="lg:hidden fixed bottom-4 left-4 right-4 z-40 rounded-3xl border border-gray-200 dark:border-white/10 bg-white/95 dark:bg-[#181a24]/95 px-4 py-3 shadow-2xl backdrop-blur-xl" aria-label="Mobile dashboard navigation">
+            <div class="flex items-center justify-around">
+                <a href="index.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="text-[9px] font-bold">Home</span></a>
+                <a href="transactions.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="history" class="w-4 h-4"></i><span class="text-[9px] font-bold">Activity</span></a>
+                <a href="deposit.html" class="-mt-7 flex h-12 w-12 items-center justify-center rounded-full border-4 border-gray-50 dark:border-[#0c0c0c] bg-primary-500 text-black shadow-lg" aria-label="Deposit"><i data-lucide="plus" class="w-5 h-5"></i></a>
+                <a href="trades.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="trending-up" class="w-4 h-4"></i><span class="text-[9px] font-bold">Live Trading</span></a>
+                <a href="profile.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="user" class="w-4 h-4"></i><span class="text-[9px] font-bold">Profile</span></a>
+            </div>
+        </nav>
+    </div>
+    <script>document.addEventListener('DOMContentLoaded', () => { if(window.lucide) lucide.createIcons(); });</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="../assets/js/ios-transitions.js" defer></script>
+</body>
+</html>

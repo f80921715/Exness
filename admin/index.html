@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en" class="dark" x-data :class="{ 'dark': $store.theme.darkMode || $store.theme.dark }">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Portal | EXNESS Secure Console</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS with custom configuration -->
+    <script src="../assets/js/tailwindcss.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#FFD100', // EXNESS Yellow
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        },
+                        gray: {
+                            850: '#18181b',
+                            900: '#121214',
+                            950: '#09090b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="../assets/js/alpine.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="../assets/js/lucide.min.js"></script>
+    <script src="../assets/js/icons.js"></script>
+
+    <!-- Supabase Client & Admin Logic -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="../assets/js/supabase-client.js" defer></script>
+    <script src="../assets/js/supabase-admin.js" defer></script>
+
+    <!-- App Styles -->
+    <link rel="stylesheet" href="../assets/css/style.css">
+
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; }
+    </style>
+</head>
+
+<body class="bg-[#f8f9fa] dark:bg-[#0b0c10] text-gray-900 dark:text-gray-100 min-h-screen antialiased flex flex-col font-sans transition-colors duration-300">
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('theme', {
+                darkMode: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+                dark: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+                init() {
+                    document.documentElement.classList.toggle('dark', this.darkMode);
+                },
+                toggle() {
+                    this.darkMode = !this.darkMode;
+                    this.dark = this.darkMode;
+                    localStorage.setItem('theme', this.darkMode ? 'dark' : 'light');
+                    document.documentElement.classList.toggle('dark', this.darkMode);
+                }
+            });
+        });
+    </script>
+
+    <!-- Loading Splash while verifying admin clearance -->
+    <div id="admin-auth-loading" class="min-h-screen w-full flex flex-col items-center justify-center p-6 text-center bg-gray-50 dark:bg-[#0b0c10]">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-primary-500/10 text-primary-500 flex items-center justify-center border border-primary-500/20">
+                <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-primary-500"></i>
+            </div>
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Verifying administrative security clearance...</p>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 1. UNAUTHORIZED / 404 SHIELD (Rendered only for non-admins)               -->
+    <!-- ========================================================================= -->
+    <div id="admin-unauthorized-shield" hidden class="min-h-screen w-full flex-col items-center justify-center p-6 text-center bg-gray-50 dark:bg-[#0b0c10]" style="display: none;">
+        <div class="max-w-md w-full p-8 bg-white dark:bg-[#141414] rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl">
+            <div class="w-16 h-16 mx-auto mb-5 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center border border-red-500/20">
+                <i data-lucide="shield-alert" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-3xl font-black mb-2 text-gray-900 dark:text-white">404</h1>
+            <h2 class="text-base font-bold text-gray-700 dark:text-gray-300 mb-2">Page Not Found</h2>
+            <p data-shield-message class="text-xs text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
+                The requested resource could not be found or you do not have administrative clearance to access this system.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="../index.html" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold text-xs transition">
+                    Return to Homepage
+                </a>
+                <a href="../login.html?admin=1" class="px-5 py-2.5 rounded-xl bg-primary-500 hover:bg-primary-600 text-black font-bold text-xs transition shadow-md shadow-primary-500/20">
+                    Sign In as Administrator
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 2. SECURE ADMIN DASHBOARD APPLICATION (Revealed only after role = 'admin') -->
+    <!-- ========================================================================= -->
+    <div id="admin-dashboard-app" hidden class="min-h-screen flex-col flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Top Navigation & Header Bar -->
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#141414] p-4 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center text-black font-black text-lg shadow-md shadow-primary-500/20">
+                    E
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg font-black tracking-tight text-gray-900 dark:text-white">EXNESS Console</span>
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-purple-500/10 text-purple-500 border border-purple-500/20">Admin Portal</span>
+                    </div>
+                    <p class="text-xs text-gray-400">Authenticated: <strong data-admin-email class="text-gray-700 dark:text-gray-300">Verifying...</strong></p>
+                </div>
+            </div>
+
+            <!-- Header Quick Actions -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button type="button" onclick="window.brokerAdmin.refresh()" title="Refresh live database data" class="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-semibold flex items-center gap-1.5 transition">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Sync Data</span>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button @click="$store.theme.toggle()" type="button" class="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition" title="Toggle color scheme">
+                    <span x-show="!$store.theme.dark"><i data-lucide="sun" class="w-4 h-4"></i></span>
+                    <span x-show="$store.theme.dark"><i data-lucide="moon" class="w-4 h-4"></i></span>
+                </button>
+
+                <a href="../dashboard/index.html" class="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-semibold flex items-center gap-1.5 transition" title="Switch to user view">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <span class="hidden md:inline">User View</span>
+                </a>
+
+                <!-- Apple Logout Button -->
+                <button type="button" data-logout-link class="px-3.5 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold flex items-center gap-1.5 transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span>Log out</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ========================================================================= -->
+        <!-- 3. OVERVIEW METRICS KPI CARDS (6 CARDS)                                   -->
+        <!-- ========================================================================= -->
+        <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+            <!-- 1. Total Users -->
+            <div class="bg-white dark:bg-[#141414] p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between text-gray-400 mb-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider">Total Users</span>
+                    <i data-lucide="users" class="w-4 h-4 text-primary-500"></i>
+                </div>
+                <div data-metric-users class="text-xl font-black text-gray-900 dark:text-white font-mono">0</div>
+                <div class="text-[10px] text-gray-400 mt-1">Platform Accounts</div>
+            </div>
+
+            <!-- 2. Total Deposits -->
+            <div class="bg-white dark:bg-[#141414] p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between text-gray-400 mb-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider">Total Deposits</span>
+                    <i data-lucide="download" class="w-4 h-4 text-green-500"></i>
+                </div>
+                <div data-metric-deposits class="text-xl font-black text-green-500 font-mono">$0.00</div>
+                <div class="text-[10px] text-gray-400 mt-1">Settled Inflows</div>
+            </div>
+
+            <!-- 3. Total Withdrawals -->
+            <div class="bg-white dark:bg-[#141414] p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between text-gray-400 mb-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider">Total Withdrawn</span>
+                    <i data-lucide="upload" class="w-4 h-4 text-primary-500"></i>
+                </div>
+                <div data-metric-withdrawals class="text-xl font-black text-primary-500 font-mono">$0.00</div>
+                <div class="text-[10px] text-gray-400 mt-1">Processed Outflows</div>
+            </div>
+
+            <!-- 4. Total Transactions -->
+            <div class="bg-white dark:bg-[#141414] p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between text-gray-400 mb-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider">Transactions</span>
+                    <i data-lucide="activity" class="w-4 h-4 text-blue-500"></i>
+                </div>
+                <div data-metric-transactions class="text-xl font-black text-gray-900 dark:text-white font-mono">0</div>
+                <div class="text-[10px] text-gray-400 mt-1">Ledger Operations</div>
+            </div>
+
+            <!-- 5. Pending Deposits -->
+            <div class="bg-white dark:bg-[#141414] p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between text-gray-400 mb-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider">Pending Deposits</span>
+                    <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
+                </div>
+                <div data-metric-pending-deposits class="text-xl font-black text-amber-500 font-mono">0</div>
+                <div class="text-[10px] text-gray-400 mt-1">Awaiting Confirm</div>
+            </div>
+
+            <!-- 6. Pending Withdrawals -->
+            <div class="bg-white dark:bg-[#141414] p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between text-gray-400 mb-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider">Pending Outflows</span>
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i>
+                </div>
+                <div data-metric-pending-withdrawals class="text-xl font-black text-red-500 font-mono">0</div>
+                <div class="text-[10px] text-gray-400 mt-1">Needs Approval</div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- 4. DEPOSITS MANAGEMENT                                                    -->
+        <!-- ========================================================================= -->
+        <section class="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900 dark:text-white">Deposit Requests</h2>
+                    <p class="text-xs text-gray-500">Review and approve wallet funding requests before crediting user balances</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-500">
+                    Pending Review
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-[11px] font-bold uppercase tracking-wider text-gray-400 bg-gray-50/50 dark:bg-gray-850/50 border-b border-gray-100 dark:border-gray-800">
+                            <th class="py-3 px-4">User & TxID</th>
+                            <th class="py-3 px-4">Amount</th>
+                            <th class="py-3 px-4">Asset / Network</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4">Date</th>
+                            <th class="py-3 px-4">Admin Action</th>
+                        </tr>
+                    </thead>
+                    <tbody data-admin-deposits-tbody>
+                        <tr>
+                            <td colspan="6" class="py-10 text-center text-xs text-gray-500">
+                                <i data-lucide="loader-2" class="w-5 h-5 mx-auto animate-spin mb-2 text-primary-500"></i>
+                                Loading deposits...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- 5. WITHDRAWALS MANAGEMENT (High Priority Table with Admin Actions)        -->
+        <!-- ========================================================================= -->
+        <section class="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900 dark:text-white">Withdrawal Requests</h2>
+                    <p class="text-xs text-gray-500">Review, approve, or reject user withdrawal submissions</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-500">
+                    Database Enforced
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-[11px] font-bold uppercase tracking-wider text-gray-400 bg-gray-50/50 dark:bg-gray-850/50 border-b border-gray-100 dark:border-gray-800">
+                            <th class="py-3 px-4">User & Destination</th>
+                            <th class="py-3 px-4">Amount</th>
+                            <th class="py-3 px-4">Network</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4">Date</th>
+                            <th class="py-3 px-4">Admin Action</th>
+                        </tr>
+                    </thead>
+                    <tbody data-admin-withdrawals-tbody>
+                        <tr>
+                            <td colspan="6" class="py-10 text-center text-xs text-gray-500">
+                                <i data-lucide="loader-2" class="w-5 h-5 mx-auto animate-spin mb-2 text-primary-500"></i>
+                                Loading withdrawals...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- 5. USERS MANAGEMENT TABLE                                                 -->
+        <!-- ========================================================================= -->
+        <section class="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900 dark:text-white">Registered Users</h2>
+                    <p class="text-xs text-gray-500">Master client directory and role clearance levels</p>
+                </div>
+                
+                <!-- Search Box -->
+                <div class="relative max-w-xs w-full">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" data-admin-user-search placeholder="Filter by name or email..." class="w-full pl-9 pr-4 py-1.5 text-xs rounded-xl bg-gray-50 dark:bg-gray-850 border border-gray-200 dark:border-gray-800 focus:outline-none focus:border-primary-500 text-gray-900 dark:text-white">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-[11px] font-bold uppercase tracking-wider text-gray-400 bg-gray-50/50 dark:bg-gray-850/50 border-b border-gray-100 dark:border-gray-800">
+                            <th class="py-3 px-4">User</th>
+                            <th class="py-3 px-4">Role</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4">Balance</th>
+                            <th class="py-3 px-4">Joined Date</th>
+                            <th class="py-3 px-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody data-admin-users-tbody>
+                        <tr>
+                            <td colspan="6" class="py-10 text-center text-xs text-gray-500">
+                                <i data-lucide="loader-2" class="w-5 h-5 mx-auto animate-spin mb-2 text-primary-500"></i>
+                                Loading users directory...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900 dark:text-white">User Details</h2>
+                    <p class="text-xs text-gray-500">Portfolio and account status for the selected user</p>
+                </div>
+                <button type="button" data-user-detail-reset class="hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 transition hover:bg-gray-200 dark:hover:bg-gray-700">
+                    Clear selection
+                </button>
+            </div>
+            <div data-user-details-panel class="p-4 sm:p-6 text-sm text-gray-600 dark:text-gray-300">
+                <p class="text-xs text-gray-500">Select a user from the directory to view their profile, account status, and recent transaction activity.</p>
+            </div>
+        </section>
+
+        <div data-user-status-confirmation hidden class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+            <div class="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-700 dark:bg-[#141414]">
+                <div class="mb-4 flex items-center gap-3">
+                    <div data-user-status-icon class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500">
+                        <i data-lucide="alert-triangle" class="h-5 w-5"></i>
+                    </div>
+                    <div>
+                        <h3 data-user-status-title class="text-base font-black text-gray-900 dark:text-white">Suspend this user?</h3>
+                        <p class="text-[11px] text-gray-500">This confirms the database action.</p>
+                    </div>
+                </div>
+                <p data-user-status-message class="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                    This will change the user's account status to suspended.
+                </p>
+                <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                    <button type="button" data-user-status-cancel class="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800">Cancel</button>
+                    <button type="button" data-user-status-confirm class="rounded-xl bg-red-500 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-red-600">Suspend user</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- 6. GLOBAL TRANSACTIONS AUDIT LEDGER                                       -->
+        <!-- ========================================================================= -->
+        <section class="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden mb-12">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900 dark:text-white">Recent Transactions Audit</h2>
+                    <p class="text-xs text-gray-500">Real-time ledger of platform operations across all portfolios</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="hidden sm:inline text-xs font-mono text-gray-400">PostgreSQL RLS Active</span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[760px] table-fixed text-left border-collapse">
+                    <thead>
+                        <tr class="text-[11px] font-bold uppercase tracking-wider text-gray-400 bg-gray-50/50 dark:bg-gray-850/50 border-b border-gray-100 dark:border-gray-800">
+                            <th class="py-3 px-4">TxID</th>
+                            <th class="py-3 px-4">User</th>
+                            <th class="py-3 px-4">Type</th>
+                            <th class="py-3 px-4">Amount</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4">Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody data-admin-transactions-tbody>
+                        <tr>
+                            <td colspan="6" class="py-10 text-center text-xs text-gray-500">
+                                <i data-lucide="loader-2" class="w-5 h-5 mx-auto animate-spin mb-2 text-primary-500"></i>
+                                Loading transactions ledger...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+</body>
+
+</html>

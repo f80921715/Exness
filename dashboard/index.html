@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en" :class="{ 'dark': $store.theme.dark }" x-data>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investor Dashboard - EXNESS</title>
+
+    <link rel="icon" type="image/png" href="../assets/images/title-logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="../assets/js/tailwindcss.js"></script>
+    <script>
+        if (!localStorage.getItem('theme')) {
+            localStorage.setItem('theme', 'dark');
+        }
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: {
+                            50: '#FFFDF0', 100: '#FFF9C2', 200: '#FFF085', 300: '#FFE247', 400: '#FFD100', 500: '#FFD100', 600: '#E5BC00', 700: '#B79000', 800: '#8A6900', 900: '#5C4400',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../assets/js/lucide.min.js"></script>
+    <script src="../assets/js/icons.js"></script>
+    <script defer src="../assets/js/alpine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="../assets/js/supabase-client.js" defer></script>
+    <script src="../assets/js/supabase-dashboard.js" defer></script>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('theme', {
+                dark: localStorage.getItem('theme') === 'dark',
+                toggle(trigger) {
+                    if (document.documentElement.dataset.themeVt === 'active') return;
+
+                    const bounds = trigger?.currentTarget?.getBoundingClientRect();
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    const x = bounds ? bounds.left + bounds.width / 2 : viewportWidth / 2;
+                    const y = bounds ? bounds.top + bounds.height / 2 : viewportHeight / 2;
+                    const radius = Math.hypot(Math.max(x, viewportWidth - x), Math.max(y, viewportHeight - y));
+                    const clipFrom = `circle(0% at ${(x / viewportWidth) * 100}% ${(y / viewportHeight) * 100}%)`;
+                    const clipTo = `circle(${(radius / (Math.hypot(viewportWidth, viewportHeight) / Math.SQRT2)) * 100}% at ${(x / viewportWidth) * 100}% ${(y / viewportHeight) * 100}%)`;
+                    const nextDark = !this.dark;
+                    const applyTheme = () => {
+                        document.documentElement.classList.toggle('dark', nextDark);
+                        this.dark = nextDark;
+                        localStorage.setItem('theme', nextDark ? 'dark' : 'light');
+                    };
+
+                    if (typeof document.startViewTransition !== 'function' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                        applyTheme();
+                        return;
+                    }
+
+                    const root = document.documentElement;
+                    root.dataset.themeVt = 'active';
+                    root.style.setProperty('--theme-clip-from', clipFrom);
+                    root.style.setProperty('--theme-clip-to', clipTo);
+                    const transition = document.startViewTransition(() => applyTheme());
+                    transition.ready.then(() => {
+                        root.animate({ clipPath: [clipFrom, clipTo] }, {
+                            duration: 400,
+                            easing: 'ease-in-out',
+                            fill: 'forwards',
+                            pseudoElement: '::view-transition-new(root)'
+                        });
+                    }).catch(() => {});
+                    transition.finished.finally(() => {
+                        delete root.dataset.themeVt;
+                        root.style.removeProperty('--theme-clip-from');
+                        root.style.removeProperty('--theme-clip-to');
+                    }).catch(() => {});
+                    if (window.renderDashboardChart) {
+                        window.renderDashboardChart();
+                    }
+                }
+            });
+
+            Alpine.store('dashboard', {
+                totalBalance: 0,
+                activeInvest: 0,
+                totalProfit: 0,
+                sidebarOpen: false,
+                depositModal: false,
+                withdrawModal: false,
+                notificationsOpen: false,
+                notifications: [],
+                unreadCount() {
+                    return this.notifications.filter((notification) => notification.unread).length;
+                },
+                markRead(id) {
+                    const notification = this.notifications.find((item) => item.id === id);
+                    if (notification) {
+                        notification.unread = false;
+                        window.brokerAccount?.markNotificationRead(id);
+                    }
+                },
+                markAllRead() {
+                    this.notifications.forEach((notification) => { notification.unread = false; });
+                    window.brokerAccount?.markAllNotificationsRead();
+                }
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="../assets/js/ios-transitions.js" defer></script>
+    <script src="../assets/js/fast-nav.js" defer></script>
+</head>
+
+<body class="bg-gray-50 dark:bg-[#0c0c0c] text-gray-900 dark:text-gray-100 font-sans antialiased min-h-screen flex transition-colors">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div x-show="$store.dashboard.sidebarOpen" @click="$store.dashboard.sidebarOpen = false" x-cloak class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"></div>
+
+    <!-- 1. Left Sidebar Navigation -->
+    <aside x-cloak :class="$store.dashboard.sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#141414] border-r border-gray-200 dark:border-gray-800 flex flex-col justify-between transition-transform duration-300 h-full max-h-screen overflow-hidden">
+        <div class="flex-1 overflow-y-auto min-h-0">
+            <!-- Sidebar Header -->
+            <div class="h-16 px-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white dark:bg-[#141414] z-10">
+                <a href="../index.html" class="flex items-center space-x-2">
+                    <img src="../assets/images/exness-logo.png" alt="EXNESS" class="h-8 w-auto brightness-0 dark:invert">
+                </a>
+                <button @click="$store.dashboard.sidebarOpen = false" class="lg:hidden text-gray-400 hover:text-white p-2">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="p-4 space-y-1.5 text-sm font-medium pb-6">
+                <a href="index.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-primary-500 text-white font-semibold shadow-md">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="trades.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800/60 transition">
+                    <i data-lucide="trending-up" class="w-5 h-5"></i>
+                    <span>Live Trading</span>
+                </a>
+                <a href="investments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800/60 transition">
+                    <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                    <span>Investment Plans</span>
+                </a>
+                <a href="cars.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800/60 transition">
+                    <i data-lucide="car" class="w-5 h-5"></i>
+                    <span>Tesla EV Orders</span>
+                    <span class="ml-auto shrink-0 whitespace-nowrap text-[9px] leading-4 font-bold bg-gray-100 dark:bg-gray-800 text-gray-500 px-1.5 rounded-full">0 active</span>
+                </a>
+                <a href="deposit.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800/60 transition">
+                    <i data-lucide="arrow-down-circle" class="w-5 h-5"></i>
+                    <span>Deposit Crypto</span>
+                </a>
+                <a href="withdraw.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800/60 transition">
+                    <i data-lucide="arrow-up-circle" class="w-5 h-5"></i>
+                    <span>Withdraw Profits</span>
+                </a>
+                <a href="transactions.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800/60 transition">
+                    <i data-lucide="history" class="w-5 h-5"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="referrals.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800/60 transition">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span>Referrals & Earn</span>
+                </a>
+                <a href="profile.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800/60 transition">
+                    <i data-lucide="shield" class="w-5 h-5"></i>
+                    <span>Profile & Security</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer: Log out -->
+        <div class="p-4 border-t border-gray-100 dark:border-gray-800 shrink-0 bg-white dark:bg-[#141414] pb-10 sm:pb-4">
+            <a href="javascript:void(0)" data-logout-link class="flex items-center space-x-3 px-3.5 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30 rounded-xl transition cursor-pointer">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span>Log out</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- 2. Main Dashboard Content Area -->
+    <div class="flex-1 lg:pl-64 flex flex-col min-w-0">
+        
+        <!-- Top Navigation Bar -->
+        <header class="hidden sm:flex h-16 bg-white dark:bg-[#141414] border-b border-gray-200 dark:border-gray-800 px-4 sm:px-8 items-center justify-between sticky top-0 z-30">
+            <div class="flex items-center space-x-4">
+                <button @click="$store.dashboard.sidebarOpen = true" class="lg:hidden p-2 text-gray-600 dark:text-gray-300" aria-label="Open menu">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <!-- Theme Toggle -->
+                    <button @click="$store.theme.toggle($event)" type="button" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white rounded-lg">
+                    <span x-show="!$store.theme.dark"><i data-lucide="sun" class="w-5 h-5"></i></span>
+                    <span x-show="$store.theme.dark"><i data-lucide="moon" class="w-5 h-5"></i></span>
+                </button>
+
+                <!-- Action Buttons -->
+                <a href="deposit.html" aria-label="Deposit funds" title="Deposit funds" class="inline-flex h-9 items-center justify-center gap-1.5 px-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-lg transition">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                    <span class="text-[11px] font-semibold tracking-wide">Deposit</span>
+                </a>
+                <a href="withdraw.html" aria-label="Withdraw funds" title="Withdraw funds" class="inline-flex h-9 items-center justify-center gap-1.5 px-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-lg transition">
+                    <i data-lucide="upload" class="w-5 h-5"></i>
+                    <span class="text-[11px] font-semibold tracking-wide">Withdraw</span>
+                </a>
+
+                <!-- Notifications -->
+                <div class="relative pl-2 border-l border-gray-200 dark:border-gray-800">
+                    <button type="button" @click="$store.dashboard.notificationsOpen = !$store.dashboard.notificationsOpen" :aria-expanded="$store.dashboard.notificationsOpen" aria-label="Open notifications" class="relative flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span x-show="$store.dashboard.unreadCount()" x-text="$store.dashboard.unreadCount()" class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-500 px-1 text-[9px] font-black text-black" aria-label="Unread notifications"></span>
+                    </button>
+                    <div x-show="$store.dashboard.notificationsOpen" @click.outside="$store.dashboard.notificationsOpen = false" x-transition x-cloak class="absolute right-0 top-12 z-50 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-[#181a24]">
+                        <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-700">
+                            <h2 class="text-sm font-bold">Notifications</h2>
+                            <button type="button" @click="$store.dashboard.markAllRead()" class="text-[10px] font-bold text-primary-600 hover:text-primary-500 dark:text-primary-400">Mark all read</button>
+                        </div>
+                        <div class="max-h-80 overflow-y-auto">
+                            <p x-show="$store.dashboard.notifications.length === 0" class="px-4 py-6 text-center text-xs text-gray-500">No notifications yet.</p>
+                            <template x-for="notification in $store.dashboard.notifications" :key="notification.id">
+                                <button type="button" @click="$store.dashboard.markRead(notification.id)" class="flex w-full items-start gap-3 border-b border-gray-100 px-4 py-3 text-left hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/70">
+                                    <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300"><i :data-lucide="notification.icon" class="h-4 w-4"></i></span>
+                                    <span class="min-w-0 flex-1">
+                                        <span class="flex items-center gap-2 text-xs font-bold"><span x-text="notification.title"></span><span x-show="notification.unread" class="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-500"></span></span>
+                                        <span class="mt-1 block text-[11px] leading-snug text-gray-500 dark:text-gray-400" x-text="notification.detail"></span>
+                                        <span class="mt-1 block text-[10px] text-gray-400" x-text="notification.time"></span>
+                                    </span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                <a href="profile.html" title="Open profile" aria-label="Open profile" class="hidden md:flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-[11px] font-bold text-gray-600 transition hover:border-gray-400 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                    <img data-auth-avatar hidden alt="Profile photo" class="h-full w-full rounded-full object-cover">
+                    <span data-auth-initials>IN</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="dashboard-home-main p-0 sm:p-8 space-y-4 sm:space-y-8 flex-1 pb-24 sm:pb-8">
+
+            <!-- Mobile banking dashboard -->
+            <section class="sm:hidden min-h-screen w-full max-w-full overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#0b0c10] dark:text-white">
+                <div class="relative bg-gradient-to-br from-primary-100 via-primary-50 to-white px-5 pt-5 pb-8 rounded-b-[2rem] border-b border-primary-300 dark:from-[#2b2608] dark:via-[#17150a] dark:to-[#0b0c10] dark:border-primary-500/30">
+                    <div class="flex items-center justify-between">
+                        <button @click="$store.dashboard.sidebarOpen = true" class="w-10 h-10 rounded-full bg-black/10 dark:bg-white/15 flex items-center justify-center" aria-label="Open menu">
+                            <i data-lucide="grid-2x2" class="w-5 h-5"></i>
+                        </button>
+                        <div class="flex items-center gap-2">
+                            <button @click="$store.theme.toggle($event)" class="w-10 h-10 rounded-full bg-black/10 dark:bg-white/15 flex items-center justify-center" aria-label="Toggle theme">
+                                <span x-show="!$store.theme.dark"><i data-lucide="sun" class="w-5 h-5"></i></span>
+                                <span x-show="$store.theme.dark"><i data-lucide="moon" class="w-5 h-5"></i></span>
+                            </button>
+                            <div class="relative">
+                                <button type="button" @click="$store.dashboard.notificationsOpen = !$store.dashboard.notificationsOpen" :aria-expanded="$store.dashboard.notificationsOpen" aria-label="Open notifications" class="relative flex h-10 w-10 items-center justify-center rounded-full bg-black/10 dark:bg-white/20">
+                                    <i data-lucide="bell" class="w-5 h-5"></i>
+                                    <span x-show="$store.dashboard.unreadCount()" x-text="$store.dashboard.unreadCount()" class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-500 px-1 text-[9px] font-black text-black"></span>
+                                </button>
+                                <div x-show="$store.dashboard.notificationsOpen" @click.outside="$store.dashboard.notificationsOpen = false" x-transition x-cloak class="absolute right-0 top-12 z-50 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-2xl dark:border-gray-700 dark:bg-[#181a24] dark:text-white">
+                                    <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-700">
+                                        <h2 class="text-sm font-bold">Notifications</h2>
+                                        <button type="button" @click="$store.dashboard.markAllRead()" class="text-[10px] font-bold text-primary-600 dark:text-primary-400">Mark all read</button>
+                                    </div>
+                                    <div class="max-h-80 overflow-y-auto">
+                                        <p x-show="$store.dashboard.notifications.length === 0" class="px-4 py-6 text-center text-xs text-gray-500">No notifications yet.</p>
+                                        <template x-for="notification in $store.dashboard.notifications" :key="notification.id">
+                                            <button type="button" @click="$store.dashboard.markRead(notification.id)" class="flex w-full items-start gap-3 border-b border-gray-100 px-4 py-3 text-left hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/70">
+                                                <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300"><i :data-lucide="notification.icon" class="h-4 w-4"></i></span>
+                                                <span class="min-w-0 flex-1">
+                                                    <span class="flex items-center gap-2 text-xs font-bold"><span x-text="notification.title"></span><span x-show="notification.unread" class="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-500"></span></span>
+                                                    <span class="mt-1 block text-[11px] leading-snug text-gray-500 dark:text-gray-400" x-text="notification.detail"></span>
+                                                    <span class="mt-1 block text-[10px] text-gray-400" x-text="notification.time"></span>
+                                                </span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-8 text-sm text-gray-700 dark:text-white/75">Welcome, <span data-auth-name class="font-bold"></span></p>
+                    <div class="flex min-w-0 items-end justify-between gap-2">
+                        <h1 data-auth-balance class="min-w-0 truncate text-3xl font-black tracking-tight">$0.00</h1>
+                        <span class="mb-1 inline-flex shrink-0 items-center gap-1 text-[10px] font-bold text-green-500"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Active</span>
+                    </div>
+                </div>
+
+                <div class="px-5 pt-5 pb-8 relative z-10">
+                    <div class="grid min-w-0 grid-cols-3 gap-3">
+                        <a href="deposit.html" class="mobile-dashboard-action min-w-0 rounded-2xl bg-white/80 dark:bg-white/10 border border-gray-200 dark:border-white/10 p-3 text-center backdrop-blur">
+                            <span class="mx-auto mb-2 w-9 h-9 rounded-full bg-primary-500 text-black flex items-center justify-center"><i data-lucide="plus" class="w-4 h-4"></i></span>
+                            <span class="block text-[11px] font-bold">Deposit</span>
+                        </a>
+                        <a href="withdraw.html" class="mobile-dashboard-action min-w-0 rounded-2xl bg-white/80 dark:bg-white/10 border border-gray-200 dark:border-white/10 p-3 text-center backdrop-blur">
+                            <span class="mx-auto mb-2 w-9 h-9 rounded-full bg-white/15 flex items-center justify-center"><i data-lucide="arrow-up-right" class="w-4 h-4"></i></span>
+                            <span class="block text-[11px] font-bold">Withdraw</span>
+                        </a>
+                        <a href="trades.html" class="mobile-dashboard-action min-w-0 rounded-2xl bg-white/80 dark:bg-white/10 border border-gray-200 dark:border-white/10 p-3 text-center backdrop-blur">
+                            <span class="mx-auto mb-2 w-9 h-9 rounded-full bg-white/15 flex items-center justify-center"><i data-lucide="trending-up" class="w-4 h-4"></i></span>
+                            <span class="block text-[11px] font-bold">Live Trading</span>
+                        </a>
+                    </div>
+
+                    <div class="mt-8 grid grid-cols-2 gap-4">
+                        <div class="min-w-0">
+                            <p class="text-xs text-gray-500 dark:text-white/60">Total profit</p>
+                            <p data-auth-total-profit class="mt-1 text-lg font-bold text-green-500">+$0.00</p>
+                        </div>
+                        <div class="min-w-0 text-right">
+                            <p class="text-xs text-gray-500 dark:text-white/60">Active capital</p>
+                            <p data-auth-active-invest class="mt-1 text-lg font-bold text-gray-900 dark:text-white">$0.00</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 rounded-3xl bg-white dark:bg-[#181a24] text-gray-900 dark:text-white p-5 shadow-xl border border-gray-200 dark:border-white/10">
+                        <div class="flex min-w-0 items-center justify-between gap-2">
+                            <div>
+                                <p class="text-xs font-semibold text-gray-500">Active plan</p>
+                                <h2 data-plan-name class="mt-1 truncate text-base font-black">No active plan</h2>
+                            </div>
+                            <span class="shrink-0 rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-1 text-[9px] font-bold text-gray-500">Plan Tier</span>
+                        </div>
+                        <div class="mt-4 h-2 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden"><div data-plan-progress-bar class="h-full w-0 rounded-full bg-primary-500 transition-all duration-500"></div></div>
+                        <div class="mt-3 flex justify-between text-[11px] text-gray-500 dark:text-gray-400"><span>Daily yield</span><strong data-plan-daily-payout class="text-gray-900 dark:text-white">$0.00</strong></div>
+                    </div>
+
+                    <div class="mt-9 pb-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-lg font-black">Recent Activity</h2>
+                            <a href="transactions.html" class="text-xs font-bold text-primary-700 dark:text-primary-300">See all</a>
+                        </div>
+                        <div class="space-y-2">
+                            <a href="deposit.html" class="flex min-w-0 items-center gap-2 rounded-2xl bg-white dark:bg-white/10 text-gray-900 dark:text-white px-3 py-3 shadow-sm dark:shadow-none">
+                                <span class="w-9 h-9 rounded-full bg-primary-500/20 text-primary-500 flex items-center justify-center"><i data-lucide="plus" class="w-4 h-4"></i></span>
+                                <span class="min-w-0 flex-1"><strong class="block truncate text-xs">Deposit Funds</strong><small class="block mt-0.5 text-[10px] text-gray-500 dark:text-white/55">USDT, BTC, ETH supported</small></span>
+                                <strong class="shrink-0 text-[11px] text-primary-500">Instant</strong>
+                            </a>
+                            <a href="investments.html" class="flex min-w-0 items-center gap-2 rounded-2xl bg-white dark:bg-white/10 text-gray-900 dark:text-white px-3 py-3 shadow-sm dark:shadow-none">
+                                <span class="w-9 h-9 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center"><i data-lucide="pie-chart" class="w-4 h-4"></i></span>
+                                <span class="min-w-0 flex-1"><strong class="block truncate text-xs">Algorithmic Strategies</strong><small class="block mt-0.5 text-[10px] text-gray-500 dark:text-white/55">Earn up to 85% ROI</small></span>
+                                <strong class="shrink-0 text-[11px] text-green-500">Explore</strong>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Balance & Metrics Cards Grid -->
+            <div class="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                
+                <!-- Card 1: Total Balance -->
+                <div class="p-4 sm:p-6 bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-center text-gray-500 dark:text-gray-400 text-xs font-semibold">
+                        <span>Total Portfolio Balance</span>
+                        <div class="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-950/60 text-primary-500 flex items-center justify-center">
+                            <i data-lucide="wallet" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div data-auth-balance class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-3">$0.00</div>
+                    <div class="flex items-center text-xs font-semibold text-gray-500 mt-2">
+                        <i data-lucide="trending-up" class="w-3.5 h-3.5 mr-1 text-green-500"></i>
+                        <span>Total profit: </span>
+                        <span data-auth-total-profit class="text-green-500 ml-1 font-bold">+$0.00</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Active Investments -->
+                <div class="p-4 sm:p-6 bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-center text-gray-500 dark:text-gray-400 text-xs font-semibold">
+                        <span>Active Investment Capital</span>
+                        <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center">
+                            <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div data-auth-active-invest class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-3">$0.00</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        <span>Active strategic yield</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Profits Withdrawn -->
+                <div class="hidden sm:block p-4 sm:p-6 bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-center text-gray-500 dark:text-gray-400 text-xs font-semibold">
+                        <span>Total Paid Out / Withdrawn</span>
+                        <div class="w-8 h-8 rounded-xl bg-green-50 dark:bg-green-950/60 text-green-500 flex items-center justify-center">
+                            <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div data-auth-withdrawn class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-3">$0.00</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        <span>Settled withdrawals</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: Tesla Vehicle Allocation -->
+                <div class="hidden sm:block p-4 sm:p-6 bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-center text-gray-500 dark:text-gray-400 text-xs font-semibold">
+                        <span>Tesla EV Order Status</span>
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-500 flex items-center justify-center">
+                            <i data-lucide="car" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div data-car-model class="text-xl font-bold text-gray-900 dark:text-white mt-3 truncate">Tesla Model X Plaid</div>
+                    <div class="flex items-center text-xs font-bold text-blue-500 mt-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse mr-1.5"></span>
+                        <span data-car-order-number>Allocation Ready</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Portfolio Performance Chart & Quick Allocation -->
+            <div class="hidden sm:grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left 2 Cols: Interactive Growth Chart -->
+                <div x-data="{ timeframe: '1W' }" class="hidden sm:block lg:col-span-2 bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 gap-2">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Portfolio Yield Analysis</h2>
+                            <p class="text-xs text-gray-500">Compounded equity progression over selected periods</p>
+                        </div>
+                        <div class="flex items-center space-x-1.5 text-xs font-semibold bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                            <button @click="timeframe = '1W'; window.setDashboardTimeframe('1W')" :class="timeframe === '1W' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs' : 'text-gray-500 dark:text-gray-400 hover:text-white'" class="px-2.5 py-1 rounded">1W</button>
+                            <button @click="timeframe = '1M'; window.setDashboardTimeframe('1M')" :class="timeframe === '1M' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs' : 'text-gray-500 dark:text-gray-400 hover:text-white'" class="px-2.5 py-1 rounded">1M</button>
+                            <button @click="timeframe = '3M'; window.setDashboardTimeframe('3M')" :class="timeframe === '3M' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs' : 'text-gray-500 dark:text-gray-400 hover:text-white'" class="px-2.5 py-1 rounded">3M</button>
+                            <button @click="timeframe = '1Y'; window.setDashboardTimeframe('1Y')" :class="timeframe === '1Y' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs' : 'text-gray-500 dark:text-gray-400 hover:text-white'" class="px-2.5 py-1 rounded">1Y</button>
+                            <button @click="timeframe = 'All'; window.setDashboardTimeframe('All')" :class="timeframe === 'All' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs' : 'text-gray-500 dark:text-gray-400 hover:text-white'" class="px-2.5 py-1 rounded">All</button>
+                        </div>
+                    </div>
+
+                    <div class="h-72 mt-4 relative">
+                        <canvas id="portfolioChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right 1 Col: Active Plan Progress & Next Payout -->
+                <div class="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-base font-bold text-gray-900 dark:text-white">Active Plan Status</h2>
+                            <span class="text-xs font-bold text-gray-500 bg-gray-100 dark:bg-gray-800 px-2.5 py-0.5 rounded-full">Not started</span>
+                        </div>
+
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl mb-4 border border-gray-100 dark:border-gray-800">
+                            <div class="text-xs text-gray-500">Current Strategy</div>
+                            <div class="text-lg font-extrabold text-gray-900 dark:text-white">No active investment</div>
+                            <div class="text-xs text-gray-500 font-semibold mt-1">Accumulated Profit: $0.00</div>
+                        </div>
+
+                        <div class="space-y-3 text-xs text-gray-600 dark:text-gray-300">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span>Plan Progress</span>
+                                    <span class="font-bold">0%</span>
+                                </div>
+                                <div class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary-500 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
+                                <span class="text-gray-500">Next Daily Accrual:</span>
+                                <strong class="text-gray-900 dark:text-white">Not scheduled</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Maturity Date:</span>
+                                <strong class="text-gray-900 dark:text-white">Not scheduled</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Capital Refund:</span>
+                                <strong class="text-gray-500">Not applicable</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <a href="investments.html" class="w-full block py-2.5 bg-primary-500 hover:bg-primary-600 text-white text-center font-bold text-xs rounded-xl transition">
+                            Reinvest or Upgrade Tier
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Tesla EV Order Tracker Banner -->
+            <div data-active-car-card hidden class="hidden sm:block bg-gradient-to-r from-gray-900 via-gray-850 to-black text-white p-6 sm:p-8 rounded-3xl border border-gray-800 shadow-xl">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                    <div class="flex items-center space-x-4">
+                        <img src="../dash/cars/3/69ad796b5849c.jpg" alt="Tesla Model X Plaid" class="w-20 h-14 object-cover rounded-xl border border-gray-700 shadow">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-primary-400">Reserved Electric Transport</span>
+                            <h3 data-car-model class="text-xl font-black">Tesla Model X Plaid</h3>
+                            <p class="text-xs text-gray-400">Allocation VIN: <code data-car-vin>5YJSA1E28PF993810</code></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <a href="cars.html" class="px-4 py-2 bg-white text-gray-900 hover:bg-gray-100 font-bold text-xs rounded-xl transition shadow">
+                            View Vehicle Allocation
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 4 Step Tracker -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="p-3 bg-white/5 rounded-xl border border-green-500/30">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-green-400 mx-auto mb-1"></i>
+                        <div class="text-xs font-bold">1. Order Confirmed</div>
+                        <div class="text-[10px] text-gray-400">Earnest $250 Settled</div>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-xl border border-green-500/30">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-green-400 mx-auto mb-1"></i>
+                        <div class="text-xs font-bold">2. Production Finished</div>
+                        <div class="text-[10px] text-gray-400">Fremont Assembly</div>
+                    </div>
+                    <div class="p-3 bg-primary-500/20 rounded-xl border border-primary-500">
+                        <div class="w-2.5 h-2.5 rounded-full bg-primary-500 animate-ping mx-auto mb-1"></div>
+                        <div class="text-xs font-bold text-primary-400">3. Vessel Transit</div>
+                        <div class="text-[10px] text-gray-300">Carrier ETA: 4 Days</div>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-xl border border-gray-800 opacity-60">
+                        <i data-lucide="clock" class="w-5 h-5 text-gray-500 mx-auto mb-1"></i>
+                        <div class="text-xs font-bold text-gray-400">4. Doorstep Handover</div>
+                        <div class="text-[10px] text-gray-500">Final Verification</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions Table -->
+            <div class="hidden sm:block bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white">Recent Transactions</h2>
+                        <p class="text-xs text-gray-500">Deposits, daily ROI distributions, and withdrawals</p>
+                    </div>
+                    <a href="transactions.html" class="text-xs font-bold text-primary-500 hover:underline">
+                        View All Activity
+                    </a>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
+                            <tr>
+                                <th class="py-3 px-4">Transaction ID</th>
+                                <th class="py-3 px-4">Type</th>
+                                <th class="py-3 px-4">Asset / Method</th>
+                                <th class="py-3 px-4">Amount</th>
+                                <th class="py-3 px-4">Date</th>
+                                <th class="py-3 px-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody data-transactions-tbody class="divide-y divide-gray-100 dark:divide-gray-800/60 font-medium">
+                            <tr>
+                                <td colspan="6" class="px-4 py-10 text-center text-sm text-gray-500">
+                                    <i data-lucide="inbox" class="mx-auto mb-3 h-8 w-8 text-gray-400"></i>
+                                    No activity yet. Your deposits, withdrawals, and trades will appear here.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Dashboard Footer -->
+        <footer class="hidden sm:block p-6 border-t border-gray-200 dark:border-gray-800 text-center text-xs text-gray-500">
+            © 2026 EXNESS. High-Frequency Quantitative Desk & Clean Energy Allocation.
+        </footer>
+
+        <nav class="sm:hidden fixed bottom-4 left-4 right-4 z-40 rounded-3xl border border-gray-200 dark:border-white/20 bg-white/95 dark:bg-[#181a24]/90 px-4 py-3 text-gray-500 dark:text-white shadow-2xl backdrop-blur-xl" aria-label="Mobile dashboard navigation">
+            <div class="flex items-center justify-around">
+                <a href="index.html" class="flex flex-col items-center gap-1 text-primary-300"><i data-lucide="house" class="w-4 h-4"></i><span class="text-[9px] font-bold">Home</span></a>
+                <a href="transactions.html" class="flex flex-col items-center gap-1 text-gray-500 dark:text-white/65"><i data-lucide="receipt" class="w-4 h-4"></i><span class="text-[9px] font-bold">Activity</span></a>
+                <a href="deposit.html" class="-mt-7 flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#0b0c10] bg-primary-500 text-black shadow-lg" aria-label="Deposit"><i data-lucide="plus" class="w-5 h-5"></i></a>
+                <a href="trades.html" class="flex flex-col items-center gap-1 text-gray-500 dark:text-white/65"><i data-lucide="trending-up" class="w-4 h-4"></i><span class="text-[9px] font-bold">Live Trading</span></a>
+                <a href="profile.html" class="flex flex-col items-center gap-1 text-gray-500 dark:text-white/65"><i data-lucide="user-round" class="w-4 h-4"></i><span class="text-[9px] font-bold">Profile</span></a>
+            </div>
+        </nav>
+
+    </div>
+
+    <!-- Chart Script -->
+    <script>
+        let pChart = null;
+        function getPortfolioChartRange(timeframe) {
+            const account = window.brokerAccount?.getData?.();
+            const currentBalance = Number(account?.balance) || 0;
+            const transactions = (account?.transactions || [])
+                .map((transaction) => ({
+                    date: new Date(String(transaction.date || transaction.created_at || '').replace(' · ', ' ')),
+                    amount: Number(transaction.amount) || 0,
+                    positive: transaction.isPositive !== false
+                }))
+                .filter((transaction) => !Number.isNaN(transaction.date.getTime()))
+                .sort((first, second) => first.date - second.date);
+
+            const dayCount = { '1W': 7, '1M': 30, '3M': 90, '1Y': 365, All: Infinity }[timeframe] || 7;
+            const cutoff = dayCount === Infinity ? 0 : Date.now() - dayCount * 24 * 60 * 60 * 1000;
+            const visible = transactions.filter((transaction) => transaction.date.getTime() >= cutoff);
+            if (!visible.length) return { labels: ['Current'], values: [currentBalance] };
+
+            let runningBalance = currentBalance;
+            const values = visible.slice().reverse().map((transaction) => {
+                const point = runningBalance;
+                runningBalance += transaction.positive ? -transaction.amount : transaction.amount;
+                return point;
+            }).reverse();
+
+            return {
+                labels: visible.map((transaction) => transaction.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                values: [...values, currentBalance]
+            };
+        }
+
+        function initDashboardChart() {
+            const ctx = document.getElementById('portfolioChart');
+            if (!ctx) return;
+            if (pChart) pChart.destroy();
+
+            const range = getPortfolioChartRange('1W');
+            const labels = range.labels;
+            const dataPoints = range.values;
+
+            pChart = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Value ($)',
+                        data: dataPoints,
+                        borderColor: '#FFD100',
+                        borderWidth: 2.5,
+                        tension: 0.35,
+                        fill: true,
+                        backgroundColor: 'rgba(255, 209, 0, 0.06)',
+                        pointBackgroundColor: '#FFD100',
+                        pointBorderColor: '#fff',
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#18181b',
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: (item) => `$${Number(item.raw).toLocaleString()}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#71717a', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.04)' },
+                            ticks: {
+                                color: '#71717a',
+                                font: { size: 10 },
+                                callback: (v) => `$${v / 1000}k`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        window.renderDashboardChart = initDashboardChart;
+        window.setDashboardTimeframe = (timeframe) => {
+            if (!pChart) return;
+
+            const range = getPortfolioChartRange(timeframe);
+            pChart.data.labels = range.labels;
+            pChart.data.datasets[0].data = range.values;
+            pChart.update();
+        };
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            setTimeout(initDashboardChart, 200);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | EXNESS</title>
+    <meta name="description" content="The page you are looking for could not be found.">
+    <link rel="icon" href="assets/images/exness-logo.png">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="assets/js/lucide.min.js"></script>
+    <style>
+        :root {
+            --error-yellow: #ffd100;
+            --error-ink: #0b0c10;
+            --error-muted: #737373;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: #ffffff;
+            color: var(--error-ink);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .error-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background:
+                radial-gradient(circle at 50% 42%, rgba(255, 209, 0, 0.18), transparent 25rem),
+                linear-gradient(180deg, #ffffff 0%, #ffffff 62%, #fffbea 100%);
+        }
+
+        .error-header {
+            width: min(100% - 2rem, 1180px);
+            margin: 0 auto;
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .error-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            color: var(--error-ink);
+            text-decoration: none;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .error-logo img {
+            width: auto;
+            height: 36px;
+            object-fit: contain;
+        }
+
+        .error-nav {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.8rem, 2vw, 1.8rem);
+        }
+
+        .error-nav a {
+            color: #525252;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 160ms ease;
+        }
+
+        .error-nav a:hover {
+            color: var(--error-ink);
+        }
+
+        .error-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .error-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 0 1rem;
+            border-radius: 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-decoration: none;
+            transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+        }
+
+        .error-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .error-button--light {
+            color: var(--error-ink);
+            border: 1px solid #e5e5e5;
+            background: rgba(255, 255, 255, 0.84);
+        }
+
+        .error-button--dark {
+            color: #ffffff;
+            background: var(--error-ink);
+            box-shadow: 0 8px 18px rgba(11, 12, 16, 0.16);
+        }
+
+        .error-main {
+            flex: 1;
+            width: min(100% - 2rem, 980px);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 3rem 0 5rem;
+        }
+
+        .error-content {
+            position: relative;
+            width: 100%;
+        }
+
+        .error-number {
+            margin: 0;
+            color: transparent;
+            font-size: clamp(10rem, 31vw, 25rem);
+            font-weight: 900;
+            line-height: 0.78;
+            letter-spacing: -0.1em;
+            -webkit-text-stroke: 2px rgba(183, 144, 0, 0.22);
+            background: linear-gradient(180deg, rgba(183, 144, 0, 0.72), rgba(255, 209, 0, 0.08));
+            -webkit-background-clip: text;
+            background-clip: text;
+            user-select: none;
+        }
+
+        .error-copy {
+            position: relative;
+            margin-top: clamp(-2rem, -4vw, -1rem);
+        }
+
+        .error-copy h1 {
+            margin: 0;
+            font-size: clamp(1.8rem, 4vw, 3.4rem);
+            line-height: 1.05;
+            letter-spacing: -0.055em;
+            font-weight: 800;
+        }
+
+        .error-copy p {
+            margin: 0.85rem auto 1.8rem;
+            max-width: 34rem;
+            color: var(--error-muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        .error-home {
+            gap: 0.5rem;
+            background: var(--error-ink);
+            color: #ffffff;
+            box-shadow: 0 12px 24px rgba(11, 12, 16, 0.18);
+        }
+
+        @media (max-width: 760px) {
+            .error-header {
+                min-height: 68px;
+            }
+
+            .error-nav {
+                display: none;
+            }
+
+            .error-actions .error-button--light {
+                display: none;
+            }
+
+            .error-main {
+                padding-top: 2rem;
+                padding-bottom: 3rem;
+            }
+
+            .error-number {
+                font-size: clamp(9rem, 46vw, 15rem);
+            }
+
+            .error-copy {
+                margin-top: -0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-page">
+        <header class="error-header">
+            <a class="error-logo" href="index.html" aria-label="EXNESS home">
+                <img src="assets/images/exness-logo.png" alt="EXNESS">
+            </a>
+
+            <nav class="error-nav" aria-label="Primary navigation">
+                <a href="index.html">Home</a>
+                <a href="cars.html">Inventory</a>
+                <a href="trading.html">Live Trading</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="faq.html">FAQ</a>
+            </nav>
+
+            <div class="error-actions">
+                <a class="error-button error-button--light" href="register.html">Sign Up</a>
+                <a class="error-button error-button--dark" href="login.html">Sign In</a>
+            </div>
+        </header>
+
+        <main class="error-main">
+            <section class="error-content" aria-labelledby="error-title">
+                <p class="error-number" aria-hidden="true">404</p>
+                <div class="error-copy">
+                    <h1 id="error-title">Sorry, that page could not be found</h1>
+                    <p>The requested page does not exist or is no longer available. Return to the EXNESS home page to continue.</p>
+                    <a class="error-button error-home" href="index.html">
+                        <i data-lucide="arrow-left" aria-hidden="true"></i>
+                        Go Back Home
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        if (window.lucide) window.lucide.createIcons();
+    </script>
+</body>
+</html>

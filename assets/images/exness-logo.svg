@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 52" fill="none">
+  <!-- Exness Geometric Logo Symbol -->
+  <g transform="translate(4, 6)">
+    <!-- Loop 1 -->
+    <path d="M12 28 C 4 28, 0 22, 0 16 C 0 8, 8 2, 17 2 C 24 2, 30 7, 34 13 L 26 19 C 23 15, 20 11, 16 11 C 12 11, 8 13, 8 16 C 8 19, 11 20, 15 20 C 19 20, 24 18, 28 15 L 34 21 C 28 25, 20 28, 12 28 Z" fill="#FFD100"/>
+    <!-- Loop 2 (Interlocking) -->
+    <path d="M28 4 C 36 4, 40 10, 40 16 C 40 24, 32 30, 23 30 C 16 30, 10 25, 6 19 L 14 13 C 17 17, 20 21, 24 21 C 28 21, 32 19, 32 16 C 32 13, 29 12, 25 12 C 21 12, 16 14, 12 17 L 6 11 C 12 7, 20 4, 28 4 Z" fill="#FFD100"/>
+  </g>
+  
+  <!-- "exness" Wordmark -->
+  <text x="56" y="28" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="26" font-weight="800" fill="#FFFFFF" letter-spacing="-0.5">exness</text>
+  
+  <!-- "TRADE GLOBAL MARKETS" Subtitle -->
+  <text x="57" y="42" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#FFD100" letter-spacing="2.8">TRADE GLOBAL MARKETS</text>
+</svg>

@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+
+<html lang="en" :class="{ 'dark': $store.theme.dark }" x-data>
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="csrf-token" content="Zebl2uDj8s9xePmaATTBDKHBk3ZEGkgWc5kthU5s">
+
+    <meta name="description" content="Sign up With EXNESS to join thousands of investors">
+
+    <meta name="author" content="EXNESS">
+
+    <meta name="theme-color" content="#FFD100">
+
+    <title>EXNESS - Privacy Policy</title>
+
+
+
+    <!-- Favicon -->
+
+    <link rel="shortcut icon" href="storage/app/public/photos/photos/Px9MifdF6k4uRiyRSGBX6qi4kKWtbhpkYNQrAouw.png" type="image/x-icon">
+
+    <link rel="apple-touch-icon-precomposed" href="storage/app/public/photos/photos/Px9MifdF6k4uRiyRSGBX6qi4kKWtbhpkYNQrAouw.png">
+
+
+
+    <!-- Inter Font -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+
+    <!-- Tailwind CSS -->
+
+    <script src="assets/js/tailwindcss.js"></script>
+
+    <script>
+
+        // Default to light mode if no preference is set
+
+        if (!localStorage.getItem('theme')) {
+
+            localStorage.setItem('theme', 'light');
+
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+
+            document.documentElement.classList.add('dark');
+
+        } else {
+
+            document.documentElement.classList.remove('dark');
+
+        }
+
+        tailwind.config = {
+
+            darkMode: 'class',
+
+            theme: {
+
+                extend: {
+
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+
+                    colors: {
+
+                        primary: {
+
+                            50: '#FFFDF0', 100: '#FFF9C2', 200: '#FFF085', 300: '#FFE247', 400: '#FFD100', 500: '#FFD100', 600: '#E5BC00', 700: '#B79000', 800: '#8A6900', 900: '#5C4400',
+
+                        },
+
+                        red: {
+
+                            50: '#FFFDF0', 100: '#FFF9C2', 200: '#FFF085', 300: '#FFE247', 400: '#FFD100', 500: '#FFD100', 600: '#E5BC00', 700: '#B79000', 800: '#8A6900', 900: '#5C4400',
+
+                        },
+
+                        gray: {
+
+                            50: '#FFFFFF', 100: '#F5F5F5', 200: '#E5E5E5', 300: '#D4D4D4',
+
+                            400: '#A3A3A3', 500: '#737373', 600: '#525252', 700: '#404040',
+
+                            800: '#262626', 900: '#0F0F0F',
+
+                        },
+
+                    },
+
+                }
+
+            }
+
+        }
+
+    </script>
+
+
+
+    <!-- Alpine.js -->
+
+    <script defer src="assets/js/alpine.min.js"></script>
+
+    <script>
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('theme', {
+                dark: localStorage.getItem('theme') === 'dark',
+                toggle(trigger) {
+                    if (window.toggleDashboardTheme) {
+                        window.toggleDashboardTheme(trigger);
+                    } else {
+                        this.dark = !this.dark;
+                        localStorage.setItem('theme', this.dark ? 'dark' : 'light');
+                        document.documentElement.classList.toggle('dark', this.dark);
+                    }
+                }
+            });
+        });
+
+    </script>
+
+
+
+    <!-- Lucide Icons -->
+
+    <script src="assets/js/lucide.min.js"></script>
+    <script src="assets/js/icons.js"></script>
+
+
+
+    <style>
+
+        .goog-te-banner-frame.skiptranslate { display: none !important; }
+
+        body { top: 0 !important; }
+
+        [x-cloak] { display: none !important; }
+
+    </style>
+
+        <link rel="stylesheet" href="assets/css/style.css">
+        <script src="assets/js/fast-nav.js" defer></script>
+</head>
+
+
+
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-sans antialiased">
+
+
+
+    <!-- Ticker Bar -->
+
+    <div class="bg-gray-900 dark:bg-black border-b border-gray-800 overflow-hidden" x-data="{ offset: 0 }" x-init="setInterval(() => offset -= 1, 30)">
+
+        <div class="py-2 flex items-center whitespace-nowrap animate-marquee" style="animation: marquee 30s linear infinite;">
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-up" class="w-3 h-3 mr-1 text-green-500"></i> XAUUSD <span class="text-green-500 ml-1">1478.81</span>
+
+            </span>
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-down" class="w-3 h-3 mr-1 text-primary-500"></i> GBPUSD <span class="text-primary-500 ml-1">1.3191</span>
+
+            </span>
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-down" class="w-3 h-3 mr-1 text-primary-500"></i> EURUSD <span class="text-primary-500 ml-1">1.1159</span>
+
+            </span>
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-up" class="w-3 h-3 mr-1 text-green-500"></i> USDJPY <span class="text-green-500 ml-1">109.59</span>
+
+            </span>
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-up" class="w-3 h-3 mr-1 text-green-500"></i> USDCAD <span class="text-green-500 ml-1">1.3172</span>
+
+            </span>
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-up" class="w-3 h-3 mr-1 text-green-500"></i> USDCHF <span class="text-green-500 ml-1">0.9776</span>
+
+            </span>
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-down" class="w-3 h-3 mr-1 text-primary-500"></i> AUDUSD <span class="text-primary-500 ml-1">0.67064</span>
+
+            </span>
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-up" class="w-3 h-3 mr-1 text-green-500"></i> GBPJPY <span class="text-green-500 ml-1">141.91</span>
+
+            </span>
+
+            <!-- Duplicate for seamless loop -->
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-up" class="w-3 h-3 mr-1 text-green-500"></i> XAUUSD <span class="text-green-500 ml-1">1478.81</span>
+
+            </span>
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-down" class="w-3 h-3 mr-1 text-primary-500"></i> GBPUSD <span class="text-primary-500 ml-1">1.3191</span>
+
+            </span>
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-down" class="w-3 h-3 mr-1 text-primary-500"></i> EURUSD <span class="text-primary-500 ml-1">1.1159</span>
+
+            </span>
+
+            <span class="inline-flex items-center mx-4 text-xs text-gray-400">
+
+                <i data-lucide="trending-up" class="w-3 h-3 mr-1 text-green-500"></i> USDJPY <span class="text-green-500 ml-1">109.59</span>
+
+            </span>
+
+        </div>
+
+    </div>
+
+    <style>
+
+        @keyframes  marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .animate-marquee { display: flex; width: max-content; }
+
+    </style>
+
+
+
+    <!-- Navigation -->
+
+    <header class="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800" x-data="{ mobileOpen: false }">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="flex items-center justify-between h-16">
+
+                <!-- Logo -->
+
+                <a href="index.html" class="flex-shrink-0">
+
+                    <img src="assets/images/exness-logo.png" alt="EXNESS" class="h-8 w-auto">
+
+                </a>
+
+
+
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">Home</a>
+                    <a href="cars.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">Inventory</a>
+                    <a href="trading.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">Live Trading</a>
+                    <a href="about.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">About</a>
+                    <a href="contact.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">Contact</a>
+                    <a href="faq.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">FAQ</a>
+                </nav>
+
+                <!-- Right Side -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <!-- Dark Mode Toggle -->
+                    <button @click="$store.theme.toggle($event)" class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                    </button>
+                    <a href="login.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors">Login</a>
+                    <a href="register.html" class="inline-flex items-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors">
+                        Sign Up
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="flex items-center md:hidden space-x-2">
+                    <button @click="$store.theme.toggle($event)" class="p-2 rounded-lg text-gray-500 dark:text-gray-400">
+                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                    </button>
+                    <button @click="mobileOpen = !mobileOpen" class="p-2 rounded-lg text-gray-500 dark:text-gray-400">
+                        <i data-lucide="menu" class="w-6 h-6" x-show="!mobileOpen"></i>
+                        <i data-lucide="x" class="w-6 h-6" x-show="mobileOpen" x-cloak></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div x-show="mobileOpen" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 max-h-[calc(100vh-4rem)] overflow-y-auto">
+            <div class="px-4 py-4 pb-8 space-y-2">
+                <a href="index.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Home</a>
+                <a href="cars.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Inventory</a>
+                <a href="trading.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Live Trading</a>
+                <a href="about.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">About</a>
+                <a href="contact.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Contact</a>
+                <a href="faq.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">FAQ</a>
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4 flex space-x-3 pb-2">
+                    <a href="login.html" class="flex-1 text-center px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium">Login</a>
+                    <a href="register.html" class="flex-1 text-center px-4 py-2.5 bg-primary-500 text-white rounded-lg font-medium">Sign Up</a>
+                </div>
+            </div>
+        </div>
+
+    </header>
+
+
+
+    <div class="gtranslate_wrapper"></div>
+
+<script>
+
+    window.gtranslateSettings = {
+
+        default_language: "en",
+
+        alt_flags:{"en":"usa"},
+
+        wrapper_selector: ".gtranslate_wrapper",
+
+        flag_style: "3d",
+
+    };
+
+</script>
+
+<script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
+
+
+
+    <!-- Page Content -->
+
+    <main>
+
+        
+
+    <!-- Page Header -->
+
+    <section class="bg-gradient-to-r from-primary-600 to-primary-800 py-16">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+
+            <h1 class="text-4xl font-bold text-white">Privacy Policy</h1>
+
+            <p class="mt-3 text-lg text-white/70">How we handle your data</p>
+
+            <nav class="mt-4 flex justify-center">
+
+                <ol class="flex items-center space-x-2 text-sm text-white/60">
+
+                    <li><a href="index.html" class="hover:text-white transition-colors"><i data-lucide="home" class="w-4 h-4 inline"></i> Home</a></li>
+
+                    <li>/</li>
+
+                    <li class="text-white font-medium">Privacy Policy</li>
+
+                </ol>
+
+            </nav>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- Privacy Content -->
+
+    <section class="bg-white dark:bg-gray-900 py-16 lg:py-24">
+
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8">
+
+                <div class="prose dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-a:text-primary-500">
+
+                    <p><strong>Our Commitment to You:</strong></p>
+
+
+
+<p>Thank you for showing interest in our service. In order for us to provide you with our service, we are required to collect and process certain personal data about you and your activity.</p>
+
+
+
+<p>By entrusting us with your personal data, we would like to assure you of our commitment to keep such information private and to operate in accordance with all regulatory laws and all EU data protection laws, including General Data Protection Regulation (GDPR) 679/2016 (EU).</p>
+
+
+
+<p>We have taken measurable steps to protect the confidentiality, security and integrity of this data. We encourage you to review the following information carefully.</p>
+
+
+
+<p><strong>Grounds for data collection:</strong></p>
+
+
+
+<p>Processing of your personal information (meaning, any data which may potentially allow your identification with reasonable means; hereinafter &ldquo;Personal Data&rdquo;) is necessary for the performance of our contractual obligations towards you and providing you with our services, to protect our legitimate interests and for compliance with legal and financial regulatory obligations to which we are subject.</p>
+
+
+
+<p>When you use our services, you consent to the collection, storage, use, disclosure and other uses of your Personal Data as described in this Privacy Policy.</p>
+
+
+
+<p><strong>How do we receive data about you?</strong></p>
+
+
+
+<p>We receive your Personal Data from various sources:</p>
+
+
+
+<ol>
+
+	<li>When you voluntarily provide us with your personal details in order to create an account (for example, your name and email address)</li>
+
+	<li>When you use or access our site and services, in connection with your use of our services (for example, your financial transactions)</li>
+
+	<li>&nbsp;</li>
+
+</ol>
+
+
+
+<p><strong>What type of data we collect?</strong></p>
+
+
+
+<p>In order to open an account, and in order to provide you with our services we will need you to collect the following data:</p>
+
+
+
+<p><strong>Personal Data<br />
+
+We collect the following Personal Data about you:</strong></p>
+
+
+
+<ul>
+
+	<li><em>Registration data</em>&nbsp;&ndash; your name, email address, phone number, occupation, country of residence, and your age (in order to verify you are over 18 years of age and eligible to participate in our service).</li>
+
+	<li><em>Voluntary data</em>&nbsp;&ndash; when you communicate with us (for example when you send us an email or use a &ldquo;contact us&rdquo; form on our site) we collect the personal data you provided us with.</li>
+
+	<li><em>Financial data</em>&nbsp;&ndash; by its nature, your use of our services includes financial transactions, thus requiring us to obtain your financial details, which includes, but not limited to your payment details (such as bank account details and financial transactions performed through our services).</li>
+
+	<li><em>Technical data</em>&nbsp;&ndash; we collect certain technical data that is automatically recorded when you use our services, such as your IP address, MAC address, device approximate location</li>
+
+	<li>Non Personal Data</li>
+
+</ul>
+
+
+
+<p>We record and collect data from or about your device (for example your computer or your mobile device) when you access our services and visit our site. This includes, but not limited to: your login credentials, UDID, Google advertising ID, IDFA, cookie identifiers, and may include other identifiers such your operating system version, browser type, language preferences, time zone, referring domains and the duration of your visits. This will facilitate our ability to improve our service and personalize your experience with us.<br />
+
+If we combine Personal Data with non-Personal Data about you, the combined data will be treated as Personal Data for as long as it remains combined.</p>
+
+
+
+<p><strong>Tracking Technologies</strong></p>
+
+
+
+<p>When you visit or access our services we use (and authorize 3rd parties to use) pixels, cookies, events and other technologies (&ldquo;Tracking Technologies&ldquo;). Those allow us to automatically collect data about you, your device and your online behavior, in order to enhance your navigation in our services, improve our site&rsquo;s performance, perform analytics and customize your experience on it. In addition, we may merge data we have with data collected through said tracking technologies with data we may obtain from other sources and, as a result, such data may become Personal Data.<br />
+
+Cookie Policy page.</p>
+
+
+
+<p><strong>How do we use the data We collect?</strong></p>
+
+
+
+<ul>
+
+	<li>Provision of service &ndash; we will use your Personal Data you provide us for the provision and improvement of our services to you.</li>
+
+	<li>Marketing purposes &ndash; we will use your Personal Data (such as your email address or phone number). For example, by subscribing to our newsletter you will receive tips and announcements straight to your email account. We may also send you promotional material concerning our services or our partners&rsquo; services (which we believe may interest you), including but not limited to, by building an automated profile based on your Personal Data, for marketing purposes. You may choose not to receive our promotional or marketing emails (all or any part thereof) by clicking on the &ldquo;unsubscribe&rdquo; link in the emails that you receive from us. Please note that even if you unsubscribe from our newsletter, we may continue to send you service-related updates and notifications or reply to your queries and feedback you provide us.</li>
+
+	<li>Opt-out of receiving marketing materials &ndash; If you do not want us to use or share your personal data for marketing purposes, you may opt-out in accordance with this &ldquo;Opt-out&rdquo; section. Please note that even if you opt-out, we may still use and share your personal information with third parties for non-marketing purposes (for example to fulfill your requests, communicate with you and respond to your inquiries, etc.). In such cases, the companies with whom we share your personal data are authorized to use your Personal Data only as necessary to provide these non-marketing services.</li>
+
+	<li>Analytics, surveys and research &ndash; we are always trying to improve our services and think of new and exciting features for our users. From time to time, we may conduct surveys or test features, and analyze the information we have to develop, evaluate and improve these features.</li>
+
+	<li>Protecting our interests &ndash; we use your Personal Data when we believe it&rsquo;s necessary in order to take precautions against liabilities, investigate and defend ourselves against any third-party claims or allegations, investigate and protect ourselves from fraud, protect the security or integrity of our services and protect the rights and property of the company, its users and/or partners.</li>
+
+	<li>Enforcing of policies &ndash; we use your Personal Data in order to enforce our policies, including but limited to our Terms &amp; Conditions.</li>
+
+	<li>Compliance with legal and regulatory requirements &ndash; we also use your Personal Data to investigate violations and prevent money laundering and perform due-diligence checks, and as required by law, regulation or other governmental authority, or to comply with a subpoena or similar legal process.</li>
+
+</ul>
+
+
+
+<p><strong>With whom do we share your Personal Data</strong></p>
+
+
+
+<ul>
+
+	<li>Internal concerned parties &ndash; we share your data with companies in our group, as well as our employees limited to those employees or partners who need to know the information in order to provide you with our services.</li>
+
+	<li>Financial providers and payment processors &ndash; we share your financial data about you for purposes of accepting deposits or performing risk analysis.</li>
+
+	<li>Business partners &ndash; we share your data with business partners, such as storage providers and analytics providers who help us provide you with our service.</li>
+
+	<li>Legal and regulatory entities &ndash; we may disclose any data in case we believe, in good faith, that such disclosure is necessary in order to enforce our Terms &amp; Conditions take precautions against liabilities, investigate and defend ourselves against any third party claims or allegations, protect the security or integrity of the site and our servers and protect the rights and property, our users and/or partners. We may also disclose your personal data where requested any other regulatory authority having control or jurisdiction over us, you or our associates or in the territories we have clients or providers, as a broker.</li>
+
+	<li>Merger and acquisitions &ndash; we may share your data if we enter into a business transaction such as a merger, acquisition, reorganization, bankruptcy, or sale of some or all of our assets. Any party that acquires our assets as part of such a transaction may continue to use your data in accordance with the terms of this Privacy Policy.</li>
+
+</ul>
+
+
+
+<p><strong>Transfer of data outside the EEA</strong></p>
+
+
+
+<p>Please note that some data recipients may be located outside the EEA. In such cases, we will transfer your data only to such countries as approved by the European Commission as providing an adequate level of data protection or enter into legal agreements ensuring an adequate level of data protection.</p>
+
+
+
+<p><strong>How we protect your data</strong></p>
+
+
+
+<p>We have implemented administrative, technical, and physical safeguards to help prevent unauthorized access, use, or disclosure of your personal data. Your data is stored on secure servers and isn&rsquo;t publicly available. We limit access of your data only to those employees or partners that need to know the information in order to enable the carrying out of the agreement between us.</p>
+
+
+
+<p>You need to help us prevent unauthorized access to your account by protecting your password appropriately and limiting access to your account (for example, by signing off after you have finished accessing your account). You will be solely responsible for keeping your password confidential and for all use of your password and your account, including any unauthorized use.</p>
+
+
+
+<p>While we seek to protect your data to ensure that it is kept confidential, we cannot absolutely guarantee its security. You should be aware that there is always some risk involved in transmitting data over the internet. While we strive to protect your Personal Data, we cannot ensure or warrant the security and privacy of your personal Data or other content you transmit using the service, and you do so at your own risk.</p>
+
+
+
+<p><strong>Retention</strong></p>
+
+
+
+<p>We will retain your personal data for as long as necessary to provide our services, and as necessary to comply with our legal obligations, resolve disputes, and enforce our policies. Retention periods will be determined taking into account the type of data that is collected and the purpose for which it is collected, bearing in mind the requirements applicable to the situation and the need to destroy outdated, unused data at the earliest reasonable time. Under applicable regulations, we will keep records containing client personal data, trading information, account opening documents, communications and anything else as required by applicable laws and regulations.</p>
+
+
+
+<p><strong>User Rights</strong></p>
+
+
+
+<ol>
+
+	<li>Receive confirmation as to whether or not personal data concerning you is being processed, and access your stored personal data, together with supplementary data.</li>
+
+	<li>Receive a copy of personal data you directly volunteer to us in a structured, commonly used and machine-readable format.</li>
+
+	<li>Request rectification of your personal data that is in our control.</li>
+
+	<li>Request erasure of your personal data.</li>
+
+	<li>Object to the processing of personal data by us.</li>
+
+	<li>Request to restrict processing of your personal data by us.</li>
+
+</ol>
+
+
+
+<p>However, please note that these rights are not absolute, and may be subject to our own legitimate interests and regulatory requirements.</p>
+
+
+
+<p><strong>How to Contact us?</strong></p>
+
+
+
+<p>If you wish to exercise any of the aforementioned rights, or receive more information, please contact our General Data Protection Officer (&ldquo;GDPO&rdquo;) using the details provided below:</p>
+
+
+
+<p>Email: support@onlintrade.com</p>
+
+
+
+<p>Attn. GDPO Compliance Officer</p>
+
+
+
+<p>If you decide to terminate your account, you may do so by emailing us at support@onlintrade.com. If you terminate your account, please be aware that personal information that you have provided us may still be maintained for legal and regulatory reasons (as described above), but it will no longer be accessible via your account.</p>
+
+
+
+<p><strong>Updates to this Policy</strong></p>
+
+
+
+<p>This Privacy Policy is subject to changes from time to time, at our sole discretion. The most current version will always be posted on our website (as reflected in the &ldquo;Last Updated&rdquo; heading). You are advised to check for updates regularly. In the event of material changes, we will provide you with a notice. By continuing to access or use our services after any revisions become effective, you agree to be bound by the updated Privacy Policy.</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    </main>
+
+
+
+    <!-- Activity Alert Popup -->
+
+    <div id="fake-alert" class="fixed bottom-5 left-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 z-50 max-w-xs border border-gray-200 dark:border-gray-700 transition-all duration-500" style="display:none; opacity:0;">
+
+        <div class="flex items-center space-x-3">
+
+            <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+
+                <i data-lucide="check-circle" class="w-4 h-4 text-green-600 dark:text-green-400"></i>
+
+            </div>
+
+            <span id="alert-text" class="text-sm text-gray-700 dark:text-gray-300"></span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Footer -->
+
+    <footer class="bg-gray-900 text-gray-400 mt-auto">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+                <!-- Brand -->
+
+                <div class="lg:col-span-1">
+
+                    <img src="assets/images/exness-logo.png" alt="EXNESS" class="h-8 w-auto mb-4 brightness-200">
+
+                    <p class="text-sm text-gray-500 mb-4">supportt@iwebbtech.top</p>
+
+                    <div class="flex space-x-4">
+
+                        <a href="#" class="text-gray-500 hover:text-white transition-colors"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+
+                        <a href="#" class="text-gray-500 hover:text-white transition-colors"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+
+                        <a href="#" class="text-gray-500 hover:text-white transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+
+                        <a href="#" class="text-gray-500 hover:text-white transition-colors"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+
+                    </div>
+
+                </div>
+
+                <!-- Company -->
+
+                <div>
+
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Company</h4>
+
+                    <ul class="space-y-2">
+
+                        <li><a href="about.html" class="text-sm hover:text-white transition-colors">About</a></li>
+
+                        <li><a href="contact.html" class="text-sm hover:text-white transition-colors">Contact</a></li>
+
+                        <li><a href="faq.html" class="text-sm hover:text-white transition-colors">FAQ</a></li>
+
+                    </ul>
+
+                </div>
+
+                <!-- Legal -->
+
+                <div>
+
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Legal</h4>
+
+                    <ul class="space-y-2">
+
+                        <li><a href="terms.html" class="text-sm hover:text-white transition-colors">Terms &amp; Conditions</a></li>
+
+                        <li><a href="privacy.html" class="text-sm hover:text-white transition-colors">Privacy Policy</a></li>
+
+                        <li><a href="risk.html" class="text-sm hover:text-white transition-colors">Risk Warning</a></li>
+
+                    </ul>
+
+                </div>
+
+                <!-- Support -->
+
+                <div>
+
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Support</h4>
+
+                    <ul class="space-y-2">
+
+                        <li><a href="safety.html" class="text-sm hover:text-white transition-colors">Safety of Funds</a></li>
+
+                        <li><a href="service.html" class="text-sm hover:text-white transition-colors">Services</a></li>
+
+                        <li><a href="trading.html" class="text-sm hover:text-white transition-colors">Trading Conditions</a></li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Risk Warning -->
+
+            <div class="mt-12 pt-8 border-t border-gray-800">
+
+                <div class="bg-gray-800/50 rounded-lg p-4 mb-8">
+
+                    <h5 class="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Risk Warning</h5>
+
+                    <p class="text-xs text-gray-500">Trading derivatives and leveraged products carries a high level of risk, including the risk of losing substantially more than your initial investment. It is not suitable for everyone. Before you make any decision in relation to a financial product you should obtain and consider our Product Disclosure Statement (PDS) and Financial Services Guide (FSG) available on our website and seek independent advice if necessary.</p>
+
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between">
+
+                    <p class="text-sm text-gray-500">&copy; EXNESS 2026. All rights reserved.</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+
+    <!-- Activity Alert Script -->
+
+    <script>
+
+    const alerts = [
+
+        "John from New York just withdrew $500",
+
+        "Alice from London just invested $1,000",
+
+        "Michael from Texas withdrew $200",
+
+        "Sandra from Berlin invested $2,000",
+
+        "Rahul from Mumbai just invested $750",
+
+        "Sophia from Dubai just withdrew $1,200",
+
+        "Liam from Sydney invested $1,500",
+
+        "Emma from Paris just withdrew $300",
+
+        "David from Toronto invested $2,200",
+
+        "Aisha from Lagos just invested $900",
+
+        "Carlos from Madrid withdrew $700",
+
+        "Mia from Cape Town just invested $1,300",
+
+        "Kenji from Tokyo withdrew $600",
+
+        "Olga from Moscow just invested $850",
+
+        "Amir from Cairo just withdrew $450",
+
+        "Lucas from So Paulo just invested $1,000",
+
+        "Emily from Dublin just withdrew $250",
+
+        "Noah from Johannesburg just invested $1,100",
+
+        "Hassan from Islamabad just withdrew $950",
+
+        "Natalie from Rome just invested $1,400",
+
+        "Jason from Chicago just withdrew $800",
+
+        "Zara from Kuala Lumpur just invested $670",
+
+        "Chen from Beijing just withdrew $720",
+
+        "Fatima from Riyadh just invested $890",
+
+        "Mark from Los Angeles just withdrew $560"
+
+    ];
+
+    function showFakeAlert() {
+
+        const alertBox = document.getElementById("fake-alert");
+
+        const alertText = document.getElementById("alert-text");
+
+        const randomAlert = alerts[Math.floor(Math.random() * alerts.length)];
+
+        alertText.textContent = randomAlert;
+
+        alertBox.style.display = "block";
+
+        setTimeout(() => { alertBox.style.opacity = 1; }, 10);
+
+        setTimeout(() => {
+
+            alertBox.style.opacity = 0;
+
+            setTimeout(() => { alertBox.style.display = "none"; }, 500);
+
+        }, 5000);
+
+    }
+
+    setInterval(showFakeAlert, 15000);
+
+    setTimeout(showFakeAlert, 5000);
+
+    </script>
+
+
+
+    <!-- Lucide Icons Init -->
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        });
+
+    </script>
+
+
+
+    
+    <!-- Real-time Investment Popup Toast -->
+    <div id="live-investor-toast" class="fixed bottom-20 left-4 z-50 transition-all duration-500 transform translate-y-10 opacity-0 pointer-events-none">
+        <div class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-3 flex items-center space-x-3 max-w-xs text-xs">
+            <div class="w-8 h-8 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="trending-up" class="w-4 h-4"></i>
+            </div>
+            <div class="text-gray-800 dark:text-gray-200 leading-tight">
+                Someone from <strong id="toast-city" class="text-gray-900 dark:text-white font-bold">Moscow</strong> 
+                <span id="toast-action">just invested</span> 
+                <span id="toast-amount" class="font-bold text-primary-500 dark:text-primary-400">$5,400</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            const toastData = [
+                { city: "Moscow", action: "just invested", amount: "$5,400" },
+                { city: "Chicago", action: "just withdrew", amount: "$1,250" },
+                { city: "London", action: "just invested", amount: "$10,500" },
+                { city: "Zurich", action: "just invested", amount: "$24,000" },
+                { city: "Dubai", action: "just ordered", amount: "Tesla Model X Plaid" },
+                { city: "Singapore", action: "just deposited", amount: "2.5 BTC" },
+                { city: "Tokyo", action: "just invested", amount: "$8,200" }
+            ];
+            let idx = 0;
+            const toast = document.getElementById('live-investor-toast');
+            const cityEl = document.getElementById('toast-city');
+            const actEl = document.getElementById('toast-action');
+            const amtEl = document.getElementById('toast-amount');
+            
+            function showToast() {
+                if (!toast) return;
+                const item = toastData[idx % toastData.length];
+                idx++;
+                cityEl.textContent = item.city;
+                actEl.textContent = item.action;
+                amtEl.textContent = item.amount;
+                toast.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    toast.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none');
+                    setTimeout(showToast, Math.floor(Math.random() * 3000) + 5000);
+                }, 4000);
+            }
+            setTimeout(showToast, 2500);
+        })();
+    </script>
+</body>
+
+
+</html>

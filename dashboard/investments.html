@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" :class="{ 'dark': $store.theme.dark }" x-data>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Plans - EXNESS</title>
+    <link rel="icon" type="image/png" href="../assets/images/title-logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="../assets/js/tailwindcss.js"></script>
+    <script>
+        if (!localStorage.getItem('theme')) localStorage.setItem('theme', 'dark');
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: { 500: '#FFD100', 600: '#E5BC00' } }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="../assets/js/lucide.min.js"></script>
+    <script src="../assets/js/icons.js"></script>
+    <script defer src="../assets/js/alpine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="../assets/js/supabase-client.js" defer></script>
+    <script src="../assets/js/supabase-dashboard.js" defer></script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('theme', {
+                dark: localStorage.getItem('theme') === 'dark',
+                toggle(trigger) {
+                    if (window.toggleDashboardTheme) {
+                        window.toggleDashboardTheme(trigger);
+                    } else {
+                        this.dark = !this.dark;
+                        localStorage.setItem('theme', this.dark ? 'dark' : 'light');
+                        document.documentElement.classList.toggle('dark', this.dark);
+                    }
+                }
+            });
+        });
+    </script>
+    <script src="../assets/js/fast-nav.js" defer></script>
+</head>
+<body class="bg-gray-50 dark:bg-[#0c0c0c] text-gray-900 dark:text-gray-100 font-sans antialiased min-h-screen flex transition-colors">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white dark:bg-[#141414] border-r border-gray-200 dark:border-gray-800 flex flex-col justify-between hidden lg:flex">
+        <div>
+            <div class="h-16 px-6 flex items-center border-b border-gray-100 dark:border-gray-800">
+                <a href="../index.html"><img src="../assets/images/exness-logo.png" alt="Logo" class="h-8 w-auto brightness-0 dark:invert"></a>
+            </div>
+            <nav class="p-4 space-y-1.5 text-sm font-medium">
+                <a href="index.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span></a>
+                <a href="trades.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="trending-up" class="w-5 h-5"></i><span>Live Trading</span></a>
+                <a href="investments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-primary-500 text-white font-semibold shadow-md"><i data-lucide="pie-chart" class="w-5 h-5"></i><span>Investment Plans</span></a>
+                <a href="cars.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="car" class="w-5 h-5"></i><span>Tesla EV Orders</span></a>
+                <a href="deposit.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="arrow-down-circle" class="w-5 h-5"></i><span>Deposit Crypto</span></a>
+                <a href="withdraw.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="arrow-up-circle" class="w-5 h-5"></i><span>Withdraw Profits</span></a>
+                <a href="transactions.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="history" class="w-5 h-5"></i><span>Transactions</span></a>
+                <a href="profile.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="shield" class="w-5 h-5"></i><span>Profile & Security</span></a>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-gray-100 dark:border-gray-800">
+            <a href="javascript:void(0)" data-logout-link class="flex items-center space-x-3 px-3.5 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 rounded-xl transition"><i data-lucide="log-out" class="w-5 h-5"></i><span>Log out</span></a>
+        </div>
+    </aside>
+
+    <!-- Content -->
+    <div class="flex-1 flex flex-col min-w-0" x-data="{ investSuccess: false, selectedPlan: 'Gold Arbitrage', investAmount: 10000 }">
+        <header class="relative min-h-16 bg-white dark:bg-[#141414] border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+            <h1 class="hidden sm:block text-base font-bold">Algorithmic Investment Portfolios</h1>
+            <span class="sm:hidden absolute left-1/2 -translate-x-1/2 text-base font-bold tracking-tight">Investments</span>
+            <div class="flex items-center space-x-3 ml-auto">
+                <button @click="$store.theme.toggle($event)" class="theme-btn p-2 text-gray-400 hover:text-white rounded-full">
+                    <span x-show="!$store.theme.dark"><i data-lucide="sun" class="w-5 h-5"></i></span>
+                    <span x-show="$store.theme.dark"><i data-lucide="moon" class="w-5 h-5"></i></span>
+                </button>
+            </div>
+        </header>
+
+        <main class="p-6 sm:p-8 space-y-8 flex-1">
+            <!-- Active Subscribed Plan Details -->
+            <div data-active-plan-card hidden class="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+                    <div>
+                        <span class="text-xs font-bold text-amber-500 bg-amber-500/20 px-2.5 py-0.5 rounded-full uppercase">Currently Active</span>
+                        <h2 data-plan-name class="text-xl font-black mt-1">Gold 50% High-Yield Strategy</h2>
+                    </div>
+                    <div class="text-right">
+                        <div data-plan-profit class="text-sm font-bold text-green-500">+$0.00 Earned</div>
+                        <div class="text-xs text-gray-400">Capital: <strong data-plan-capital class="text-gray-900 dark:text-white">$0.00</strong></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-center text-xs">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                        <div class="text-gray-400">Daily Return Rate</div>
+                        <div data-plan-daily-payout class="text-base font-bold text-gray-900 dark:text-white mt-0.5">+2.38% / day</div>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                        <div class="text-gray-400">Strategy Status</div>
+                        <div class="text-base font-bold text-green-500 mt-0.5">Active & Accruing</div>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                        <div class="text-gray-400">Next Payout</div>
+                        <div class="text-base font-bold text-primary-500 mt-0.5">Today, 00:00 UTC</div>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                        <div class="text-gray-400">Principal Status</div>
+                        <div class="text-base font-bold text-green-500 mt-0.5">100% Protected</div>
+                    </div>
+                </div>
+            </div>
+
+            <div data-no-plan-card class="rounded-2xl border border-gray-200 bg-white p-10 text-center shadow-sm dark:border-gray-800 dark:bg-[#141414]">
+                <i data-lucide="pie-chart" class="mx-auto mb-4 h-10 w-10 text-gray-400"></i>
+                <h2 class="text-lg font-bold">No active investments</h2>
+                <p class="mt-2 text-sm text-gray-500">Subscribe to any strategy below to start earning automated daily yields.</p>
+            </div>
+
+            <!-- Available Packages Grid -->
+            <div>
+                <h3 class="text-lg font-bold mb-4">Subscribe to Additional Tier</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Starter -->
+                    <div class="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-gray-400 uppercase">Starter Arbitrage</span>
+                            <div class="text-2xl font-black mt-2">15% ROI</div>
+                            <div class="text-xs text-gray-500">7 Days Duration</div>
+                            <div class="my-4 border-t border-b border-gray-100 dark:border-gray-800 py-3 space-y-2 text-xs">
+                                <div class="flex justify-between"><span>Min Deposit:</span> <strong>$500</strong></div>
+                                <div class="flex justify-between"><span>Max Deposit:</span> <strong>$4,999</strong></div>
+                                <div class="flex justify-between"><span>Payout:</span> <strong>Daily Compounding</strong></div>
+                            </div>
+                        </div>
+                        <button type="button" data-subscribe-plan data-plan-name="Starter Arbitrage" data-plan-capital="500" data-plan-rate="2.14" class="w-full py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-primary-500 hover:text-white rounded-xl text-xs font-bold transition">
+                            Invest $500 From Balance
+                        </button>
+                    </div>
+
+                    <!-- Silver -->
+                    <div class="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-blue-400 uppercase">Silver Strategy</span>
+                            <div class="text-2xl font-black mt-2">30% ROI</div>
+                            <div class="text-xs text-gray-500">14 Days Duration</div>
+                            <div class="my-4 border-t border-b border-gray-100 dark:border-gray-800 py-3 space-y-2 text-xs">
+                                <div class="flex justify-between"><span>Min Deposit:</span> <strong>$5,000</strong></div>
+                                <div class="flex justify-between"><span>Max Deposit:</span> <strong>$19,999</strong></div>
+                                <div class="flex justify-between"><span>Payout:</span> <strong>Daily Compounding</strong></div>
+                            </div>
+                        </div>
+                        <button type="button" data-subscribe-plan data-plan-name="Silver Strategy" data-plan-capital="5000" data-plan-rate="2.14" class="w-full py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-primary-500 hover:text-white rounded-xl text-xs font-bold transition">
+                            Invest $5,000 From Balance
+                        </button>
+                    </div>
+
+                    <!-- Tesla VIP -->
+                    <div class="bg-white dark:bg-[#141414] border-2 border-primary-500 rounded-2xl p-6 shadow-xl flex flex-col justify-between relative">
+                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-500 text-white text-[10px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full">VIP Allocation</span>
+                        <div>
+                            <span class="text-xs font-bold text-primary-400 uppercase">Tesla VIP Executive</span>
+                            <div class="text-2xl font-black mt-2">85% ROI</div>
+                            <div class="text-xs text-gray-500">30 Days Duration</div>
+                            <div class="my-4 border-t border-b border-gray-100 dark:border-gray-800 py-3 space-y-2 text-xs">
+                                <div class="flex justify-between"><span>Min Deposit:</span> <strong>$50,000+</strong></div>
+                                <div class="flex justify-between"><span>EV Reward:</span> <strong class="text-green-500">Tesla Model 3 Handover</strong></div>
+                                <div class="flex justify-between"><span>Personal Broker:</span> <strong class="text-primary-500">24/7 Dedicated</strong></div>
+                            </div>
+                        </div>
+                        <button type="button" data-subscribe-plan data-plan-name="Tesla VIP Executive" data-plan-capital="50000" data-plan-rate="2.83" class="w-full py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl text-xs font-bold transition">
+                            Join VIP Plan ($50,000)
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+        <nav class="lg:hidden fixed bottom-4 left-4 right-4 z-40 rounded-3xl border border-gray-200 dark:border-white/10 bg-white/95 dark:bg-[#181a24]/95 px-4 py-3 shadow-2xl backdrop-blur-xl" aria-label="Mobile dashboard navigation"><div class="flex items-center justify-around"><a href="index.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="text-[9px] font-bold">Home</span></a><a href="transactions.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="history" class="w-4 h-4"></i><span class="text-[9px] font-bold">Activity</span></a><a href="deposit.html" class="-mt-7 flex h-12 w-12 items-center justify-center rounded-full border-4 border-gray-50 dark:border-[#0c0c0c] bg-primary-500 text-black shadow-lg" aria-label="Deposit"><i data-lucide="plus" class="w-5 h-5"></i></a><a href="trades.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="trending-up" class="w-4 h-4"></i><span class="text-[9px] font-bold">Live Trading</span></a><a href="profile.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="user" class="w-4 h-4"></i><span class="text-[9px] font-bold">Profile</span></a></div></nav>
+    </div>
+    <script>document.addEventListener('DOMContentLoaded', () => { if(window.lucide) lucide.createIcons(); });</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="../assets/js/ios-transitions.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" :class="{ 'dark': $store.theme.dark }" x-data>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile & Security - EXNESS</title>
+    <link rel="icon" type="image/png" href="../assets/images/title-logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="../assets/js/tailwindcss.js"></script>
+    <script>
+        if (!localStorage.getItem('theme')) localStorage.setItem('theme', 'dark');
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: { 500: '#FFD100', 600: '#E5BC00' } }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="../assets/js/lucide.min.js"></script>
+    <script src="../assets/js/icons.js"></script>
+    <script defer src="../assets/js/alpine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="../assets/js/supabase-client.js" defer></script>
+    <script src="../assets/js/supabase-dashboard.js" defer></script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('theme', {
+                dark: localStorage.getItem('theme') === 'dark',
+                toggle(trigger) {
+                    if (window.toggleDashboardTheme) {
+                        window.toggleDashboardTheme(trigger);
+                    } else {
+                        this.dark = !this.dark;
+                        localStorage.setItem('theme', this.dark ? 'dark' : 'light');
+                        document.documentElement.classList.toggle('dark', this.dark);
+                    }
+                }
+            });
+        });
+    </script>
+    <script src="../assets/js/fast-nav.js" defer></script>
+</head>
+<body class="bg-gray-50 dark:bg-[#0c0c0c] text-gray-900 dark:text-gray-100 font-sans antialiased min-h-screen flex transition-colors">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white dark:bg-[#141414] border-r border-gray-200 dark:border-gray-800 flex flex-col justify-between hidden lg:flex">
+        <div>
+            <div class="h-16 px-6 flex items-center border-b border-gray-100 dark:border-gray-800">
+                <a href="../index.html"><img src="../assets/images/exness-logo.png" alt="Logo" class="h-8 w-auto brightness-0 dark:invert"></a>
+            </div>
+            <nav class="p-4 space-y-1.5 text-sm font-medium">
+                <a href="index.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span></a>
+                <a href="trades.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="trending-up" class="w-5 h-5"></i><span>Live Trading</span></a>
+                <a href="investments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="pie-chart" class="w-5 h-5"></i><span>Investment Plans</span></a>
+                <a href="cars.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="car" class="w-5 h-5"></i><span>Tesla EV Orders</span></a>
+                <a href="deposit.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="arrow-down-circle" class="w-5 h-5"></i><span>Deposit Crypto</span></a>
+                <a href="withdraw.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="arrow-up-circle" class="w-5 h-5"></i><span>Withdraw Profits</span></a>
+                <a href="transactions.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="history" class="w-5 h-5"></i><span>Transactions</span></a>
+                <a href="profile.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-primary-500 text-white font-semibold shadow-md"><i data-lucide="shield" class="w-5 h-5"></i><span>Profile & Security</span></a>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-gray-100 dark:border-gray-800">
+            <a href="javascript:void(0)" data-logout-link class="flex items-center space-x-3 px-3.5 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 rounded-xl transition"><i data-lucide="log-out" class="w-5 h-5"></i><span>Log out</span></a>
+        </div>
+    </aside>
+
+    <!-- Content -->
+    <div class="flex-1 flex flex-col min-w-0" x-data="{ saved: false, twoFaEnabled: true }">
+        <header class="relative min-h-16 bg-white dark:bg-[#141414] border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+            <h1 class="hidden sm:block text-base font-bold">Investor Profile &amp; Security Settings</h1>
+            <span class="sm:hidden absolute left-1/2 -translate-x-1/2 text-base font-bold tracking-tight">Profile</span>
+            <div class="flex items-center space-x-3 ml-auto">
+                <button @click="$store.theme.toggle($event)" class="theme-btn p-2 text-gray-400 hover:text-white rounded-full">
+                    <span x-show="!$store.theme.dark"><i data-lucide="sun" class="w-5 h-5"></i></span>
+                    <span x-show="$store.theme.dark"><i data-lucide="moon" class="w-5 h-5"></i></span>
+                </button>
+            </div>
+        </header>
+
+        <main class="p-6 sm:p-8 space-y-6 flex-1 max-w-4xl mx-auto w-full">
+            <div data-profile-saved x-show="saved" hidden class="p-4 bg-green-50 dark:bg-green-950/60 border border-green-500 rounded-2xl text-green-700 dark:text-green-300 text-sm flex items-center">
+                <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i>
+                <span>Profile details saved successfully!</span>
+            </div>
+
+            <div data-profile-status-banner hidden class="mb-4"></div>
+
+            <!-- KYC Status Banner -->
+            <div class="p-6 bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-green-500/20 text-green-500 flex items-center justify-center">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white">Identity Verification (KYC Level 2)</h3>
+                        <p class="text-xs text-gray-500">Complete your profile to unlock account features.</p>
+                    </div>
+                </div>
+                <span data-user-status-pill class="inline-flex items-center rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-300">Active</span>
+            </div>
+
+            <!-- Profile Info Form -->
+            <div class="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
+                <div class="mb-6 flex items-center gap-4 border-b border-gray-100 pb-6 dark:border-gray-800">
+                    <div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-100 text-lg font-bold text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                        <img data-auth-avatar hidden alt="Profile photo" class="h-full w-full object-cover">
+                        <span data-auth-initials>IN</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold">Profile photo</h3>
+                        <p class="mt-1 text-xs text-gray-500">Choose a JPG, PNG, or WebP image up to 2 MB.</p>
+                        <label class="mt-3 inline-flex cursor-pointer items-center rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-600 transition hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:text-white">
+                            <i data-lucide="upload" class="mr-2 h-4 w-4"></i>
+                            Choose photo
+                            <input data-avatar-input type="file" accept="image/png,image/jpeg,image/webp" class="sr-only">
+                        </label>
+                    </div>
+                </div>
+                <h3 class="text-sm font-bold uppercase tracking-wider mb-6">Personal Information</h3>
+                <form data-profile-form @submit.prevent="saved = true; setTimeout(() => saved = false, 3000)" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Username</label>
+                            <input type="text" data-auth-username value="" placeholder="Your username" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold focus:outline-none focus:border-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Full Name</label>
+                            <input type="text" data-auth-name value="" placeholder="Your full name" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold focus:outline-none focus:border-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
+                            <input type="email" data-auth-email value="" disabled class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-400">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Phone Number</label>
+                            <input type="text" data-auth-phone value="" placeholder="Add phone number" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold focus:outline-none focus:border-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Country of Residence</label>
+                            <input type="text" value="" placeholder="Add country" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold focus:outline-none focus:border-primary-500">
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow transition">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Two-Factor Security -->
+            <div class="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Two-Factor Authentication (Google Authenticator)</h3>
+                        <p class="text-xs text-gray-500 mt-1">Requires 6-digit code on withdrawals and major transactions.</p>
+                    </div>
+                    <!-- iOS Native Toggle -->
+                    <div x-data="{ sliding: false }"
+                        @click="
+                            sliding = true;
+                            twoFaEnabled = !twoFaEnabled;
+                            setTimeout(() => sliding = false, 220)
+                        "
+                        :class="twoFaEnabled ? 'bg-[#34C759]' : 'bg-[#E5E5EA] dark:bg-[#39393D]'"
+                        role="switch"
+                        :aria-checked="twoFaEnabled.toString()"
+                        class="relative cursor-pointer select-none flex-shrink-0"
+                        style="width:51px;height:31px;border-radius:999px;transition:background-color 0.2s ease-in-out;padding:2px;">
+                        <div
+                            :style="{
+                                width: sliding ? '34px' : '27px',
+                                transform: (sliding && twoFaEnabled)
+                                    ? 'translateX(13px)'
+                                    : (!sliding && twoFaEnabled)
+                                    ? 'translateX(22px)'
+                                    : 'translateX(0px)'
+                            }"
+                            style="height:27px;border-radius:999px;background:#ffffff;box-shadow:0 3px 8px rgba(0,0,0,0.24),0 1px 3px rgba(0,0,0,0.16),0 0 0 0.5px rgba(0,0,0,0.08);transition:width 0.18s cubic-bezier(0.4,0,0.2,1),transform 0.22s cubic-bezier(0.34,1.3,0.64,1);">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <nav class="lg:hidden fixed bottom-4 left-4 right-4 z-40 rounded-3xl border border-gray-200 dark:border-white/10 bg-white/95 dark:bg-[#181a24]/95 px-4 py-3 shadow-2xl backdrop-blur-xl" aria-label="Mobile dashboard navigation"><div class="flex items-center justify-around"><a href="index.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="text-[9px] font-bold">Home</span></a><a href="transactions.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="history" class="w-4 h-4"></i><span class="text-[9px] font-bold">Activity</span></a><a href="deposit.html" class="-mt-7 flex h-12 w-12 items-center justify-center rounded-full border-4 border-gray-50 dark:border-[#0c0c0c] bg-primary-500 text-black shadow-lg" aria-label="Deposit"><i data-lucide="plus" class="w-5 h-5"></i></a><a href="trades.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="trending-up" class="w-4 h-4"></i><span class="text-[9px] font-bold">Live Trading</span></a><a href="profile.html" class="flex flex-col items-center gap-1 text-primary-500"><i data-lucide="user" class="w-4 h-4"></i><span class="text-[9px] font-bold">Profile</span></a></div></nav>
+    </div>
+    <script>document.addEventListener('DOMContentLoaded', () => { if(window.lucide) lucide.createIcons(); });</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="../assets/js/ios-transitions.js" defer></script>
+</body>
+</html>

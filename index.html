@@ -1,0 +1,2653 @@
+<!DOCTYPE html>
+
+<html lang="en" :class="{ 'dark': $store.theme.dark }" x-data>
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="csrf-token" content="pfDKO1HZ1dZ5ibuJzWZXESsklYJgKJIxKuNdigfN">
+
+    <meta name="description" content="Sign up With EXNESS to join thousands of investors">
+
+    <meta name="author" content="EXNESS">
+
+    <meta name="theme-color" content="#FFD100">
+
+    <title>EXNESS - Welcome to EXNESS</title>
+
+
+
+    <!-- Favicon -->
+
+    <link rel="shortcut icon" href="storage/app/public/photos/photos/Px9MifdF6k4uRiyRSGBX6qi4kKWtbhpkYNQrAouw.png" type="image/x-icon">
+
+    <link rel="apple-touch-icon-precomposed" href="storage/app/public/photos/photos/Px9MifdF6k4uRiyRSGBX6qi4kKWtbhpkYNQrAouw.png">
+
+
+
+    <!-- Inter Font -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+
+    <!-- Tailwind CSS -->
+
+    <script src="assets/js/tailwindcss.js"></script>
+
+    <script>
+
+        // Default to light mode if no preference is set
+
+        if (!localStorage.getItem('theme')) {
+
+            localStorage.setItem('theme', 'light');
+
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+
+            document.documentElement.classList.add('dark');
+
+        } else {
+
+            document.documentElement.classList.remove('dark');
+
+        }
+
+        tailwind.config = {
+
+            darkMode: 'class',
+
+            theme: {
+
+                extend: {
+
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+
+                    colors: {
+
+                        primary: {
+
+                            50: '#FFFDF0', 100: '#FFF9C2', 200: '#FFF085', 300: '#FFE247', 400: '#FFD100', 500: '#FFD100', 600: '#E5BC00', 700: '#B79000', 800: '#8A6900', 900: '#5C4400',
+
+                        },
+
+                        red: {
+
+                            50: '#FFFDF0', 100: '#FFF9C2', 200: '#FFF085', 300: '#FFE247', 400: '#FFD100', 500: '#FFD100', 600: '#E5BC00', 700: '#B79000', 800: '#8A6900', 900: '#5C4400',
+
+                        },
+
+                        gray: {
+
+                            50: '#FFFFFF', 100: '#F5F5F5', 200: '#E5E5E5', 300: '#D4D4D4',
+
+                            400: '#A3A3A3', 500: '#737373', 600: '#525252', 700: '#404040',
+
+                            800: '#262626', 900: '#0F0F0F',
+
+                        },
+
+                    },
+
+                }
+
+            }
+
+        }
+
+    </script>
+
+
+
+    <!-- Alpine.js -->
+
+    <script defer src="assets/js/alpine.min.js"></script>
+
+    <script>
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('theme', {
+                dark: localStorage.getItem('theme') === 'dark',
+                toggle(trigger) {
+                    if (window.toggleDashboardTheme) {
+                        window.toggleDashboardTheme(trigger);
+                    } else {
+                        this.dark = !this.dark;
+                        localStorage.setItem('theme', this.dark ? 'dark' : 'light');
+                        document.documentElement.classList.toggle('dark', this.dark);
+                    }
+                }
+            });
+        });
+
+    </script>
+
+
+
+    <!-- Lucide Icons -->
+
+    <script src="assets/js/lucide.min.js"></script>
+    <script src="assets/js/icons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="assets/js/supabase-client.js?v=landing-auth-2" defer></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+
+
+
+    <style>
+
+        .goog-te-banner-frame.skiptranslate { display: none !important; }
+
+        body { top: 0 !important; }
+
+        [x-cloak] { display: none !important; }
+
+    </style>
+
+        <script src="assets/js/fast-nav.js" defer></script>
+</head>
+
+
+
+<body class="landing-page bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-sans antialiased">
+
+
+
+    <!-- Exness Top Live Market Ticker (Sliding Marquee) -->
+    <div class="landing-ticker bg-[#0B0C10] border-b border-[#FFD100]/20 text-xs py-2 overflow-hidden">
+        <div class="animate-marquee">
+            <!-- Set 1 -->
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-[#FFD100] font-bold">EURUSD</span>
+                <span class="text-gray-400">1.1734</span>
+                <span class="text-emerald-400 font-semibold">▲ +0.21%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">GBPUSD</span>
+                <span class="text-gray-400">1.3762</span>
+                <span class="text-emerald-400 font-semibold">▲ +0.18%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">XAUUSD</span>
+                <span class="text-gray-400">2,489.15</span>
+                <span class="text-emerald-400 font-semibold">▲ +0.42%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">BTCUSD</span>
+                <span class="text-gray-400">58,742.30</span>
+                <span class="text-emerald-400 font-semibold">▲ +1.26%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-primary-400"></span>
+                <span class="text-[#FFD100] font-bold">USOIL</span>
+                <span class="text-gray-400">72.48</span>
+                <span class="text-primary-400 font-semibold">▼ -0.35%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">USDJPY</span>
+                <span class="text-gray-400">144.21</span>
+                <span class="text-emerald-400 font-semibold">▲ +0.12%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">AAPL</span>
+                <span class="text-gray-400">189.84</span>
+                <span class="text-emerald-400 font-semibold">▲ +0.53%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">ETHUSD</span>
+                <span class="text-gray-400">3,128.40</span>
+                <span class="text-emerald-400 font-semibold">▲ +2.14%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="text-gray-500 font-medium tracking-wide">Trade Smarter. Anywhere.</span>
+            </span>
+            <!-- Set 2 (duplicate for seamless loop) -->
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-[#FFD100] font-bold">EURUSD</span>
+                <span class="text-gray-400">1.1734</span>
+                <span class="text-emerald-400 font-semibold">▲ +0.21%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">GBPUSD</span>
+                <span class="text-gray-400">1.3762</span>
+                <span class="text-emerald-400 font-semibold">▲ +0.18%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">XAUUSD</span>
+                <span class="text-gray-400">2,489.15</span>
+                <span class="text-emerald-400 font-semibold">▲ +0.42%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">BTCUSD</span>
+                <span class="text-gray-400">58,742.30</span>
+                <span class="text-emerald-400 font-semibold">▲ +1.26%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-primary-400"></span>
+                <span class="text-[#FFD100] font-bold">USOIL</span>
+                <span class="text-gray-400">72.48</span>
+                <span class="text-primary-400 font-semibold">▼ -0.35%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">USDJPY</span>
+                <span class="text-gray-400">144.21</span>
+                <span class="text-emerald-400 font-semibold">▲ +0.12%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">AAPL</span>
+                <span class="text-gray-400">189.84</span>
+                <span class="text-emerald-400 font-semibold">▲ +0.53%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[#FFD100] font-bold">ETHUSD</span>
+                <span class="text-gray-400">3,128.40</span>
+                <span class="text-emerald-400 font-semibold">▲ +2.14%</span>
+            </span>
+            <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
+                <span class="text-gray-500 font-medium tracking-wide">Trade Smarter. Anywhere.</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Exness Navigation -->
+    <header class="landing-header sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors" x-data="{ mobileOpen: false }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20 sm:h-16">
+                <!-- Logo -->
+                <a href="index.html" class="flex items-center">
+                    <img src="assets/images/exness-logo.png" alt="EXNESS" class="h-11 sm:h-9 w-auto object-contain brightness-0 dark:brightness-200">
+                </a>
+
+                <!-- Desktop Nav Links -->
+                <nav class="hidden lg:flex items-center space-x-8">
+                    <a href="index.html" class="text-sm font-semibold text-primary-500">Home</a>
+                    <a href="cars.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors">Inventory</a>
+                    <a href="trading.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors">Live Trading</a>
+                    <a href="about.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors">About</a>
+                    <a href="contact.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors">Contact</a>
+                    <a href="faq.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors">FAQ</a>
+                </nav>
+
+                <!-- Right Controls -->
+                <div class="hidden md:flex items-center space-x-5">
+                    <!-- Theme Toggle -->
+                    <button @click="$store.theme.toggle($event)" class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Toggle Theme">
+                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                    </button>
+                    <div data-landing-guest-auth class="flex items-center space-x-5">
+                        <a href="login.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Login</a>
+                        <a href="register.html" class="inline-flex items-center justify-center px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white text-sm font-extrabold rounded-lg transition-colors">
+                            Sign Up
+                        </a>
+                    </div>
+                    <div data-landing-user-auth hidden class="flex items-center space-x-3">
+                        <a href="dashboard/index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Dashboard</a>
+                        <button type="button" data-landing-logout title="Log out" aria-label="Log out" class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">Log out</button>
+                        <a href="dashboard/profile.html" title="Open profile" aria-label="Open profile" class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-100 text-[11px] font-bold text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                            <img data-landing-avatar hidden alt="Profile photo" class="h-full w-full object-cover">
+                            <span data-landing-initials>IN</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Mobile Hamburger -->
+                <div class="flex items-center lg:hidden space-x-3">
+                    <button aria-label="Toggle theme" @click="$store.theme.toggle($event)" class="p-2 rounded-lg text-gray-500 dark:text-gray-400">
+                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                    </button>
+                    <button aria-label="Open navigation" @click="mobileOpen = !mobileOpen" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                        <i data-lucide="menu" class="w-6 h-6" x-show="!mobileOpen"></i>
+                        <i data-lucide="x" class="w-6 h-6" x-show="mobileOpen" x-cloak></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown with transition -->
+        <div x-show="mobileOpen" x-cloak
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-2"
+             class="lg:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-5 space-y-3">
+            <a href="index.html" class="block px-3 py-2 text-base font-semibold text-primary-500 rounded-lg">Home</a>
+            <a href="cars.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Inventory</a>
+            <a href="trading.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Live Trading</a>
+            <a href="about.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">About</a>
+            <a href="contact.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Contact</a>
+            <a href="faq.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">FAQ</a>
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex space-x-3">
+                <div data-landing-guest-mobile class="flex w-full space-x-3">
+                    <a href="login.html" class="flex-1 text-center py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium">Login</a>
+                    <a href="register.html" class="flex-1 text-center py-2.5 rounded-lg bg-primary-500 text-white font-bold">Sign Up</a>
+                </div>
+                <div data-landing-user-mobile hidden class="flex w-full items-center justify-between gap-3">
+                    <a href="dashboard/index.html" class="flex-1 text-center py-2.5 rounded-lg bg-primary-500 text-white font-bold">Dashboard</a>
+                    <button type="button" data-landing-logout class="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium">Log out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- Trading-focused landing hero -->
+    <section data-landing-hero class="relative min-h-[540px] text-white pt-16 pb-20 overflow-hidden bg-[#080b10]" style="background-image: linear-gradient(90deg, rgba(8, 11, 16, 0.9) 0%, rgba(8, 11, 16, 0.55) 32%, rgba(8, 11, 16, 0.08) 66%, rgba(8, 11, 16, 0.72) 100%), url('assets/images/hero-trading-bg.png'); background-size: cover; background-position: 45% center;">
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                
+                <!-- Left Column: Original UX Copy & CTAs (6 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <span class="inline-block text-xs md:text-sm font-semibold text-[#FFD100] tracking-wider uppercase">
+                        Global Trading Partner
+                    </span>
+
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                        Trade. Invest.<br>
+                        <span class="text-[#FFD100]">Grow.</span>
+                    </h1>
+
+                    <p class="text-gray-300 text-base sm:text-lg leading-relaxed max-w-xl">
+                        Access 1,000+ financial instruments, including forex, metals, indices, stocks, and cryptocurrencies. Trade anytime, anywhere with Exness.
+                    </p>
+
+                    <!-- Original UX Dual CTA Buttons -->
+                    <div class="flex flex-wrap items-center gap-4 pt-2">
+                        <a href="register.html" class="inline-flex items-center justify-center px-7 py-3.5 bg-white hover:bg-gray-100 text-primary-700 font-extrabold text-base rounded-lg transition-colors">
+                            <i data-lucide="trending-up" class="w-5 h-5 mr-2"></i>
+                            Start Trading Now
+                        </a>
+                        <a href="cars.html" class="inline-flex items-center justify-center px-7 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-base rounded-lg border border-white/30 transition-colors">
+                            <i data-lucide="car" class="w-5 h-5 mr-2 text-primary-400"></i>
+                            Watch Video
+                        </a>
+                    </div>
+
+                    <!-- Original UX Trust Badges -->
+                    <div class="flex flex-wrap items-center gap-4 pt-5">
+                        <span class="inline-flex items-center space-x-2 text-gray-400 text-xs">
+                            <svg class="w-4 h-4 text-[#FFD100]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <span>Regulated & Safe</span>
+                        </span>
+                        <span class="inline-flex items-center space-x-2 text-gray-400 text-xs">
+                            <svg class="w-4 h-4 text-[#FFD100]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path></svg>
+                            <span>Fast Execution</span>
+                        </span>
+                        <span class="inline-flex items-center space-x-2 text-gray-400 text-xs">
+                            <svg class="w-4 h-4 text-[#FFD100]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0 .993-.241 1.929-.668 2.754l-1.524-1.525a3.997 3.997 0 00.078-2.183l1.562-1.562C17.63 8.344 16 9.818 16 10z" clip-rule="evenodd"></path></svg>
+                            <span>24/7 Support</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Right Column: Feature Cards -->
+                <div class="lg:col-span-4 lg:col-start-9 space-y-4">
+                    <div class="grid grid-cols-2 gap-3.5">
+                        <div class="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/15 transition-all">
+                            <div class="w-9 h-9 bg-[#FFD100]/15 rounded-lg flex items-center justify-center mb-2.5 text-[#FFD100]">
+                                <i data-lucide="candlestick-chart" class="w-4 h-4"></i>
+                            </div>
+                            <h3 class="text-white font-bold text-sm">Forex</h3>
+                            <p class="text-xs text-white/70 font-medium mt-0.5">Major, minor & exotic pairs.</p>
+                            <p class="text-[11px] text-[#FFD100] mt-2">Trade Forex <span aria-hidden="true">-&gt;</span></p>
+                        </div>
+
+                        <div class="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/15 transition-all">
+                            <div class="w-9 h-9 bg-[#FFD100]/15 rounded-lg flex items-center justify-center mb-2.5 text-[#FFD100]">
+                                <i data-lucide="landmark" class="w-4 h-4"></i>
+                            </div>
+                            <h3 class="text-white font-bold text-sm">Metals</h3>
+                            <p class="text-xs text-white/70 font-medium mt-0.5">Gold, silver and more.</p>
+                            <p class="text-[11px] text-[#FFD100] mt-2">Trade Metals <span aria-hidden="true">-&gt;</span></p>
+                        </div>
+
+                        <div class="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/15 transition-all">
+                            <div class="w-9 h-9 bg-[#FFD100]/15 rounded-lg flex items-center justify-center mb-2.5 text-[#FFD100]">
+                                <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                            </div>
+                            <h3 class="text-white font-bold text-sm">Indices</h3>
+                            <p class="text-xs text-white/70 font-medium mt-0.5">Global indices, 24/7.</p>
+                            <p class="text-[11px] text-[#FFD100] mt-2">Trade Indices <span aria-hidden="true">-&gt;</span></p>
+                        </div>
+
+                        <div class="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/15 transition-all">
+                            <div class="w-9 h-9 bg-[#FFD100]/15 rounded-lg flex items-center justify-center mb-2.5 text-[#FFD100]">
+                                <i data-lucide="bitcoin" class="w-4 h-4"></i>
+                            </div>
+                            <h3 class="text-white font-bold text-sm">Cryptocurrencies</h3>
+                            <p class="text-xs text-white/70 font-medium mt-0.5">Leading digital assets.</p>
+                            <p class="text-[11px] text-[#FFD100] mt-2">Trade Crypto <span aria-hidden="true">-&gt;</span></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <div class="relative h-10 bg-white overflow-hidden">
+        <svg class="absolute -top-1 left-0 w-full h-16" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,35 C360,0 720,0 1080,20 C1240,29 1350,34 1440,35 L1440,60 L0,60 Z" fill="#ffffff"></path>
+        </svg>
+    </div>
+
+    <!-- Section 2 — Quick Actions -->
+
+    <section class="bg-white dark:bg-gray-900 py-12 border-b border-gray-200 dark:border-gray-800">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+                                                                    <a href="register.html" class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg transition-all">
+
+                    <div class="flex items-center justify-between">
+
+                        <div>
+
+                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors">Wallet</h3>
+
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Fund or withdraw</p>
+
+                        </div>
+
+                        <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+
+                            <i data-lucide="wallet" class="w-5 h-5 text-primary-500"></i>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+                <a href="register.html" class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg transition-all">
+
+                    <div class="flex items-center justify-between">
+
+                        <div>
+
+                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors">Investments</h3>
+
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Create a plan</p>
+
+                        </div>
+
+                        <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+
+                            <i data-lucide="trending-up" class="w-5 h-5 text-primary-500"></i>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+                <a href="cars.html" class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg transition-all">
+
+                    <div class="flex items-center justify-between">
+
+                        <div>
+
+                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors">Inventory</h3>
+
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Browse vehicles</p>
+
+                        </div>
+
+                        <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+
+                            <i data-lucide="car" class="w-5 h-5 text-primary-500"></i>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+                <a href="register.html" class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg transition-all">
+
+                    <div class="flex items-center justify-between">
+
+                        <div>
+
+                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors">Portfolio</h3>
+
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Track performance</p>
+
+                        </div>
+
+                        <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+
+                            <i data-lucide="clock" class="w-5 h-5 text-primary-500"></i>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- Section 3 — Available Inventory -->
+
+    <section class="bg-primary-50 dark:bg-gray-900 py-16 lg:py-24">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="flex items-end justify-between mb-10">
+
+                <div>
+
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Available Inventory</h2>
+
+                    <p class="mt-2 text-primary-500">Explore a curated selection ready for delivery.</p>
+
+                </div>
+
+                <a href="cars.html" class="hidden sm:inline-flex items-center text-sm font-medium text-primary-500 hover:text-primary-600">
+
+                    View all <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+
+                </a>
+
+            </div>
+
+
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                                            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group">
+
+                            <!-- Photo -->
+
+                            <div class="aspect-[4/3] overflow-hidden">
+
+                                                                    <img src="dash/cars/1/6ZTwQ6GXZKW8eyLxJOIducdgXmkknldhQim7uVI7.jpg" alt="Tesla Model X" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+
+                                                            </div>
+
+                            <!-- Info -->
+
+                            <div class="p-4">
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Tesla Model X</h3>
+
+                                                                    <div class="flex items-center gap-4 mt-2 text-sm">
+
+                                                                                                                                                            </div>
+
+                                                                <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Starting at</p>
+
+                                <p class="text-xl font-bold text-gray-900 dark:text-white">$36,000.00*</p>
+
+                                <p class="text-xs text-gray-400 dark:text-gray-500">After Est. Gas Savings</p>
+
+                                <div class="mt-4 flex gap-2">
+
+                                    <a href="car-model-x.html" class="flex-1 text-center px-3 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Learn</a>
+
+                                    <a href="car-model-x.html" class="flex-1 text-center px-3 py-2 text-sm font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">Order</a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group">
+
+                            <!-- Photo -->
+
+                            <div class="aspect-[4/3] overflow-hidden">
+
+                                                                    <img src="dash/cars/2/69ad73f750ccc.jpg" alt="Tesla Model 3 Long Range" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+
+                                                            </div>
+
+                            <!-- Info -->
+
+                            <div class="p-4">
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Tesla Model 3 Long Range</h3>
+
+                                                                    <div class="flex items-center gap-4 mt-2 text-sm">
+
+                                                                                                                                                            </div>
+
+                                                                <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Starting at</p>
+
+                                <p class="text-xl font-bold text-gray-900 dark:text-white">$47,240.00*</p>
+
+                                <p class="text-xs text-gray-400 dark:text-gray-500">After Est. Gas Savings</p>
+
+                                <div class="mt-4 flex gap-2">
+
+                                    <a href="car-model-3-long-range.html" class="flex-1 text-center px-3 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Learn</a>
+
+                                    <a href="car-model-3-long-range.html" class="flex-1 text-center px-3 py-2 text-sm font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">Order</a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group">
+
+                            <!-- Photo -->
+
+                            <div class="aspect-[4/3] overflow-hidden">
+
+                                                                    <img src="dash/cars/3/69ad796b5849c.jpg" alt="Tesla Model X Plaid" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+
+                                                            </div>
+
+                            <!-- Info -->
+
+                            <div class="p-4">
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Tesla Model X Plaid</h3>
+
+                                                                    <div class="flex items-center gap-4 mt-2 text-sm">
+
+                                                                                                                                                            </div>
+
+                                                                <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Starting at</p>
+
+                                <p class="text-xl font-bold text-gray-900 dark:text-white">$94,990.00*</p>
+
+                                <p class="text-xs text-gray-400 dark:text-gray-500">After Est. Gas Savings</p>
+
+                                <div class="mt-4 flex gap-2">
+
+                                    <a href="car-model-x-plaid.html" class="flex-1 text-center px-3 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Learn</a>
+
+                                    <a href="car-model-x-plaid.html" class="flex-1 text-center px-3 py-2 text-sm font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">Order</a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                                    </div>
+
+            
+
+            <div class="sm:hidden mt-6 text-center">
+
+                <a href="cars.html" class="inline-flex items-center text-sm font-medium text-primary-500">
+
+                    View all vehicles <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- Section 4 — Red Wave Separator -->
+
+    <div class="relative h-32 lg:h-48 bg-gradient-to-r from-primary-600 to-primary-800">
+
+        <svg class="absolute top-0 left-0 right-0 w-full" viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+            <path d="M0,0L1440,0L1440,60C1200,20,240,20,0,60Z" class="fill-primary-50 dark:fill-gray-900"></path>
+
+        </svg>
+
+        <svg class="absolute bottom-0 left-0 right-0 w-full" viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+            <path d="M0,60L1440,60L1440,0C1200,40,240,40,0,0Z" class="fill-gray-900"></path>
+
+        </svg>
+
+    </div>
+
+
+
+    <!-- Section 5 — Stock Markets -->
+
+    <section class="bg-gray-900 py-16 lg:py-24">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="flex items-end justify-between mb-10">
+
+                <div>
+
+                    <h2 class="text-3xl font-bold text-white">Stock Markets</h2>
+
+                    <p class="mt-2 text-gray-400">Featured picks, top gainers, losers, and most active.</p>
+
+                </div>
+
+                                    <a href="register.html" class="hidden sm:inline-flex items-center text-sm font-medium text-primary-400 hover:text-primary-300">
+
+                        Open markets <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+
+                    </a>
+
+                            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- TradingView Hotlists -->
+
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden" style="height: 420px;">
+
+                    <div class="tradingview-widget-container" style="height:100%;width:100%">
+
+                        <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-hotlists.js" async>
+
+                        {
+
+                            "colorTheme": "dark",
+
+                            "dateRange": "12M",
+
+                            "exchange": "US",
+
+                            "showChart": true,
+
+                            "locale": "en",
+
+                            "isTransparent": true,
+
+                            "showSymbolLogo": true,
+
+                            "showFloatingTooltip": false,
+
+                            "width": "100%",
+
+                            "height": "100%",
+
+                            "plotLineColorGrowing": "rgba(255, 209, 0, 1)",
+
+                            "plotLineColorFalling": "rgba(255, 209, 0, 1)",
+
+                            "gridLineColor": "rgba(240, 243, 250, 0)",
+
+                            "scaleFontColor": "rgba(255, 255, 255, 0.6)",
+
+                            "belowLineFillColorGrowing": "rgba(255, 209, 0, 0.12)",
+
+                            "belowLineFillColorFalling": "rgba(255, 209, 0, 0.12)",
+
+                            "belowLineFillColorGrowingBottom": "rgba(255, 209, 0, 0)",
+
+                            "belowLineFillColorFallingBottom": "rgba(255, 209, 0, 0)",
+
+                            "symbolActiveColor": "rgba(255, 209, 0, 0.12)"
+
+                        }
+
+                        </script>
+
+                    </div>
+
+                </div>
+
+                <!-- TradingView Market Overview -->
+
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden" style="height: 420px;">
+
+                    <div class="tradingview-widget-container" style="height:100%;width:100%">
+
+                        <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+
+                        {
+
+                            "colorTheme": "dark",
+
+                            "dateRange": "12M",
+
+                            "showChart": true,
+
+                            "locale": "en",
+
+                            "isTransparent": true,
+
+                            "showSymbolLogo": true,
+
+                            "showFloatingTooltip": false,
+
+                            "width": "100%",
+
+                            "height": "100%",
+
+                            "tabs": [
+
+                                {
+
+                                    "title": "Stocks",
+
+                                    "symbols": [
+
+                                        {"s": "NASDAQ:TSLA", "d": "Tesla"},
+
+                                        {"s": "NASDAQ:AAPL", "d": "Apple"},
+
+                                        {"s": "NASDAQ:MSFT", "d": "Microsoft"},
+
+                                        {"s": "NASDAQ:GOOGL", "d": "Alphabet"},
+
+                                        {"s": "NASDAQ:AMZN", "d": "Amazon"},
+
+                                        {"s": "NASDAQ:NVDA", "d": "Nvidia"}
+
+                                    ],
+
+                                    "originalTitle": "Stocks"
+
+                                }
+
+                            ],
+
+                            "plotLineColorGrowing": "rgba(255, 209, 0, 1)",
+
+                            "plotLineColorFalling": "rgba(255, 209, 0, 1)",
+
+                            "gridLineColor": "rgba(240, 243, 250, 0)",
+
+                            "scaleFontColor": "rgba(255, 255, 255, 0.6)",
+
+                            "belowLineFillColorGrowing": "rgba(255, 209, 0, 0.12)",
+
+                            "belowLineFillColorFalling": "rgba(255, 209, 0, 0.12)",
+
+                            "belowLineFillColorGrowingBottom": "rgba(255, 209, 0, 0)",
+
+                            "belowLineFillColorFallingBottom": "rgba(255, 209, 0, 0)",
+
+                            "symbolActiveColor": "rgba(255, 209, 0, 0.12)"
+
+                        }
+
+                        </script>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- Section 6 — Red Banner Separator -->
+
+    <div class="h-2 bg-primary-500"></div>
+
+
+
+    <!-- Section 7 — Market News -->
+
+    <section class="bg-white dark:bg-gray-900 py-16 lg:py-24">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="flex items-end justify-between mb-10">
+
+                <div>
+
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Market News</h2>
+
+                    <p class="mt-2 text-gray-500 dark:text-gray-400">Latest headlines impacting your watchlist.</p>
+
+                </div>
+
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden" style="height: 400px;">
+
+                <div class="tradingview-widget-container" style="height:100%;width:100%">
+
+                    <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+
+                    {
+
+                        "feedMode": "all_symbols",
+
+                        "colorTheme": "dark",
+
+                        "isTransparent": true,
+
+                        "displayMode": "regular",
+
+                        "width": "100%",
+
+                        "height": "100%",
+
+                        "locale": "en"
+
+                    }
+
+                    </script>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- Section 8 — Investment Plans -->
+
+    <section class="bg-gray-100 dark:bg-gray-800 py-16 lg:py-24">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="text-center mb-12">
+
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Investment Plans</h2>
+
+                <p class="mt-2 text-gray-500 dark:text-gray-400">Choose a plan that fits your financial goals</p>
+
+            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Test</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    500$ - 2999$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Beginner Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    100$ - 25000$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Standard plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    25000$ - 100000$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Business plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    100000$ - 1000000$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Basic  Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    3000$ - 29999$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Stock Starter Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    100$ - 500$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Stock Growth Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    500$ - 2000$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Stock Premium Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    2000$ - 10000$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Stock Elite Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    10000$ - 50000$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Crypto Starter Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    50$ - 300$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Crypto Growth Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    300$ - 1500$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Crypto Premium Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    1500$ - 7500$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Crypto Elite Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    7500$ - 30000$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Real Estate Starter Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    200$ - 1000$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Real Estate Growth Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    1000$ - 5000$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Real Estate Premium Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    5000$ - 25000$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+
+                            <div class="text-center">
+
+                                <div class="w-12 h-12 bg-primary-50 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+
+                                    <i data-lucide="gem" class="w-6 h-6 text-primary-500"></i>
+
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Real Estate Elite Plan</h3>
+
+                                <div class="mt-2 text-2xl font-bold text-primary-500">
+
+                                    25000$ - 100000$
+
+                                </div>
+
+                            </div>
+
+                            <ul class="mt-6 space-y-3">
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full access to all instrument types
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    All trading assets available
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    24/7 live support
+
+                                </li>
+
+                                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+
+                                    <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500 flex-shrink-0"></i>
+
+                                    Full education centre access
+
+                                </li>
+
+                            </ul>
+
+                            <div class="mt-6">
+
+                                                                    <a href="register.html" class="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-medium rounded-lg hover:from-primary-600 hover:to-primary-800 transition-all">
+
+                                        Get Started
+
+                                    </a>
+
+                                                            </div>
+
+                        </div>
+
+                                    </div>
+
+            
+
+                    </div>
+
+    </section>
+
+
+
+    <!-- Section 9 — Stats -->
+
+    <section class="bg-gray-900 py-16">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+
+                <div>
+
+                    <p class="text-4xl font-bold text-primary-500">89+</p>
+
+                    <p class="mt-2 text-sm text-gray-400">Countries Served</p>
+
+                    <p class="text-xs text-gray-500">Our clients currently come from</p>
+
+                </div>
+
+                <div>
+
+                    <p class="text-4xl font-bold text-primary-500">90%</p>
+
+                    <p class="mt-2 text-sm text-gray-400">Signal Accuracy</p>
+
+                    <p class="text-xs text-gray-500">High probability signals</p>
+
+                </div>
+
+                <div>
+
+                    <p class="text-4xl font-bold text-primary-500">13K+</p>
+
+                    <p class="mt-2 text-sm text-gray-400">Active Followers</p>
+
+                    <p class="text-xs text-gray-500">And counting daily</p>
+
+                </div>
+
+                <div>
+
+                    <p class="text-4xl font-bold text-primary-500">10K+</p>
+
+                    <p class="mt-2 text-sm text-gray-400">Years Experience</p>
+
+                    <p class="text-xs text-gray-500">Combined team expertise</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- Section 10 — Testimonials -->
+
+    <section class="bg-gray-800 py-16 lg:py-24">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="text-center mb-12">
+
+                <h2 class="text-3xl font-bold text-white">What Our Clients Say</h2>
+
+                <p class="mt-2 text-gray-400">Trusted by thousands of investors worldwide</p>
+
+            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <div class="bg-gray-900 border border-primary-500/20 rounded-xl p-6">
+
+                        <div class="flex items-center mb-4">
+
+                            <div class="w-12 h-12 bg-primary-500/20 rounded-full flex items-center justify-center mr-4">
+
+                                <span class="text-primary-400 font-bold text-lg">J</span>
+
+                            </div>
+
+                            <div>
+
+                                <h4 class="font-semibold text-white">James W.</h4>
+
+                                <p class="text-sm text-gray-500">Professional Trader</p>
+
+                            </div>
+
+                        </div>
+
+                        <p class="text-gray-400 italic">"The platform has transformed the way I manage my investments. The automated tools and real-time data are exceptional."</p>
+
+                    </div>
+
+                    <div class="bg-gray-900 border border-primary-500/20 rounded-xl p-6">
+
+                        <div class="flex items-center mb-4">
+
+                            <div class="w-12 h-12 bg-primary-500/20 rounded-full flex items-center justify-center mr-4">
+
+                                <span class="text-primary-400 font-bold text-lg">S</span>
+
+                            </div>
+
+                            <div>
+
+                                <h4 class="font-semibold text-white">Sarah M.</h4>
+
+                                <p class="text-sm text-gray-500">Investor</p>
+
+                            </div>
+
+                        </div>
+
+                        <p class="text-gray-400 italic">"Outstanding customer support and the car marketplace is a game changer. I purchased my EV and manage my portfolio all in one place."</p>
+
+                    </div>
+
+                </div>
+
+                    </div>
+
+    </section>
+
+
+
+    <!-- Section 11 — CTA / Get Started -->
+
+    <section class="bg-gradient-to-r from-primary-500 to-primary-700 py-16 lg:py-24">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="text-center mb-12">
+
+                <h2 class="text-3xl md:text-4xl font-bold text-white">Fast account opening in 3 simple steps</h2>
+
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+
+                <div class="text-center">
+
+                    <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-white border-2 border-white/30">1</div>
+
+                    <h3 class="font-semibold text-white text-lg">Register</h3>
+
+                    <p class="text-sm text-white/70 mt-2">Create your free account in minutes</p>
+
+                </div>
+
+                <div class="text-center">
+
+                    <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-white border-2 border-white/30">2</div>
+
+                    <h3 class="font-semibold text-white text-lg">Fund</h3>
+
+                    <p class="text-sm text-white/70 mt-2">Deposit with crypto or bank transfer</p>
+
+                </div>
+
+                <div class="text-center">
+
+                    <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-white border-2 border-white/30">3</div>
+
+                    <h3 class="font-semibold text-white text-lg">Trade</h3>
+
+                    <p class="text-sm text-white/70 mt-2">Start investing and trading immediately</p>
+
+                </div>
+
+            </div>
+
+            <div class="text-center mt-10">
+
+                <a href="register.html" class="inline-flex items-center px-8 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
+
+                    <i data-lucide="user-plus" class="w-5 h-5 mr-2"></i> Create Account
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    </main>
+
+
+
+    <!-- Activity Alert Popup -->
+
+    <div id="fake-alert" class="fixed bottom-5 left-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 z-50 max-w-xs border border-gray-200 dark:border-gray-700 transition-all duration-500" style="display:none; opacity:0;">
+
+        <div class="flex items-center space-x-3">
+
+            <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+
+                <i data-lucide="check-circle" class="w-4 h-4 text-green-600 dark:text-green-400"></i>
+
+            </div>
+
+            <span id="alert-text" class="text-sm text-gray-700 dark:text-gray-300"></span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Footer -->
+
+    <footer class="bg-gray-900 text-gray-400 mt-auto">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+                <!-- Brand -->
+
+                <div class="lg:col-span-1">
+
+                    <img src="assets/images/exness-logo.png" alt="EXNESS" class="h-8 w-auto mb-4 brightness-200">
+
+                    <p class="text-sm text-gray-500 mb-4">supportt@iwebbtech.top</p>
+
+                    <div class="flex space-x-4">
+
+                        <a href="#" class="text-gray-500 hover:text-white transition-colors"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+
+                        <a href="#" class="text-gray-500 hover:text-white transition-colors"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+
+                        <a href="#" class="text-gray-500 hover:text-white transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+
+                        <a href="#" class="text-gray-500 hover:text-white transition-colors"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+
+                    </div>
+
+                </div>
+
+                <!-- Company -->
+
+                <div>
+
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Company</h4>
+
+                    <ul class="space-y-2">
+
+                        <li><a href="about.html" class="text-sm hover:text-white transition-colors">About</a></li>
+
+                        <li><a href="contact.html" class="text-sm hover:text-white transition-colors">Contact</a></li>
+
+                        <li><a href="faq.html" class="text-sm hover:text-white transition-colors">FAQ</a></li>
+
+                    </ul>
+
+                </div>
+
+                <!-- Legal -->
+
+                <div>
+
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Legal</h4>
+
+                    <ul class="space-y-2">
+
+                        <li><a href="terms.html" class="text-sm hover:text-white transition-colors">Terms &amp; Conditions</a></li>
+
+                        <li><a href="privacy.html" class="text-sm hover:text-white transition-colors">Privacy Policy</a></li>
+
+                        <li><a href="risk.html" class="text-sm hover:text-white transition-colors">Risk Warning</a></li>
+
+                    </ul>
+
+                </div>
+
+                <!-- Support -->
+
+                <div>
+
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Support</h4>
+
+                    <ul class="space-y-2">
+
+                        <li><a href="safety.html" class="text-sm hover:text-white transition-colors">Safety of Funds</a></li>
+
+                        <li><a href="service.html" class="text-sm hover:text-white transition-colors">Services</a></li>
+
+                        <li><a href="trading.html" class="text-sm hover:text-white transition-colors">Trading Conditions</a></li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Risk Warning -->
+
+            <div class="mt-12 pt-8 border-t border-gray-800">
+
+                <div class="bg-gray-800/50 rounded-lg p-4 mb-8">
+
+                    <h5 class="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Risk Warning</h5>
+
+                    <p class="text-xs text-gray-500">Trading derivatives and leveraged products carries a high level of risk, including the risk of losing substantially more than your initial investment. It is not suitable for everyone. Before you make any decision in relation to a financial product you should obtain and consider our Product Disclosure Statement (PDS) and Financial Services Guide (FSG) available on our website and seek independent advice if necessary.</p>
+
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between">
+
+                    <p class="text-sm text-gray-500">&copy; EXNESS 2026. All rights reserved.</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+
+    <!-- GSAP powers the landing-page entrance and iOS-style transitions. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="assets/js/ios-transitions.js" defer></script>
+
+    <!-- Activity Alert Script -->
+
+    <script>
+
+    const alerts = [
+
+        "John from New York just withdrew $500",
+
+        "Alice from London just invested $1,000",
+
+        "Michael from Texas withdrew $200",
+
+        "Sandra from Berlin invested $2,000",
+
+        "Rahul from Mumbai just invested $750",
+
+        "Sophia from Dubai just withdrew $1,200",
+
+        "Liam from Sydney invested $1,500",
+
+        "Emma from Paris just withdrew $300",
+
+        "David from Toronto invested $2,200",
+
+        "Aisha from Lagos just invested $900",
+
+        "Carlos from Madrid withdrew $700",
+
+        "Mia from Cape Town just invested $1,300",
+
+        "Kenji from Tokyo withdrew $600",
+
+        "Olga from Moscow just invested $850",
+
+        "Amir from Cairo just withdrew $450",
+
+        "Lucas from So Paulo just invested $1,000",
+
+        "Emily from Dublin just withdrew $250",
+
+        "Noah from Johannesburg just invested $1,100",
+
+        "Hassan from Islamabad just withdrew $950",
+
+        "Natalie from Rome just invested $1,400",
+
+        "Jason from Chicago just withdrew $800",
+
+        "Zara from Kuala Lumpur just invested $670",
+
+        "Chen from Beijing just withdrew $720",
+
+        "Fatima from Riyadh just invested $890",
+
+        "Mark from Los Angeles just withdrew $560"
+
+    ];
+
+    function showFakeAlert() {
+
+        const alertBox = document.getElementById("fake-alert");
+
+        const alertText = document.getElementById("alert-text");
+
+        const randomAlert = alerts[Math.floor(Math.random() * alerts.length)];
+
+        alertText.textContent = randomAlert;
+
+        alertBox.style.display = "block";
+
+        setTimeout(() => { alertBox.style.opacity = 1; }, 10);
+
+        setTimeout(() => {
+
+            alertBox.style.opacity = 0;
+
+            setTimeout(() => { alertBox.style.display = "none"; }, 500);
+
+        }, 5000);
+
+    }
+
+    setInterval(showFakeAlert, 15000);
+
+    setTimeout(showFakeAlert, 5000);
+
+    </script>
+
+
+
+    <!-- Lucide Icons Init -->
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        });
+
+    </script>
+
+
+
+    
+    <!-- Real-time Investment Popup Toast -->
+    <div id="live-investor-toast" class="fixed bottom-20 left-4 z-50 transition-all duration-500 transform translate-y-10 opacity-0 pointer-events-none">
+        <div class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-3 flex items-center space-x-3 max-w-xs text-xs">
+            <div class="w-8 h-8 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="trending-up" class="w-4 h-4"></i>
+            </div>
+            <div class="text-gray-800 dark:text-gray-200 leading-tight">
+                Someone from <strong id="toast-city" class="text-gray-900 dark:text-white font-bold">Moscow</strong> 
+                <span id="toast-action">just invested</span> 
+                <span id="toast-amount" class="font-bold text-primary-500 dark:text-primary-400">$5,400</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            const toastData = [
+                { city: "Moscow", action: "just invested", amount: "$5,400" },
+                { city: "Chicago", action: "just withdrew", amount: "$1,250" },
+                { city: "London", action: "just invested", amount: "$10,500" },
+                { city: "Zurich", action: "just invested", amount: "$24,000" },
+                { city: "Dubai", action: "just ordered", amount: "Tesla Model X Plaid" },
+                { city: "Singapore", action: "just deposited", amount: "2.5 BTC" },
+                { city: "Tokyo", action: "just invested", amount: "$8,200" }
+            ];
+            let idx = 0;
+            const toast = document.getElementById('live-investor-toast');
+            const cityEl = document.getElementById('toast-city');
+            const actEl = document.getElementById('toast-action');
+            const amtEl = document.getElementById('toast-amount');
+            
+            function showToast() {
+                if (!toast) return;
+                const item = toastData[idx % toastData.length];
+                idx++;
+                cityEl.textContent = item.city;
+                actEl.textContent = item.action;
+                amtEl.textContent = item.amount;
+                toast.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    toast.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none');
+                    setTimeout(showToast, Math.floor(Math.random() * 3000) + 5000);
+                }, 4000);
+            }
+            setTimeout(showToast, 2500);
+        })();
+    </script>
+</body>
+
+
+</html>
