@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark" x-data :class="{ 'dark': $store.theme.darkMode || $store.theme.dark }">
+<html lang="en" x-data>
 
 <head>
     <meta charset="UTF-8">
@@ -58,7 +58,7 @@
     <script src="../assets/js/supabase-admin.js" defer></script>
 
     <!-- App Styles -->
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css?v=admin-action-ui-20261001-3">
 
     <style>
         [x-cloak] { display: none !important; }
@@ -66,13 +66,13 @@
     </style>
 </head>
 
-<body class="bg-[#f8f9fa] dark:bg-[#0b0c10] text-gray-900 dark:text-gray-100 min-h-screen antialiased flex flex-col font-sans transition-colors duration-300">
+<body class="admin-reference bg-[#f8f9fa] text-gray-900 min-h-screen antialiased flex flex-col font-sans">
 
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('theme', {
-                darkMode: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
-                dark: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+                darkMode: false,
+                dark: false,
                 init() {
                     document.documentElement.classList.toggle('dark', this.darkMode);
                 },
@@ -123,53 +123,156 @@
     <!-- ========================================================================= -->
     <!-- 2. SECURE ADMIN DASHBOARD APPLICATION (Revealed only after role = 'admin') -->
     <!-- ========================================================================= -->
-    <div id="admin-dashboard-app" hidden class="min-h-screen flex-col flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-        <!-- Top Navigation & Header Bar -->
-        <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#141414] p-4 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center text-black font-black text-lg shadow-md shadow-primary-500/20">
-                    E
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-lg font-black tracking-tight text-gray-900 dark:text-white">EXNESS Console</span>
-                        <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-purple-500/10 text-purple-500 border border-purple-500/20">Admin Portal</span>
-                    </div>
-                    <p class="text-xs text-gray-400">Authenticated: <strong data-admin-email class="text-gray-700 dark:text-gray-300">Verifying...</strong></p>
-                </div>
-            </div>
-
-            <!-- Header Quick Actions -->
-            <div class="flex items-center space-x-2 sm:space-x-3">
-                <button type="button" onclick="window.brokerAdmin.refresh()" title="Refresh live database data" class="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-semibold flex items-center gap-1.5 transition">
-                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                    <span class="hidden sm:inline">Sync Data</span>
-                </button>
-
-                <!-- Theme Toggle -->
-                <button @click="$store.theme.toggle()" type="button" class="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition" title="Toggle color scheme">
-                    <span x-show="!$store.theme.dark"><i data-lucide="sun" class="w-4 h-4"></i></span>
-                    <span x-show="$store.theme.dark"><i data-lucide="moon" class="w-4 h-4"></i></span>
-                </button>
-
-                <a href="../dashboard/index.html" class="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-semibold flex items-center gap-1.5 transition" title="Switch to user view">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                    <span class="hidden md:inline">User View</span>
-                </a>
-
-                <!-- Apple Logout Button -->
-                <button type="button" data-logout-link class="px-3.5 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold flex items-center gap-1.5 transition">
-                    <i data-lucide="log-out" class="w-4 h-4"></i>
-                    <span>Log out</span>
-                </button>
-            </div>
+    <div id="admin-dashboard-app" hidden class="min-h-screen flex-col flex-1 w-full">
+        <header class="admin-topbar">
+            <button type="button" class="admin-icon-button" data-admin-menu-toggle aria-label="Open admin menu" aria-expanded="false" aria-controls="admin-sidebar">
+                <i data-lucide="menu"></i>
+            </button>
+            <a class="admin-brand" href="../index.html" aria-label="Home"><img src="../ChatGPT%20Image%20Sep%2013%2C%202026%2C%2003_11_05%20AM.png" alt="Exness"></a>
+            <button type="button" class="admin-profile" aria-label="Administrator profile"><span data-admin-avatar>AD</span></button>
         </header>
+
+        <div class="admin-drawer-backdrop" data-admin-drawer-close hidden></div>
+        <aside id="admin-sidebar" class="admin-sidebar" aria-hidden="true">
+            <nav aria-label="Admin navigation">
+                <p class="admin-nav-caption">Account actions</p>
+                <button type="button" data-admin-nav="action" class="is-active"><i data-lucide="credit-card"></i><span>Fund Account</span></button>
+                <button type="button" data-admin-nav="topup-suspension"><i data-lucide="triangle-alert"></i><span>Top-up Suspension</span></button>
+                <button type="button" data-admin-nav="suspend"><i data-lucide="user-x"></i><span>Suspend Account</span></button>
+                <button type="button" data-admin-nav="unsuspend"><i data-lucide="user-check"></i><span>Unsuspend Account</span></button>
+                <button type="button" data-admin-nav="topup-release"><i data-lucide="circle-check"></i><span>Top-up Release</span></button>
+                <button type="button" data-admin-nav="plan"><i data-lucide="file-text"></i><span>Update Account Type</span></button>
+                <button type="button" data-admin-nav="wallet"><i data-lucide="square-pen"></i><span>Update Wallet</span></button>
+
+                <p class="admin-nav-caption">Account</p>
+                <a href="../forgot-password.html"><i data-lucide="square-pen"></i><span>Change Password</span></a>
+                <button type="button" data-logout-link><i data-lucide="log-out"></i><span>Logout</span></button>
+            </nav>
+        </aside>
+
+        <main data-admin-view="action" class="admin-action-view">
+            <h1>Action</h1>
+            <section class="admin-form-card" data-action-panel="fund">
+                <div class="admin-form-heading"><h2>Account Action</h2><p>Fund Client Account</p></div>
+                <form data-admin-fund-form>
+                    <label for="fund-user">Select User</label>
+                    <select id="fund-user" name="user" required data-action-user><option value="">Select User</option></select>
+                    <label for="balance-type">Balance Type</label>
+                    <select id="balance-type" name="balanceType" required>
+                        <option value="">Select an Option from List</option>
+                        <optgroup label="Investment">
+                            <option value="investment-add">Investment (Addition)</option>
+                            <option value="investment-static">Investment (Static)</option>
+                            <option value="investment-deduct">Investment (Deduction)</option>
+                        </optgroup>
+                        <optgroup label="Total Balance">
+                            <option value="total-balance-add">Total Balance (Addition)</option>
+                            <option value="total-balance-static">Total Balance (Static)</option>
+                            <option value="total-balance-deduct">Total Balance (Deduction)</option>
+                        </optgroup>
+                        <optgroup label="Total Bonus">
+                            <option value="total-bonus-add">Total Bonus (Addition)</option>
+                            <option value="total-bonus-static">Total Bonus (Static)</option>
+                            <option value="total-bonus-deduct">Total Bonus (Deduction)</option>
+                        </optgroup>
+                        <optgroup label="Profit Earned">
+                            <option value="profit-earned-add">Profit Earned (Addition)</option>
+                            <option value="profit-earned-static">Profit Earned (Static)</option>
+                            <option value="profit-earned-deduct">Profit Earned (Deduction)</option>
+                        </optgroup>
+                    </select>
+                    <label for="fund-amount">Amount to Add</label>
+                    <input id="fund-amount" name="amount" type="number" min="0" step="0.01" placeholder="Amount" required>
+                    <label for="fund-description">Description</label>
+                    <textarea id="fund-description" name="description" rows="3" placeholder="Describe this Transaction"></textarea>
+                    <div class="admin-form-actions"><button type="submit">Save Changes</button></div>
+                </form>
+            </section>
+
+            <section class="admin-form-card" data-admin-view="suspend" hidden>
+                <div class="admin-form-heading"><h2>Account Action</h2><p>Suspend Client Account</p></div>
+                <form data-admin-suspend-form>
+                    <label for="suspend-user">Select User</label>
+                    <select id="suspend-user" name="user" required data-action-user><option value="">Select User</option></select>
+                    <label for="suspend-reason">Reason for Suspension</label>
+                    <textarea id="suspend-reason" name="reason" rows="3" placeholder="Describe why this account is being suspended" required></textarea>
+                    <label class="admin-confirm-choice"><input type="checkbox" name="confirm" required><span>I confirm this account should be suspended.</span></label>
+                    <div class="admin-form-actions"><button type="submit">Suspend Account</button></div>
+                </form>
+            </section>
+
+            <section class="admin-form-card" data-admin-view="unsuspend" hidden>
+                <div class="admin-form-heading"><h2>Account Action</h2><p>Unsuspend Client Account</p></div>
+                <form data-admin-unsuspend-form>
+                    <label for="unsuspend-user">Select User</label>
+                    <select id="unsuspend-user" name="user" required data-action-user><option value="">Select User</option></select>
+                    <label for="unsuspend-reason">Reason for Reactivation</label>
+                    <textarea id="unsuspend-reason" name="reason" rows="3" placeholder="Describe why this account can be reactivated" required></textarea>
+                    <label class="admin-confirm-choice"><input type="checkbox" name="confirm" required><span>I confirm this account should be unsuspended.</span></label>
+                    <div class="admin-form-actions"><button type="submit">Unsuspend Account</button></div>
+                </form>
+            </section>
+
+            <section class="admin-form-card" data-admin-view="topup-suspension" hidden>
+                <div class="admin-form-heading"><h2>Account Action</h2><p>Require Top-up to Continue Trading</p></div>
+                <form data-admin-topup-suspension-form>
+                    <label for="topup-suspension-user">Select User</label>
+                    <select id="topup-suspension-user" name="user" required data-action-user><option value="">Select User</option></select>
+                    <label for="topup-suspension-reason">Reason</label>
+                    <textarea id="topup-suspension-reason" name="reason" rows="3" placeholder="Describe why a top-up is required" required></textarea>
+                    <div class="admin-warning-note">The client will see an amber banner: “Top up your account to continue trading.”</div>
+                    <label class="admin-confirm-choice"><input type="checkbox" name="confirm" required><span>I confirm this account requires a top-up.</span></label>
+                    <div class="admin-form-actions"><button type="submit" class="is-warning">Require Top-up</button></div>
+                </form>
+            </section>
+
+            <section class="admin-form-card" data-admin-view="topup-release" hidden>
+                <div class="admin-form-heading"><h2>Account Action</h2><p>Release Top-up Restriction</p></div>
+                <form data-admin-topup-release-form>
+                    <label for="topup-release-user">Select User</label>
+                    <select id="topup-release-user" name="user" required data-action-user><option value="">Select User</option></select>
+                    <label for="topup-release-reason">Reason for Release</label>
+                    <textarea id="topup-release-reason" name="reason" rows="3" placeholder="Describe why the top-up restriction can be released" required></textarea>
+                    <label class="admin-confirm-choice"><input type="checkbox" name="confirm" required><span>I confirm this user can resume trading.</span></label>
+                    <div class="admin-form-actions"><button type="submit">Release Top-up Restriction</button></div>
+                </form>
+            </section>
+
+            <section class="admin-form-card" data-admin-view="plan" hidden>
+                <div class="admin-form-heading"><h2>Account Action</h2><p>Update Client Plan</p></div>
+                <form data-admin-plan-form>
+                    <label for="plan-user">Select User</label>
+                    <select id="plan-user" name="user" required data-action-user><option value="">Select User</option></select>
+                    <label for="client-plan">Select Plan</label>
+                    <select id="client-plan" name="plan" required>
+                        <option value="">Select an Option from List</option>
+                        <option>BRONZE</option><option>SILVER</option><option>GOLD</option><option>DIAMOND</option><option>VIP</option>
+                    </select>
+                    <div class="admin-form-actions"><button type="submit">Save Changes</button></div>
+                </form>
+            </section>
+
+            <section class="admin-form-card" data-admin-view="wallet" hidden>
+                <div class="admin-form-heading"><h2>Update</h2><p>Wallet Address</p></div>
+                <form data-admin-wallet-form>
+                    <label for="wallet-type">Wallet Type</label>
+                    <select id="wallet-type" name="walletType" required><option>BTC</option><option>ETH</option><option>USDT</option></select>
+                    <label for="wallet-address">Wallet Address</label>
+                    <input id="wallet-address" name="walletAddress" type="text" placeholder="Wallet Address" required>
+                    <label for="wallet-pin">Secure PIN</label>
+                    <input id="wallet-pin" name="pin" type="password" inputmode="numeric" placeholder="Secure PIN here" required>
+                    <div class="admin-form-actions"><button type="submit">Save Changes</button></div>
+                </form>
+            </section>
+        </main>
+
+        <template hidden>
+        <h1>Dashboard</h1>
 
         <!-- ========================================================================= -->
         <!-- 3. OVERVIEW METRICS KPI CARDS (6 CARDS)                                   -->
         <!-- ========================================================================= -->
-        <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+        <section class="admin-metric-grid">
             <!-- 1. Total Users -->
             <div class="bg-white dark:bg-[#141414] p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between text-gray-400 mb-2">
@@ -234,7 +337,7 @@
         <!-- ========================================================================= -->
         <!-- 4. DEPOSITS MANAGEMENT                                                    -->
         <!-- ========================================================================= -->
-        <section class="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+        <section class="admin-form-card admin-data-card">
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
                 <div>
                     <h2 class="text-sm font-bold text-gray-900 dark:text-white">Deposit Requests</h2>
@@ -272,7 +375,7 @@
         <!-- ========================================================================= -->
         <!-- 5. WITHDRAWALS MANAGEMENT (High Priority Table with Admin Actions)        -->
         <!-- ========================================================================= -->
-        <section class="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+        <section class="admin-form-card admin-data-card">
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
                 <div>
                     <h2 class="text-sm font-bold text-gray-900 dark:text-white">Withdrawal Requests</h2>
@@ -310,7 +413,7 @@
         <!-- ========================================================================= -->
         <!-- 5. USERS MANAGEMENT TABLE                                                 -->
         <!-- ========================================================================= -->
-        <section class="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+        <section class="admin-form-card admin-data-card">
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 class="text-sm font-bold text-gray-900 dark:text-white">Registered Users</h2>
@@ -348,7 +451,7 @@
             </div>
         </section>
 
-        <section class="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+        <section class="admin-form-card admin-data-card">
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between gap-4">
                 <div>
                     <h2 class="text-sm font-bold text-gray-900 dark:text-white">User Details</h2>
@@ -387,7 +490,7 @@
         <!-- ========================================================================= -->
         <!-- 6. GLOBAL TRANSACTIONS AUDIT LEDGER                                       -->
         <!-- ========================================================================= -->
-        <section class="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden mb-12">
+        <section class="admin-form-card admin-data-card">
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
                 <div>
                     <h2 class="text-sm font-bold text-gray-900 dark:text-white">Recent Transactions Audit</h2>
@@ -421,7 +524,7 @@
                 </table>
             </div>
         </section>
-
+        </template>
     </div>
 
 </body>

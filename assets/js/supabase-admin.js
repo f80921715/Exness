@@ -224,47 +224,7 @@
                 ];
             }
 
-            // 2. Fetch all transactions
-            const { data: transactions, error: tErr } = await client
-                .from('transactions')
-                .select('*, profiles(full_name, email, username)')
-                .order('created_at', { ascending: false });
-
-            if (!tErr && transactions) {
-                adminState.transactions = transactions;
-            } else {
-                adminState.transactions = [];
-            }
-
-            // 3. Fetch all deposits
-            const { data: deposits, error: dErr } = await client
-                .from('deposits')
-                .select('*, profiles(full_name, email, username)')
-                .order('created_at', { ascending: false });
-
-            if (!dErr && deposits) {
-                adminState.deposits = deposits;
-            } else {
-                adminState.deposits = [];
-            }
-
-            // 4. Fetch all withdrawals
-            const { data: withdrawals, error: wErr } = await client
-                .from('withdrawals')
-                .select('*, profiles(full_name, email, username)')
-                .order('created_at', { ascending: false });
-
-            if (!wErr && withdrawals) {
-                adminState.withdrawals = withdrawals;
-            } else {
-                adminState.withdrawals = [];
-            }
-
-            // Calculate real metrics
-            calculateMetrics();
-
-            // Render all components
-            renderAdminDashboard();
+            populateActionUserSelects();
 
         } catch (err) {
             console.error('[Admin] Data fetch exception:', err);
@@ -318,6 +278,12 @@
         const adminEmailEl = document.querySelector('[data-admin-email]');
         if (adminEmailEl) adminEmailEl.textContent = adminState.currentUser.email || 'Admin';
 
+        const adminAvatar = document.querySelector('[data-admin-avatar]');
+        if (adminAvatar) {
+            const displayName = adminState.currentProfile?.full_name || adminState.currentUser.email || 'Admin';
+            adminAvatar.textContent = displayName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+        }
+
         const adminNameEl = document.querySelector('[data-admin-name]');
         if (adminNameEl) adminNameEl.textContent = adminState.currentProfile?.full_name || 'Administrator';
 
@@ -346,6 +312,7 @@
         renderTransactionsTable();
         renderDepositsTable();
         renderWithdrawalsTable();
+        populateActionUserSelects();
 
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
             window.lucide.createIcons();
@@ -410,8 +377,20 @@
                             <p class="mt-1 font-bold text-gray-900 dark:text-white">${getRoleBadgeHTML(user.role)}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
-                            <p class="text-gray-400">Balance</p>
+                            <p class="text-gray-400">Total Balance</p>
                             <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatUSD(user.balance)}</p>
+                        </div>
+                        <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
+                            <p class="text-gray-400">Investment</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatUSD(user.active_invest)}</p>
+                        </div>
+                        <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
+                            <p class="text-gray-400">Total Bonus</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatUSD(user.bonus_balance)}</p>
+                        </div>
+                        <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
+                            <p class="text-gray-400">Profit Earned</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatUSD(user.total_profit)}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
                             <p class="text-gray-400">Registered</p>
@@ -433,7 +412,7 @@
                         ${actionText}
                     </button>
                     <button type="button" data-user-topup-toggle class="w-full rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-amber-600">
-                        Top Up Account
+                        Require Top-up
                     </button>
                 </div>
 
@@ -497,7 +476,9 @@
         const topUpButton = panel.querySelector('[data-user-topup-toggle]');
         if (topUpButton) {
             topUpButton.addEventListener('click', () => {
-                openUserStatusConfirm(user, 'topup_required');
+                setAdminView('topup-suspension');
+                const topUpUserSelect = document.querySelector('#topup-suspension-user');
+                if (topUpUserSelect) topUpUserSelect.value = user.id;
             });
         }
     }
@@ -598,11 +579,11 @@
         }
     }
 
-    async function toggleUserAccountStatus(userId, nextStatus, actionLabel) {
-        if (!userId || !nextStatus) return;
+    async function toggleUserAccountStatus(userId, nextStatus, actionLabel, reason = '') {
+        if (!userId || !nextStatus) return false;
 
         const record = adminState.users.find((user) => user.id === userId);
-        if (!record) return;
+        if (!record) return false;
 
         try {
             const { data, error } = await client
@@ -626,7 +607,7 @@
                 adminState.currentUser.id,
                 actionLabel === 'suspend' ? 'suspended user' : actionLabel === 'topup_required' ? 'restricted user trading' : 'activated user',
                 userId,
-                `Admin ${actionLabel === 'suspend' ? 'suspended' : actionLabel === 'topup_required' ? 'restricted trading for' : 'activated'} user ${record.email || 'account'} from ${record.status || 'active'} to ${nextStatus}.`
+                `Admin ${actionLabel === 'suspend' ? 'suspended' : actionLabel === 'topup_required' ? 'restricted trading for' : 'activated'} user ${record.email || 'account'} from ${record.status || 'active'} to ${nextStatus}.${reason ? ` Reason: ${reason}` : ''}`
             );
 
             showAdminToast(
@@ -638,9 +619,11 @@
             );
             renderUsersTable();
             renderUserDetailsPanel();
+            return true;
         } catch (err) {
             console.error('[Admin] Status update failed:', err);
             showAdminToast(err.message || 'Unable to update user status.', 'error');
+            return false;
         }
     }
 
@@ -922,7 +905,7 @@
             await fetchAdminData();
         },
 
-        async adjustBalance(userId, amount, direction) {
+        async adjustBalance(userId, amount, direction, description = '') {
             try {
                 const numericAmount = Number(amount);
                 if (!userId || !numericAmount || numericAmount <= 0) {
@@ -936,13 +919,67 @@
                 });
                 if (error) throw error;
 
+                if (description) {
+                    await recordAdminAction(
+                        adminState.currentUser.id,
+                        'balance adjustment note',
+                        userId,
+                        description
+                    );
+                }
+
                 showAdminToast(direction === 'increase' ? 'Balance increased successfully.' : 'Balance decreased successfully.');
                 await fetchAdminData();
                 refreshSelectedUserView();
+                return true;
             } catch (error) {
                 console.error('[Admin] Balance adjustment failed:', error);
                 showAdminToast(error.message || 'Unable to adjust balance.', 'error');
+                return false;
             }
+        },
+
+        async applyBalanceAction(userId, balanceType, action, amount, description = '') {
+            try {
+                const numericAmount = Number(amount);
+                if (!userId || !balanceType || !action || !Number.isFinite(numericAmount) || numericAmount < 0 || (action !== 'static' && numericAmount === 0)) {
+                    throw new Error('Enter a valid amount for this balance action.');
+                }
+
+                const { error } = await client.rpc('admin_apply_balance_action', {
+                    p_user_id: userId,
+                    p_balance_type: balanceType,
+                    p_action: action,
+                    p_amount: numericAmount,
+                    p_description: description
+                });
+                if (error) throw error;
+
+                showAdminToast('Balance updated successfully.');
+                await fetchAdminData();
+                refreshSelectedUserView();
+                return true;
+            } catch (error) {
+                console.error('[Admin] Balance action failed:', error);
+                showAdminToast(error.message || 'Unable to update balance.', 'error');
+                return false;
+            }
+        },
+
+        async suspendUser(userId, reason) {
+            return toggleUserAccountStatus(userId, 'suspended', 'suspend', reason);
+        },
+
+        async unsuspendUser(userId, reason) {
+            return toggleUserAccountStatus(userId, 'active', 'activate', reason);
+        },
+
+        async requireTopUp(userId, reason) {
+            return toggleUserAccountStatus(userId, 'topup_required', 'topup_required', reason);
+        },
+
+        async releaseTopUp(userId, reason) {
+            return toggleUserAccountStatus(userId, 'active', 'activate', reason);
         },
 
         filterUsers(query) {
@@ -1002,6 +1039,159 @@
         });
     }
 
+    function setAdminView(view) {
+        const actionView = document.querySelector('.admin-action-view');
+        if (actionView) actionView.hidden = false;
+        document.querySelector('[data-action-panel="fund"]')?.toggleAttribute('hidden', view !== 'action');
+        document.querySelector('[data-admin-view="plan"]')?.toggleAttribute('hidden', view !== 'plan');
+        document.querySelector('[data-admin-view="wallet"]')?.toggleAttribute('hidden', view !== 'wallet');
+        document.querySelector('[data-admin-view="suspend"]')?.toggleAttribute('hidden', view !== 'suspend');
+        document.querySelector('[data-admin-view="unsuspend"]')?.toggleAttribute('hidden', view !== 'unsuspend');
+        document.querySelector('[data-admin-view="topup-suspension"]')?.toggleAttribute('hidden', view !== 'topup-suspension');
+        document.querySelector('[data-admin-view="topup-release"]')?.toggleAttribute('hidden', view !== 'topup-release');
+        document.querySelectorAll('[data-admin-nav]').forEach((button) => {
+            button.classList.toggle('is-active', button.dataset.adminNav === view);
+        });
+        closeAdminDrawer();
+    }
+
+    function closeAdminDrawer() {
+        const sidebar = document.getElementById('admin-sidebar');
+        const toggle = document.querySelector('[data-admin-menu-toggle]');
+        const backdrop = document.querySelector('[data-admin-drawer-close]');
+        sidebar?.classList.remove('is-open');
+        sidebar?.setAttribute('aria-hidden', 'true');
+        toggle?.setAttribute('aria-expanded', 'false');
+        toggle?.setAttribute('aria-label', 'Open admin menu');
+        if (backdrop) backdrop.hidden = true;
+    }
+
+    function setupAdminNavigation() {
+        const sidebar = document.getElementById('admin-sidebar');
+        const toggle = document.querySelector('[data-admin-menu-toggle]');
+        const backdrop = document.querySelector('[data-admin-drawer-close]');
+        toggle?.addEventListener('click', () => {
+            const open = !sidebar?.classList.contains('is-open');
+            sidebar?.classList.toggle('is-open', open);
+            sidebar?.setAttribute('aria-hidden', String(!open));
+            toggle.setAttribute('aria-expanded', String(open));
+            toggle.setAttribute('aria-label', open ? 'Close admin menu' : 'Open admin menu');
+            if (backdrop) backdrop.hidden = !open;
+        });
+        backdrop?.addEventListener('click', closeAdminDrawer);
+        document.querySelectorAll('[data-admin-nav]').forEach((button) => {
+            button.addEventListener('click', () => setAdminView(button.dataset.adminNav));
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeAdminDrawer();
+        });
+    }
+
+    function populateActionUserSelects() {
+        document.querySelectorAll('[data-action-user]').forEach((select) => {
+            const currentValue = select.value;
+            select.replaceChildren(new Option('Select User', ''));
+            adminState.users.forEach((user) => {
+                const label = getUserDisplayName(user) + (user.email ? ` (${user.email})` : '');
+                select.add(new Option(label, user.id));
+            });
+            select.value = currentValue;
+        });
+    }
+
+    function setupActionForms() {
+        const fundForm = document.querySelector('[data-admin-fund-form]');
+        fundForm?.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(fundForm);
+            const userId = String(formData.get('user') || '');
+            const type = String(formData.get('balanceType') || '');
+            const amount = Number(formData.get('amount'));
+            const actions = {
+                'investment-add': ['investment', 'addition'],
+                'investment-static': ['investment', 'static'],
+                'investment-deduct': ['investment', 'deduction'],
+                'total-balance-add': ['total_balance', 'addition'],
+                'total-balance-static': ['total_balance', 'static'],
+                'total-balance-deduct': ['total_balance', 'deduction'],
+                'total-bonus-add': ['total_bonus', 'addition'],
+                'total-bonus-static': ['total_bonus', 'static'],
+                'total-bonus-deduct': ['total_bonus', 'deduction'],
+                'profit-earned-add': ['profit_earned', 'addition'],
+                'profit-earned-static': ['profit_earned', 'static'],
+                'profit-earned-deduct': ['profit_earned', 'deduction']
+            };
+            const balanceAction = actions[type];
+            if (!userId || !balanceAction || !Number.isFinite(amount) || amount < 0 || (balanceAction[1] !== 'static' && amount === 0)) {
+                showAdminToast('Select a user and enter a valid amount.', 'error');
+                return;
+            }
+            const saved = await window.brokerAdmin.applyBalanceAction(
+                userId,
+                balanceAction[0],
+                balanceAction[1],
+                amount,
+                String(formData.get('description') || '').trim()
+            );
+            if (saved) fundForm.reset();
+        });
+
+        document.querySelector('[data-admin-plan-form]')?.addEventListener('submit', (event) => {
+            event.preventDefault();
+            showAdminToast('Plan updates are not configured in the database.', 'error');
+        });
+
+        document.querySelector('[data-admin-wallet-form]')?.addEventListener('submit', (event) => {
+            event.preventDefault();
+            showAdminToast('Wallet updates are not configured in the database.', 'error');
+        });
+
+        const suspendForm = document.querySelector('[data-admin-suspend-form]');
+        suspendForm?.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(suspendForm);
+            const userId = String(formData.get('user') || '');
+            const reason = String(formData.get('reason') || '').trim();
+            if (!userId || !reason || !formData.get('confirm')) {
+                showAdminToast('Select a user, enter a reason, and confirm suspension.', 'error');
+                return;
+            }
+            const suspended = await window.brokerAdmin.suspendUser(userId, reason);
+            if (suspended) suspendForm.reset();
+        });
+
+        const bindStatusActionForm = (selector, action, validationMessage) => {
+            const form = document.querySelector(selector);
+            form?.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData(form);
+                const userId = String(formData.get('user') || '');
+                const reason = String(formData.get('reason') || '').trim();
+                if (!userId || !reason || !formData.get('confirm')) {
+                    showAdminToast(validationMessage, 'error');
+                    return;
+                }
+                if (await action(userId, reason)) form.reset();
+            });
+        };
+
+        bindStatusActionForm(
+            '[data-admin-unsuspend-form]',
+            (userId, reason) => window.brokerAdmin.unsuspendUser(userId, reason),
+            'Select a user, enter a reason, and confirm unsuspension.'
+        );
+        bindStatusActionForm(
+            '[data-admin-topup-suspension-form]',
+            (userId, reason) => window.brokerAdmin.requireTopUp(userId, reason),
+            'Select a user, enter a reason, and confirm the top-up restriction.'
+        );
+        bindStatusActionForm(
+            '[data-admin-topup-release-form]',
+            (userId, reason) => window.brokerAdmin.releaseTopUp(userId, reason),
+            'Select a user, enter a reason, and confirm the release.'
+        );
+    }
+
     // Initialize Admin Module
     async function initAdmin() {
         const authorized = await verifyAdminRole();
@@ -1018,12 +1208,15 @@
         const dashboard = document.getElementById('admin-dashboard-app');
         if (dashboard) {
             dashboard.hidden = false;
-            dashboard.style.display = 'flex';
+            dashboard.style.display = 'block';
         }
 
         document.title = 'Admin Portal | EXNESS Secure Console';
 
         setupAdminLogout();
+        setupAdminNavigation();
+        setupActionForms();
+        setAdminView('action');
         await fetchAdminData();
 
         // Attach search listener

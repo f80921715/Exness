@@ -40,22 +40,12 @@
                         },
                         // Tesla Red Design System — Neutral Scale
                         gray: {
-                            50: '#FFFFFF',
-                            100: '#F5F5F5',
-                            200: '#E5E5E5',
-                            300: '#D4D4D4',
-                            400: '#A3A3A3',
-                            500: '#737373',
-                            600: '#525252',
-                            700: '#404040',
-                            800: '#262626',
-                            900: '#0F0F0F',
+                            50: '#FFFFFF', 100: '#F5F5F5', 200: '#E5E5E5', 300: '#D4D4D4', 400: '#A3A3A3',
+                            500: '#737373', 600: '#525252', 700: '#404040', 800: '#262626', 900: '#0F0F0F',
                         },
                         'glass': 'rgba(255, 255, 255, 0.05)',
                     },
-                    backdropBlur: {
-                        'xs': '2px',
-                    },
+                    backdropBlur: { 'xs': '2px' },
                     animation: {
                         'gradient-x': 'gradient-x 15s ease infinite',
                         'gradient-y': 'gradient-y 15s ease infinite',
@@ -65,34 +55,16 @@
                     },
                     keyframes: {
                         'gradient-y': {
-                            '0%, 100%': {
-                                'background-size': '400% 400%',
-                                'background-position': 'center top'
-                            },
-                            '50%': {
-                                'background-size': '200% 200%',
-                                'background-position': 'center center'
-                            }
+                            '0%, 100%': { 'background-size': '400% 400%', 'background-position': 'center top' },
+                            '50%': { 'background-size': '200% 200%', 'background-position': 'center center' }
                         },
                         'gradient-x': {
-                            '0%, 100%': {
-                                'background-size': '200% 200%',
-                                'background-position': 'left center'
-                            },
-                            '50%': {
-                                'background-size': '200% 200%',
-                                'background-position': 'right center'
-                            }
+                            '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
+                            '50%': { 'background-size': '200% 200%', 'background-position': 'right center' }
                         },
                         'gradient-xy': {
-                            '0%, 100%': {
-                                'background-size': '400% 400%',
-                                'background-position': 'left center'
-                            },
-                            '50%': {
-                                'background-size': '200% 200%',
-                                'background-position': 'right center'
-                            }
+                            '0%, 100%': { 'background-size': '400% 400%', 'background-position': 'left center' },
+                            '50%': { 'background-size': '200% 200%', 'background-position': 'right center' }
                         },
                         'float': {
                             '0%, 100%': { transform: 'translateY(0)' },
@@ -106,9 +78,6 @@
 
     <!-- Alpine.js -->
     <script defer src="assets/js/alpine.min.js"></script>
-
-    <!-- Lucide Icons -->
-    <script src="assets/js/lucide.min.js"></script>
     <script src="assets/js/icons.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="assets/js/supabase-client.js" defer></script>
@@ -230,7 +199,7 @@ EXPERTISE.???">
     <script src="assets/js/fast-nav.js" defer></script>
 </head>
 
-<body class="h-full bg-gray-100 font-sans antialiased transition-colors duration-300 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+<body class="auth-page h-full bg-gray-100 font-sans antialiased transition-colors duration-300 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
 
 
     <!-- Theme Toggle (Hidden but accessible) -->
@@ -260,210 +229,85 @@ EXPERTISE.???">
 <!-- Fintech Trading Platform Registration -->
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 relative overflow-hidden py-8 sm:py-12">
     <div class="relative z-10 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div class="w-full max-w-2xl">
+        <div class="w-full max-w-lg">
             <!-- Professional Trading Registration Card -->
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl"
-                 x-data="registrationForm()" x-cloak>
+              <div class="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-8 sm:p-10 shadow-2xl">
 
                 <!-- Header Section -->
-                <div class="text-center mb-8">
+                <div class="text-center mb-6">
                     <!-- Logo -->
-                    <div class="flex items-center justify-center mb-6">
-                        <img src="assets/images/exness-logo.png"
-                             class="h-12 sm:h-16 w-auto"
-                             alt="EXNESS" />
+                    <div class="flex items-center justify-center mb-4">
+                        <a href="index.html">
+                            <img src="assets/images/exness-logo.png"
+                                 class="h-12 w-auto"
+                                 alt="EXNESS" />
+                        </a>
                     </div>
 
                     <!-- Title -->
-                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                        Join <span class="text-primary-500">EXNESS</span>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        Create an Account
                     </h1>
-                    <p class="text-gray-500 dark:text-gray-300 text-sm sm:text-base lg:text-lg mb-6">
-                        Start your professional trading journey
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Start trading with EXNESS today.
                     </p>
-
-                    <!-- Trading Stats - Mobile Responsive -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-xs sm:text-sm">
-                        <!--<div class="text-center p-3 bg-gray-800/50 rounded-xl border border-gray-700/50">-->
-                        <!--    <div class="flex items-center justify-center gap-1 text-green-400 mb-1">-->
-                        <!--        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>-->
-                        <!--        <span class="font-semibold">99.9% Uptime</span>-->
-                        <!--    </div>-->
-                        <!--    <div class="text-gray-400">Reliable Platform</div>-->
-                        <!--</div>-->
-                        <!--<div class="text-center p-3 bg-gray-800/50 rounded-xl border border-gray-700/50">-->
-                        <!--    <div class="flex items-center justify-center gap-1 text-blue-400 mb-1">-->
-                        <!--        <i data-lucide="shield-check" class="w-3 h-3"></i>-->
-                        <!--        <span class="font-semibold">Bank-Grade</span>-->
-                        <!--    </div>-->
-                        <!--    <div class="text-gray-400">Security</div>-->
-                        <!--</div>-->
-                        <div class="text-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50">
-                            <div class="flex items-center justify-center gap-1 text-primary-400 mb-1">
-                                <i data-lucide="users" class="w-3 h-3"></i>
-                                <span class="font-semibold">1M+ Traders</span>
-                            </div>
-                            <div class="text-gray-500 dark:text-gray-400">Community</div>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Enhanced Progress Steps - Mobile Optimized -->
-                <div class="mb-8">
-                    <div class="flex items-center justify-between sm:justify-center sm:space-x-8">
-                        <template x-for="(step, index) in steps" :key="index">
-                            <div class="flex flex-col items-center">
-                                <!-- Step Circle -->
-                                <div class="relative mb-2">
-                                    <div class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full text-xs sm:text-sm font-bold transition-all duration-300"
-                                         :class="currentStep > index ? 'bg-green-500 text-white' :
-                                                currentStep === index ? 'bg-primary-500 text-white' :
-                                                'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400'">
-                                        <span x-show="currentStep <= index" x-text="index + 1"></span>
-                                        <i x-show="currentStep > index" data-lucide="check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                                    </div>
-                                    <!-- Active Step Pulse -->
-                                    <div x-show="currentStep === index"
-                                         class="absolute inset-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary-500 animate-ping opacity-20"></div>
-                                </div>
-
-                                <!-- Step Label -->
-                                <div class="text-center">
-                                    <div class="text-xs sm:text-sm font-medium transition-colors duration-300"
-                                         :class="currentStep >= index ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'"
-                                         x-text="step.title"></div>
-                                    <div class="text-xs text-gray-500 hidden sm:block" x-text="step.description"></div>
-                                </div>
-
-                                <!-- Connector Line -->
-                                <div x-show="index < steps.length - 1"
-                                     class="hidden sm:block absolute top-4 left-1/2 w-16 h-0.5 transition-colors duration-300"
-                                     :class="currentStep > index ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-700'"
-                                     style="transform: translateX(2rem);"></div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Error Summary Section -->
-                
                 <!-- Registration Form -->
-                <form action="dashboard/index.html" method="GET" class="space-y-6" id="register" x-cloak>
+                <form action="#" method="post" class="space-y-4" id="register">
                     <input type="hidden" name="_token" value="IvxIWHA4Cac9QsWdjiorWTX3J1L6UhyR20XAjF5Y">
-                    <!-- Step 1: Personal Information -->
-                    <div x-show="currentStep === 0"
-                         x-transition:enter="transition ease-out duration-300"
-                         x-transition:enter-start="opacity-0 transform translate-x-4"
-                         x-transition:enter-end="opacity-100 transform translate-x-0">
+                    <input type="hidden" name="currency" id="currency" value="USD">
+                    <input type="hidden" name="language" id="language" value="en">
 
-                        <!-- Step Header -->
-                        <div class="mb-6 p-4 bg-primary-500/10 rounded-xl border border-primary-500/20">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-primary-500/20 rounded-lg">
-                                    <i data-lucide="user-circle" class="w-5 h-5 text-primary-400"></i>
-                                </div>
-                                <div>
-                                <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Personal Information</h3>
-                                    <p class="text-gray-500 dark:text-gray-400 text-sm">Create your trading profile</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                            <!-- Username Field -->
-                            <div class="space-y-2">
-                                <label for="username" class="block text-sm font-bold text-gray-700 dark:text-gray-200">
-                                    Trading Username <span class="text-primary-400">*</span>
-                                </label>
-                                <div class="relative group">
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-4">
-                                        <i data-lucide="user" class="h-5 w-5 text-gray-400 group-focus-within:text-primary-400 transition-colors"></i>
-                                    </div>
-                                    <input type="text" name="username" id="username" required
-                                           class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-12 pr-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:bg-gray-50 dark:focus:bg-gray-800 transition-all duration-200 text-sm font-bold"
-                                           placeholder="Choose username">
-                                </div>
-                                                            </div>
-
-                            <!-- Full Name Field -->
-                            <div class="space-y-2">
-                                <label for="name" class="block text-sm font-bold text-gray-700 dark:text-gray-200">
-                                    Full Name <span class="text-primary-400">*</span>
-                                </label>
-                                <div class="relative group">
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-4">
-                                        <i data-lucide="user-check" class="h-5 w-5 text-gray-400 group-focus-within:text-primary-400 transition-colors"></i>
-                                    </div>
-                                    <input type="text" name="name" id="name" required
-                                           class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-12 pr-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:bg-gray-50 dark:focus:bg-gray-800 transition-all duration-200 text-sm font-bold"
-                                           placeholder="Enter full name">
-                                </div>
-                                                            </div>
-
-                            <!-- Email Field -->
-                            <div class="space-y-2">
-                                <label for="email" class="block text-sm font-bold text-gray-700 dark:text-gray-200">
-                                    Email Address <span class="text-primary-400">*</span>
-                                </label>
-                                <div class="relative group">
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-4">
-                                        <i data-lucide="mail" class="h-5 w-5 text-gray-400 group-focus-within:text-primary-400 transition-colors"></i>
-                                    </div>
-                                    <input type="email" name="email" id="email" required
-                                           class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-12 pr-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:bg-gray-50 dark:focus:bg-gray-800 transition-all duration-200 text-sm font-bold"
-                                           placeholder="your.email@example.com">
-                                </div>
-                                                            </div>
-
-                            <!-- Phone Field -->
-                            <div class="space-y-2">
-                                <label for="phone" class="block text-sm font-bold text-gray-700 dark:text-gray-200">
-                                    Phone Number <span class="text-primary-400">*</span>
-                                </label>
-                                <div class="relative group">
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-4">
-                                        <i data-lucide="phone" class="h-5 w-5 text-gray-400 group-focus-within:text-primary-400 transition-colors"></i>
-                                    </div>
-                                    <input type="tel" name="phone" id="phone" required
-                                           class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-12 pr-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:bg-gray-50 dark:focus:bg-gray-800 transition-all duration-200 text-sm font-bold"
-                                           placeholder="+1 (555) 123-4567">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                <!-- Step 2: Location & Currency -->
-                <div x-show="currentStep === 1"
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 transform translate-x-4"
-                     x-transition:enter-end="opacity-100 transform translate-x-0">
-
-                    <!-- Step Header -->
-                    <div class="mb-6 p-4 bg-primary-500/10 rounded-xl border border-primary-500/20">
-                        <div class="flex items-center gap-3">
-                            <div class="p-2 bg-primary-500/20 rounded-lg">
-                                <i data-lucide="globe-2" class="w-5 h-5 text-primary-400"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Location</h3>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm">Set your regional trading preferences</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-1 gap-4 sm:gap-6">
-                        <!-- Country Field -->
-                        <div class="space-y-2">
-                            <label for="country" class="block text-sm font-bold text-gray-700 dark:text-gray-200">
-                                Country <span class="text-primary-400">*</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <!-- Username Field -->
+                        <div class="space-y-1">
+                            <label for="username" class="block text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                Trading Username <span class="text-primary-500">*</span>
                             </label>
-                            <div class="relative group">
-                                <div class="absolute inset-y-0 left-0 flex items-center pl-4 z-10">
-                                    <i data-lucide="flag" class="h-5 w-5 text-gray-400 group-focus-within:text-primary-400 transition-colors"></i>
-                                </div>
-                                <select name="country" id="country" required
-                                        class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-12 pr-8 py-4 text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:bg-gray-50 dark:focus:bg-gray-800 transition-all duration-200 text-sm font-bold appearance-none">
-                                    <option selected disabled class="text-gray-400">Select your country</option>
+                            <input type="text" name="username" id="username" required
+                                   class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3.5 py-3 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 text-sm"
+                                   placeholder="Choose username">
+                        </div>
+
+                        <!-- Full Name Field -->
+                        <div class="space-y-1">
+                            <label for="name" class="block text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                Full Name <span class="text-primary-500">*</span>
+                            </label>
+                            <input type="text" name="name" id="name" required
+                                   class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3.5 py-3 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 text-sm"
+                                   placeholder="Enter full name">
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="space-y-1">
+                            <label for="email" class="block text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                Email Address <span class="text-primary-500">*</span>
+                            </label>
+                            <input type="email" name="email" id="email" required
+                                   class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3.5 py-3 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 text-sm"
+                                   placeholder="your.email@example.com">
+                        </div>
+
+                        <!-- Phone Field -->
+                        <div class="space-y-1">
+                            <label for="phone" class="block text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                Phone Number <span class="text-primary-500">*</span>
+                            </label>
+                            <input type="tel" name="phone" id="phone" required
+                                   class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3.5 py-3 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 text-sm"
+                                   placeholder="+1 (555) 123-4567">
+                        </div>
+
+                        <!-- Country Field -->
+                        <div class="space-y-1 sm:col-span-2">
+                            <label for="country" class="block text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                Country of Residence <span class="text-primary-500">*</span>
+                            </label>
+                            <select name="country" id="country" required
+                                    class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3.5 py-3 text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 text-sm">
+                                    <option value="" selected disabled class="text-gray-400">Select your country</option>
                                     <option value="Afganistan">Afghanistan</option>
 <option value="Albania">Albania</option>
 <option value="Algeria">Algeria</option>
@@ -712,237 +556,58 @@ EXPERTISE.???">
 <option value="Zambia">Zambia</option>
 <option value="Zimbabwe">Zimbabwe</option>
                                 </select>
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                                    <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400"></i>
-                                </div>
-                            </div>
                         </div>
 
-                        <!-- Currency Field -->
-                        
-                    </div>
-
-                    <!-- Trading Preferences Info -->
-                    <div class="mt-6 p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                        <div class="flex items-start gap-3">
-                            <i data-lucide="info" class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0"></i>
-                            <div class="text-sm">
-                                <p class="text-blue-600 dark:text-blue-300 font-bold mb-1">Regional Trading Information</p>
-                                <p class="text-gray-600 dark:text-gray-300">Your location helps us provide region-specific features, compliance, and optimal server connections for faster trading execution.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 3: Security -->
-                <div x-show="currentStep === 2"
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 transform translate-x-4"
-                     x-transition:enter-end="opacity-100 transform translate-x-0">
-
-                    <!-- Step Header -->
-                    <div class="mb-6 p-4 bg-primary-500/10 rounded-xl border border-primary-500/20">
-                        <div class="flex items-center gap-3">
-                            <div class="p-2 bg-primary-500/20 rounded-lg">
-                                <i data-lucide="shield-check" class="w-5 h-5 text-primary-400"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Account Security</h3>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm">Secure your trading account</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <!-- Password Field -->
-                        <div class="space-y-2">
-                            <label for="password" class="block text-sm font-bold text-gray-700 dark:text-gray-200">
-                                Password <span class="text-primary-400">*</span>
+                        <div class="space-y-1 sm:col-span-2">
+                            <label for="password" class="block text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                Password <span class="text-primary-500">*</span>
                             </label>
-                            <div class="relative group">
-                                <div class="absolute inset-y-0 left-0 flex items-center pl-4">
-                                    <i data-lucide="lock" class="h-5 w-5 text-gray-400 group-focus-within:text-primary-400 transition-colors"></i>
-                                </div>
-                                <input type="password" name="password" id="password" required
-                                       class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-12 pr-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:bg-gray-50 dark:focus:bg-gray-800 transition-all duration-200 text-sm font-bold"
-                                       placeholder="Create strong password">
-                            </div>
-                                                    </div>
+                            <input type="password" name="password" id="password" required
+                                   class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3.5 py-3 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 text-sm"
+                                   placeholder="Create a strong password (min 8 characters)">
+                        </div>
 
                         <!-- Confirm Password Field -->
-                        <div class="space-y-2">
-                            <label for="password_confirmation" class="block text-sm font-bold text-gray-700 dark:text-gray-200">
-                                Confirm Password <span class="text-primary-400">*</span>
+                        <div class="space-y-1 sm:col-span-2">
+                            <label for="password_confirmation" class="block text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                Confirm Password <span class="text-primary-500">*</span>
                             </label>
-                            <div class="relative group">
-                                <div class="absolute inset-y-0 left-0 flex items-center pl-4">
-                                    <i data-lucide="key" class="h-5 w-5 text-gray-400 group-focus-within:text-primary-400 transition-colors"></i>
-                                </div>
-                                <input type="password" name="password_confirmation" id="password_confirmation" required
-                                       class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-12 pr-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:bg-gray-50 dark:focus:bg-gray-800 transition-all duration-200 text-sm font-bold"
-                                       placeholder="Confirm your password">
-                            </div>
+                            <input type="password" name="password_confirmation" id="password_confirmation" required
+                                   class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3.5 py-3 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 text-sm"
+                                   placeholder="Re-enter your password">
                         </div>
-                    </div>
-
-                    <!-- CAPTCHA Section -->
-                    <div class="space-y-4 mt-6">
-                        <div class="space-y-2">
-                            <label for="captcha" class="block text-sm font-bold text-gray-700 dark:text-gray-200">
-                                Simple Math Verification <span class="text-primary-400">*</span>
-                            </label>
-
-                            <!-- CAPTCHA Display -->
-                            <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl p-4 mb-3">
-                                <div class="flex items-center justify-center">
-                                    <div class="bg-gradient-to-r from-gray-50 dark:from-gray-800 to-gray-50 dark:to-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-600">
-                                        <div class="text-center">
-                                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-3 font-medium">What is the answer to this simple math?</p>
-                                            <div class="bg-gray-50 dark:bg-gray-900 rounded-lg px-8 py-4 border border-gray-200 dark:border-gray-700">
-                                                <span class="text-3xl font-bold text-green-400 tracking-wide select-none"
-                                                      style="font-family: 'Arial', sans-serif;">
-                                                    1 + 10 = ?
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- CAPTCHA Input -->
-                            <div class="relative group">
-                                <div class="absolute inset-y-0 left-0 flex items-center pl-4">
-                                    <i data-lucide="calculator" class="h-5 w-5 text-gray-400 group-focus-within:text-primary-400 transition-colors"></i>
-                                </div>
-                                <input type="number" name="captcha" id="captcha" required
-                                       class="block w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-12 pr-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:bg-gray-50 dark:focus:bg-gray-800 transition-all duration-200 text-sm font-bold text-center"
-                                       placeholder="Enter the answer (numbers only)"
-                                       autocomplete="off"
-                                       min="0"
-                                       max="99">
-                            </div>
-
-                            
-                            <!-- Helper text -->
-                            <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                <i data-lucide="info" class="w-3 h-3"></i>
-                                Just solve this simple math problem to verify you're human. Much easier than typing random codes!
-                            </p>
-                        </div>
-                    </div>
-
-                    
-                    <!-- Password Requirements -->
-                    <div class="mt-6 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-                        <p class="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">Password Requirements:</p>
-                        <ul class="text-xs text-gray-600 dark:text-gray-300 space-y-1">
-                            <li class="flex items-center gap-2">
-                                <i data-lucide="check" class="w-3 h-3 text-green-400"></i>
-                                At least 8 characters long
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <i data-lucide="check" class="w-3 h-3 text-green-400"></i>
-                                Contains uppercase and lowercase letters
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <i data-lucide="check" class="w-3 h-3 text-green-400"></i>
-                                Includes at least one number or special character
-                            </li>
-                        </ul>
                     </div>
 
                     <!-- Terms Agreement -->
-                    <div class="mt-6 p-6 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                        <div class="flex items-start gap-4">
-                            <div class="flex items-center h-5 mt-1">
-                                <input type="checkbox" name="agree" id="agree" required
-                                       class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-colors">
-                            </div>
-                            <div class="flex-1">
-                                <label for="agree" class="text-sm font-bold text-gray-700 dark:text-gray-200 leading-relaxed">
-                                    I agree to EXNESS's
-                                    <a href="terms.html" target="_blank" class="text-primary-400 hover:text-primary-300 font-bold underline underline-offset-2">
-                                        Terms and Conditions
-                                    </a>
-                                    and acknowledge that I have read and understood the
-                                    <a href="privacy.html" target="_blank" class="text-primary-400 hover:text-primary-300 font-bold underline underline-offset-2">
-                                        Privacy Policy
-                                    </a>
-                                </label>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                    By creating an account, you confirm that you are at least 18 years old and agree to receive trading updates and market insights.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Enhanced Navigation Buttons -->
-                <div class="flex flex-col sm:flex-row justify-between items-center mt-10 pt-8 border-t border-gray-200 dark:border-gray-700 gap-4" x-cloak>
-                    <!-- Previous Button -->
-                    <button type="button" @click="previousStep()"
-                            x-show="currentStep > 0"
-                            class="inline-flex items-center gap-2 px-6 py-3 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800/50 group">
-                        <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
-                        <span class="font-bold">Previous Step</span>
-                    </button>
-
-                    <!-- Progress Indicator -->
-                    <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                        <span x-text="`Step ${currentStep + 1} of ${steps.length}`" class="font-bold"></span>
+                    <div class="flex items-start gap-3 mt-1">
+                        <input type="checkbox" name="agree" id="agree" required
+                               class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-primary-500/20 shrink-0">
+                        <label for="agree" class="text-xs text-gray-600 dark:text-gray-300 leading-snug">
+                            I agree to the
+                            <a href="terms.html" target="_blank" class="text-primary-500 hover:text-primary-600 underline underline-offset-2">Terms and Conditions</a>
+                            and
+                            <a href="privacy.html" target="_blank" class="text-primary-500 hover:text-primary-600 underline underline-offset-2">Privacy Policy</a>.
+                            I confirm I am at least 18 years old.
+                        </label>
                     </div>
 
-                    <!-- Next Button -->
-                    <button type="button" @click="nextStep()"
-                            x-show="currentStep < steps.length - 1"
-                            class="inline-flex items-center gap-2 px-8 py-3 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 group">
-                        <span>Continue</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-                    </button>
+                    <!-- Submit Button -->
+                    <div class="pt-2">
+                        <button type="submit"
+                                class="w-full flex justify-center items-center gap-2 rounded-xl bg-primary-500 hover:bg-primary-600 px-6 py-3.5 text-sm font-bold text-gray-900 transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500/50">
+                            Create Account
+                        </button>
+                    </div>
 
-                    <!-- Create Account Button -->
-                    <button type="submit" x-show="currentStep === steps.length - 1"
-                            class="inline-flex items-center gap-2 px-8 py-3 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 group">
-                        <i data-lucide="user-plus" class="w-5 h-5"></i>
-                        <span>Create Trading Account</span>
-                        <i data-lucide="sparkles" class="w-4 h-4 group-hover:rotate-12 transition-transform"></i>
-                    </button>
-                </div>
-
-                <!-- Professional Footer -->
-                <div class="mt-8 text-center space-y-4">
-                    <div class="flex items-center justify-center gap-6 text-sm">
-                        <p class="text-gray-500 dark:text-gray-400">
+                    <!-- Footer -->
+                    <div class="pt-4 border-t border-gray-200 dark:border-gray-700/60 text-center">
+                        <p class="text-sm text-gray-600 dark:text-gray-300">
                             Already have an account?
-                            <a href="login.html"
-                               class="font-bold text-primary-400 hover:text-primary-300 transition-colors underline underline-offset-2">
-                                Sign in here
-                            </a>
+                            <a href="login.html" class="font-bold text-primary-500 hover:text-primary-600 dark:text-primary-400 underline underline-offset-2">Sign in</a>
                         </p>
                     </div>
-
-                    <!-- Trust Indicators -->
-                    <div class="flex items-center justify-center gap-8 py-4 text-xs text-gray-500">
-                        <div class="flex items-center gap-1">
-                            <i data-lucide="shield" class="w-3 h-3"></i>
-                            <span>SSL Secured</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <i data-lucide="lock" class="w-3 h-3"></i>
-                            <span>256-bit Encryption</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <i data-lucide="award" class="w-3 h-3"></i>
-                            <span>Regulated Platform</span>
-                        </div>
-                    </div>
-
-                    <p class="text-xs text-gray-500">
-                        © 2026 EXNESS. All rights reserved. |
-                        Licensed and regulated trading platform.
-                    </p>
-                </div>
-            </form>
+                </form>
         </div>
     </div>
 </div>
@@ -962,14 +627,6 @@ EXPERTISE.???">
             display: none !important;
         }
     </style>
-
-    <div id="google_translate_element" style="display:none"></div>
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({pageLanguage: "en"}, 'google_translate_element');
-        }
-    </script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     <script>
         function registrationForm() {
@@ -1073,12 +730,10 @@ EXPERTISE.???">
                         // Validate security
                         const passwordElement = document.getElementById('password');
                         const confirmPasswordElement = document.getElementById('password_confirmation');
-                        const captchaElement = document.getElementById('captcha');
                         const agreeElement = document.getElementById('agree');
 
                         const password = passwordElement.value;
                         const confirmPassword = confirmPasswordElement.value;
-                        const captcha = captchaElement.value.trim();
                         const agree = agreeElement.checked;
 
                         // Password validation
@@ -1107,16 +762,6 @@ EXPERTISE.???">
                         } else {
                             confirmPasswordElement.classList.remove('border-primary-500', 'bg-primary-50', 'dark:bg-primary-900/20');
                             confirmPasswordElement.classList.add('border-gray-300', 'dark:border-gray-600');
-                        }
-
-                        // CAPTCHA validation
-                        if (!captcha) {
-                            missingFields.push('Math Verification Answer');
-                            isValid = false;
-                            captchaElement.classList.add('border-primary-500', 'bg-primary-50', 'dark:bg-primary-900/20');
-                        } else {
-                            captchaElement.classList.remove('border-primary-500', 'bg-primary-50', 'dark:bg-primary-900/20');
-                            captchaElement.classList.add('border-gray-300', 'dark:border-gray-600');
                         }
 
                         // Terms agreement validation
@@ -1172,6 +817,8 @@ EXPERTISE.???">
 
         // Form submission enhancement
         document.addEventListener('DOMContentLoaded', function() {
+            const country = document.getElementById('country');
+
             const form = document.getElementById('register');
             if (form) {
                 form.addEventListener('submit', function(e) {
@@ -1210,243 +857,24 @@ EXPERTISE.???">
     </style>
 
 
-    <!-- Real-time Investment Popup Toast -->
-    <div id="live-investor-toast" class="fixed bottom-20 left-4 z-50 transition-all duration-500 transform translate-y-10 opacity-0 pointer-events-none">
-        <div class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-3 flex items-center space-x-3 max-w-xs text-xs">
-            <div class="w-8 h-8 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center flex-shrink-0">
-                <i data-lucide="trending-up" class="w-4 h-4"></i>
-            </div>
-            <div class="text-gray-800 dark:text-gray-200 leading-tight">
-                Someone from <strong id="toast-city" class="text-gray-900 dark:text-white font-bold">Moscow</strong> 
-                <span id="toast-action">just invested</span> 
-                <span id="toast-amount" class="font-bold text-primary-500 dark:text-primary-400">$5,400</span>
-            </div>
-        </div>
-    </div>
-    <script>
-        (function() {
-            const toastData = [
-                { city: "Moscow", action: "just invested", amount: "$5,400" },
-                { city: "Chicago", action: "just withdrew", amount: "$1,250" },
-                { city: "London", action: "just invested", amount: "$10,500" },
-                { city: "Zurich", action: "just invested", amount: "$24,000" },
-                { city: "Dubai", action: "just ordered", amount: "Tesla Model X Plaid" },
-                { city: "Singapore", action: "just deposited", amount: "2.5 BTC" },
-                { city: "Tokyo", action: "just invested", amount: "$8,200" }
-            ];
-            let idx = 0;
-            const toast = document.getElementById('live-investor-toast');
-            const cityEl = document.getElementById('toast-city');
-            const actEl = document.getElementById('toast-action');
-            const amtEl = document.getElementById('toast-amount');
-            
-            function showToast() {
-                if (!toast) return;
-                const item = toastData[idx % toastData.length];
-                idx++;
-                cityEl.textContent = item.city;
-                actEl.textContent = item.action;
-                amtEl.textContent = item.amount;
-                toast.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
-                setTimeout(() => {
-                    toast.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none');
-                    setTimeout(showToast, Math.floor(Math.random() * 3000) + 5000);
-                }, 4000);
-            }
-            setTimeout(showToast, 2500);
-        })();
-    </script>
-</body>
-
-</html>
-        </div>
-    </div>
-
-    <!-- Professional Trading Ticker -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-200/50 dark:border-gray-700/50 z-40">
-        <div class="tradingview-widget-container">
-            <div class="tradingview-widget-container__widget"></div>
-            <!--<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>-->
-            <!--{-->
-            <!--    "symbols": [-->
-            <!--        {"proName": "BINANCE:BTCUSDT", "title": "BTC/USDT"},-->
-            <!--        {"proName": "BINANCE:ETHUSDT", "title": "ETH/USDT"},-->
-            <!--        {"proName": "FX:EURUSD", "title": "EUR/USD"},-->
-            <!--        {"proName": "FX:GBPUSD", "title": "GBP/USD"},-->
-            <!--        {"proName": "FX:USDJPY", "title": "USD/JPY"},-->
-            <!--        {"proName": "NASDAQ:AAPL", "title": "APPLE"},-->
-            <!--        {"proName": "TVC:GOLD", "title": "GOLD"}-->
-            <!--    ],-->
-            <!--    "showSymbolLogo": true,-->
-            <!--    "colorTheme": "dark",-->
-            <!--    "isTransparent": true,-->
-            <!--    "displayMode": "adaptive",-->
-            <!--    "locale": "en"-->
-            <!--}-->
-            <!--</script>-->
-            <div class="gtranslate_wrapper"></div>
-
-<script>
-
-    window.gtranslateSettings = {
-
-        default_language: "en",
-
-        alt_flags:{"en":"usa"},
-
-        wrapper_selector: ".gtranslate_wrapper",
-
-        flag_style: "3d",
-
-    };
-
-</script>
-
-<script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
-
         </div>
     </div>
 
     <!-- Initialize Scripts -->
-    <script>
-        // Initialize theme
-        document.addEventListener('alpine:init', () => {
-            Alpine.store('theme', {
-                init() {
-                    this.darkMode = localStorage.getItem('theme') === 'dark';
-                    this.dark = this.darkMode;
-                },
-                darkMode: false,
-                dark: false,
-                toggle(trigger) {
-                    if (window.toggleDashboardTheme) {
-                        window.toggleDashboardTheme(trigger);
-                        this.darkMode = document.documentElement.classList.contains('dark');
-                        this.dark = this.darkMode;
-                    } else {
-                        this.darkMode = !this.darkMode;
-                        this.dark = this.darkMode;
-                        this.updateTheme();
-                    }
-                },
-                updateTheme() {
-                    localStorage.setItem('theme', this.darkMode ? 'dark' : 'light');
-                    document.documentElement.classList.toggle('dark', this.darkMode);
-                    document.body.classList.toggle('bg-gray-900', this.darkMode);
-                    document.body.classList.toggle('text-gray-100', this.darkMode);
-                    document.body.classList.toggle('bg-gray-300', !this.darkMode);
-                    document.body.classList.toggle('text-gray-900', !this.darkMode);
-                }
-            });
-        });
-
-        // Initialize Lucide icons
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        });
-
-        // Re-initialize icons after Alpine updates
-        document.addEventListener('alpine:updated', () => {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        });
-    </script>
-
-    <!-- CSRF Token Auto-Refresh Script -->
-
-    <!-- Language Selector -->
     <div class="gtranslate_wrapper"></div>
-
-<script>
-
-    window.gtranslateSettings = {
-
-        default_language: "en",
-
-        alt_flags:{"en":"usa"},
-
-        wrapper_selector: ".gtranslate_wrapper",
-
-        flag_style: "3d",
-
-    };
-
-</script>
-
-<script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
-
-    <!-- Language Selector -->
-    <!--<div class="gtranslate_wrapper"></div>
-
-<script>
-
-    window.gtranslateSettings = {
-
-        default_language: "en",
-
-        alt_flags:{"en":"usa"},
-
-        wrapper_selector: ".gtranslate_wrapper",
-
-        flag_style: "3d",
-
-    };
-
-</script>
-
-<script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
-
--->
-
-    <!-- Real-time Investment Popup Toast -->
-    <div id="live-investor-toast" class="fixed bottom-20 left-4 z-50 transition-all duration-500 transform translate-y-10 opacity-0 pointer-events-none">
-        <div class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-3 flex items-center space-x-3 max-w-xs text-xs">
-            <div class="w-8 h-8 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center flex-shrink-0">
-                <i data-lucide="trending-up" class="w-4 h-4"></i>
-            </div>
-            <div class="text-gray-800 dark:text-gray-200 leading-tight">
-                Someone from <strong id="toast-city" class="text-gray-900 dark:text-white font-bold">Moscow</strong> 
-                <span id="toast-action">just invested</span> 
-                <span id="toast-amount" class="font-bold text-primary-500 dark:text-primary-400">$5,400</span>
-            </div>
-        </div>
-    </div>
     <script>
-        (function() {
-            const toastData = [
-                { city: "Moscow", action: "just invested", amount: "$5,400" },
-                { city: "Chicago", action: "just withdrew", amount: "$1,250" },
-                { city: "London", action: "just invested", amount: "$10,500" },
-                { city: "Zurich", action: "just invested", amount: "$24,000" },
-                { city: "Dubai", action: "just ordered", amount: "Tesla Model X Plaid" },
-                { city: "Singapore", action: "just deposited", amount: "2.5 BTC" },
-                { city: "Tokyo", action: "just invested", amount: "$8,200" }
-            ];
-            let idx = 0;
-            const toast = document.getElementById('live-investor-toast');
-            const cityEl = document.getElementById('toast-city');
-            const actEl = document.getElementById('toast-action');
-            const amtEl = document.getElementById('toast-amount');
-            
-            function showToast() {
-                if (!toast) return;
-                const item = toastData[idx % toastData.length];
-                idx++;
-                cityEl.textContent = item.city;
-                actEl.textContent = item.action;
-                amtEl.textContent = item.amount;
-                toast.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
-                setTimeout(() => {
-                    toast.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none');
-                    setTimeout(showToast, Math.floor(Math.random() * 3000) + 5000);
-                }, 4000);
-            }
-            setTimeout(showToast, 2500);
-        })();
+        window.gtranslateSettings = {
+            default_language: "en",
+            alt_flags: { en: "usa" },
+            wrapper_selector: ".gtranslate_wrapper",
+            flag_style: "3d"
+        };
+    </script>
+    <script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
     </script>
 </body>
-
 </html>

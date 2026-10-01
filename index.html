@@ -139,6 +139,7 @@
     <script src="assets/js/icons.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="assets/js/supabase-client.js?v=landing-auth-2" defer></script>
+    <script src="assets/js/landing-auth.js" defer></script>
     <link rel="stylesheet" href="assets/css/style.css">
 
 
@@ -146,10 +147,42 @@
     <style>
 
         .goog-te-banner-frame.skiptranslate { display: none !important; }
+        #gt_float_wrapper, .gtranslate_wrapper, .gt_float_wrapper, .gt_translate, .goog-te-banner-frame {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
 
         body { top: 0 !important; }
 
         [x-cloak] { display: none !important; }
+
+        .site-language-toggle {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.02);
+            border-radius: 999px;
+            padding: 0.25rem 0.4rem 0.25rem 0.7rem;
+            color: #374151;
+        }
+
+        .dark .site-language-toggle {
+            border-color: rgba(148, 163, 184, 0.28);
+            background: rgba(15, 23, 42, 0.35);
+            color: #e5e7eb;
+        }
+
+        .site-language-toggle select {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            font-size: 0.72rem;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+            padding-right: 0.1rem;
+        }
 
     </style>
 
@@ -170,49 +203,49 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span class="text-[#FFD100] font-bold">EURUSD</span>
                 <span class="text-gray-400">1.1734</span>
-                <span class="text-emerald-400 font-semibold">▲ +0.21%</span>
+                <span class="text-emerald-400 font-semibold">â–² +0.21%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">GBPUSD</span>
                 <span class="text-gray-400">1.3762</span>
-                <span class="text-emerald-400 font-semibold">▲ +0.18%</span>
+                <span class="text-emerald-400 font-semibold">â–² +0.18%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">XAUUSD</span>
                 <span class="text-gray-400">2,489.15</span>
-                <span class="text-emerald-400 font-semibold">▲ +0.42%</span>
+                <span class="text-emerald-400 font-semibold">â–² +0.42%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">BTCUSD</span>
                 <span class="text-gray-400">58,742.30</span>
-                <span class="text-emerald-400 font-semibold">▲ +1.26%</span>
+                <span class="text-emerald-400 font-semibold">â–² +1.26%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-primary-400"></span>
                 <span class="text-[#FFD100] font-bold">USOIL</span>
                 <span class="text-gray-400">72.48</span>
-                <span class="text-primary-400 font-semibold">▼ -0.35%</span>
+                <span class="text-primary-400 font-semibold">â–¼ -0.35%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">USDJPY</span>
                 <span class="text-gray-400">144.21</span>
-                <span class="text-emerald-400 font-semibold">▲ +0.12%</span>
+                <span class="text-emerald-400 font-semibold">â–² +0.12%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">AAPL</span>
                 <span class="text-gray-400">189.84</span>
-                <span class="text-emerald-400 font-semibold">▲ +0.53%</span>
+                <span class="text-emerald-400 font-semibold">â–² +0.53%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">ETHUSD</span>
                 <span class="text-gray-400">3,128.40</span>
-                <span class="text-emerald-400 font-semibold">▲ +2.14%</span>
+                <span class="text-emerald-400 font-semibold">â–² +2.14%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="text-gray-500 font-medium tracking-wide">Trade Smarter. Anywhere.</span>
@@ -222,49 +255,49 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span class="text-[#FFD100] font-bold">EURUSD</span>
                 <span class="text-gray-400">1.1734</span>
-                <span class="text-emerald-400 font-semibold">▲ +0.21%</span>
+                <span class="text-emerald-400 font-semibold">â–² +0.21%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">GBPUSD</span>
                 <span class="text-gray-400">1.3762</span>
-                <span class="text-emerald-400 font-semibold">▲ +0.18%</span>
+                <span class="text-emerald-400 font-semibold">â–² +0.18%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">XAUUSD</span>
                 <span class="text-gray-400">2,489.15</span>
-                <span class="text-emerald-400 font-semibold">▲ +0.42%</span>
+                <span class="text-emerald-400 font-semibold">â–² +0.42%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">BTCUSD</span>
                 <span class="text-gray-400">58,742.30</span>
-                <span class="text-emerald-400 font-semibold">▲ +1.26%</span>
+                <span class="text-emerald-400 font-semibold">â–² +1.26%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-primary-400"></span>
                 <span class="text-[#FFD100] font-bold">USOIL</span>
                 <span class="text-gray-400">72.48</span>
-                <span class="text-primary-400 font-semibold">▼ -0.35%</span>
+                <span class="text-primary-400 font-semibold">â–¼ -0.35%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">USDJPY</span>
                 <span class="text-gray-400">144.21</span>
-                <span class="text-emerald-400 font-semibold">▲ +0.12%</span>
+                <span class="text-emerald-400 font-semibold">â–² +0.12%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">AAPL</span>
                 <span class="text-gray-400">189.84</span>
-                <span class="text-emerald-400 font-semibold">▲ +0.53%</span>
+                <span class="text-emerald-400 font-semibold">â–² +0.53%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span class="text-[#FFD100] font-bold">ETHUSD</span>
                 <span class="text-gray-400">3,128.40</span>
-                <span class="text-emerald-400 font-semibold">▲ +2.14%</span>
+                <span class="text-emerald-400 font-semibold">â–² +2.14%</span>
             </span>
             <span class="inline-flex items-center space-x-1.5 whitespace-nowrap px-5">
                 <span class="text-gray-500 font-medium tracking-wide">Trade Smarter. Anywhere.</span>
@@ -278,48 +311,81 @@
             <div class="flex items-center justify-between h-20 sm:h-16">
                 <!-- Logo -->
                 <a href="index.html" class="flex items-center">
-                    <img src="assets/images/exness-logo.png" alt="EXNESS" class="h-11 sm:h-9 w-auto object-contain brightness-0 dark:brightness-200">
+                    <img src="ChatGPT%20Image%20Sep%2013%2C%202026%2C%2003_11_05%20AM.png" alt="EXNESS" class="h-11 sm:h-9 w-auto object-contain">
                 </a>
 
-                <!-- Desktop Nav Links -->
-                <nav class="hidden lg:flex items-center space-x-8">
-                    <a href="index.html" class="text-sm font-semibold text-primary-500">Home</a>
-                    <a href="cars.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors">Inventory</a>
-                    <a href="trading.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors">Live Trading</a>
-                    <a href="about.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors">About</a>
-                    <a href="contact.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors">Contact</a>
-                    <a href="faq.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors">FAQ</a>
+                                <!-- Desktop Nav Links -->
+                <nav class="hidden lg:flex items-center space-x-7">
+                    <a href="index.html" class="text-sm font-semibold text-primary-500" data-i18n="nav.home">Home</a>
+                    <a href="trading.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors" data-i18n="nav.trading">Live Trading</a>
+                    
+                    <!-- Services Dropdown -->
+                    <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                        <a href="services.html" class="flex items-center text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors py-2">
+                            <span data-i18n="nav.services">Services</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 ml-1 transition-transform" :class="{ 'rotate-180': open }"></i>
+                        </a>
+                        <div x-show="open" x-cloak
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 translate-y-1"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 translate-y-1"
+                             class="absolute left-0 mt-1 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 z-50">
+                            <a href="services.html" class="flex items-center px-4 py-2.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700/60">
+                                <i data-lucide="grid" class="w-4 h-4 mr-2.5 text-primary-500"></i> All Services
+                            </a>
+                            <a href="cryptocurrency.html" class="flex items-center px-4 py-2.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700/60">
+                                <i data-lucide="coins" class="w-4 h-4 mr-2.5 text-primary-500"></i> Cryptocurrency
+                            </a>
+                            <a href="cryptomining.html" class="flex items-center px-4 py-2.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700/60">
+                                <i data-lucide="cpu" class="w-4 h-4 mr-2.5 text-primary-500"></i> Crypto Mining
+                            </a>
+                            <a href="forexstock.html" class="flex items-center px-4 py-2.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700/60">
+                                <i data-lucide="trending-up" class="w-4 h-4 mr-2.5 text-primary-500"></i> Forex &amp; Stocks
+                            </a>
+                            <a href="realestate.html" class="flex items-center px-4 py-2.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700/60">
+                                <i data-lucide="building-2" class="w-4 h-4 mr-2.5 text-primary-500"></i> Real Estate
+                            </a>
+                        </div>
+                    </div>
+
+                    <a href="invest.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors" data-i18n="nav.plans">Plans</a>
+                    <a href="about.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors" data-i18n="nav.about">About</a>
+                    <a href="contact.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors" data-i18n="nav.contact">Contact</a>
+                    <a href="faqs.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-primary-400 transition-colors" data-i18n="nav.faq">FAQ</a>
                 </nav>
 
                 <!-- Right Controls -->
                 <div class="hidden md:flex items-center space-x-5">
-                    <!-- Theme Toggle -->
-                    <button @click="$store.theme.toggle($event)" class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Toggle Theme">
-                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
-                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
-                    </button>
+                    <label class="site-language-toggle" aria-label="Select site language">
+                        <span class="text-[10px] uppercase tracking-[0.18em] font-bold opacity-80">Lang</span>
+                        <select data-site-language aria-label="Select language">
+                            <option value="en">EN</option>
+                            <option value="fr">FR</option>
+                            <option value="es">ES</option>
+                            <option value="pt">PT</option>
+                            <option value="de">DE</option>
+                            <option value="it">IT</option>
+                            <option value="ar">AR</option>
+                        </select>
+                    </label>
+
                     <div data-landing-guest-auth class="flex items-center space-x-5">
-                        <a href="login.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Login</a>
-                        <a href="register.html" class="inline-flex items-center justify-center px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white text-sm font-extrabold rounded-lg transition-colors">
+                        <a href="login.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors" data-i18n="nav.login">Login</a>
+                        <a href="register.html" class="inline-flex items-center justify-center px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white text-sm font-extrabold rounded-lg transition-colors" data-i18n="nav.signup">
                             Sign Up
                         </a>
                     </div>
                     <div data-landing-user-auth hidden class="flex items-center space-x-3">
-                        <a href="dashboard/index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Dashboard</a>
-                        <button type="button" data-landing-logout title="Log out" aria-label="Log out" class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">Log out</button>
-                        <a href="dashboard/profile.html" title="Open profile" aria-label="Open profile" class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-100 text-[11px] font-bold text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                            <img data-landing-avatar hidden alt="Profile photo" class="h-full w-full object-cover">
-                            <span data-landing-initials>IN</span>
-                        </a>
+                        <a href="dashboard/index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors" data-i18n="nav.dashboard">Dashboard</a>
+                        <button type="button" data-landing-logout title="Log out" aria-label="Log out" class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors" data-i18n="nav.logout">Log out</button>
                     </div>
                 </div>
 
                 <!-- Mobile Hamburger -->
                 <div class="flex items-center lg:hidden space-x-3">
-                    <button aria-label="Toggle theme" @click="$store.theme.toggle($event)" class="p-2 rounded-lg text-gray-500 dark:text-gray-400">
-                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
-                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
-                    </button>
                     <button aria-label="Open navigation" @click="mobileOpen = !mobileOpen" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                         <i data-lucide="menu" class="w-6 h-6" x-show="!mobileOpen"></i>
                         <i data-lucide="x" class="w-6 h-6" x-show="mobileOpen" x-cloak></i>
@@ -328,7 +394,7 @@
             </div>
         </div>
 
-        <!-- Mobile Menu Dropdown with transition -->
+                <!-- Mobile Menu Dropdown with transition -->
         <div x-show="mobileOpen" x-cloak
              x-transition:enter="transition ease-out duration-250"
              x-transition:enter-start="opacity-0 -translate-y-2"
@@ -336,17 +402,44 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 -translate-y-2"
-             class="lg:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-5 space-y-3">
-            <a href="index.html" class="block px-3 py-2 text-base font-semibold text-primary-500 rounded-lg">Home</a>
-            <a href="cars.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Inventory</a>
-            <a href="trading.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Live Trading</a>
-            <a href="about.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">About</a>
-            <a href="contact.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Contact</a>
-            <a href="faq.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">FAQ</a>
-            <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex space-x-3">
+             class="lg:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-5 space-y-2">
+            <a href="index.html" class="block px-3 py-2 text-base font-semibold text-primary-500 rounded-lg" data-i18n="nav.home">Home</a>
+            <a href="trading.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" data-i18n="nav.trading">Live Trading</a>
+            
+            <div x-data="{ subOpen: false }">
+                <button @click="subOpen = !subOpen" class="w-full flex items-center justify-between px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <span>Services</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" :class="{ 'rotate-180': subOpen }"></i>
+                </button>
+                <div x-show="subOpen" class="pl-5 space-y-1.5 py-1">
+                    <a href="services.html" class="block py-1.5 text-sm font-medium text-primary-500">All Services</a>
+                    <a href="cryptocurrency.html" class="block py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-400">Cryptocurrency</a>
+                    <a href="cryptomining.html" class="block py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-400">Crypto Mining</a>
+                    <a href="forexstock.html" class="block py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-400">Forex &amp; Stocks</a>
+                    <a href="realestate.html" class="block py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-400">Real Estate</a>
+                </div>
+            </div>
+
+            <a href="invest.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" data-i18n="nav.plans">Investment Plans</a>
+            <a href="about.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" data-i18n="nav.about">About</a>
+            <a href="contact.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" data-i18n="nav.contact">Contact</a>
+            <a href="faqs.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" data-i18n="nav.faq">FAQ</a>
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                <label class="site-language-toggle w-full justify-center" aria-label="Select site language">
+                    <span class="text-[10px] uppercase tracking-[0.18em] font-bold opacity-80">Lang</span>
+                    <select data-site-language aria-label="Select language" class="w-full text-center">
+                        <option value="en">EN</option>
+                        <option value="fr">FR</option>
+                        <option value="es">ES</option>
+                        <option value="pt">PT</option>
+                        <option value="de">DE</option>
+                        <option value="it">IT</option>
+                        <option value="ar">AR</option>
+                    </select>
+                </label>
                 <div data-landing-guest-mobile class="flex w-full space-x-3">
-                    <a href="login.html" class="flex-1 text-center py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium">Login</a>
-                    <a href="register.html" class="flex-1 text-center py-2.5 rounded-lg bg-primary-500 text-white font-bold">Sign Up</a>
+                    <a href="login.html" class="flex-1 text-center py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium" data-i18n="nav.login">Login</a>
+                    <a href="register.html" class="flex-1 text-center py-2.5 rounded-lg bg-primary-500 text-white font-bold" data-i18n="nav.signup">Sign Up</a>
                 </div>
                 <div data-landing-user-mobile hidden class="flex w-full items-center justify-between gap-3">
                     <a href="dashboard/index.html" class="flex-1 text-center py-2.5 rounded-lg bg-primary-500 text-white font-bold">Dashboard</a>
@@ -356,6 +449,102 @@
         </div>
     </header>
 
+    <script>
+        const siteTranslations = {
+            en: {
+                'nav.home': 'Home',
+                'nav.trading': 'Live Trading',
+                'nav.services': 'Services',
+                'nav.plans': 'Plans',
+                'nav.about': 'About',
+                'nav.contact': 'Contact',
+                'nav.faq': 'FAQ',
+                'nav.login': 'Login',
+                'nav.signup': 'Sign Up',
+                'nav.dashboard': 'Dashboard',
+                'nav.logout': 'Log out',
+                'hero.kicker': 'Global Trading Partner',
+                'hero.line1': 'Trade. Invest.',
+                'hero.line2': 'Grow.',
+                'hero.copy': 'Access 1,000+ financial instruments, including forex, metals, indices, stocks, and cryptocurrencies. Trade anytime, anywhere with Exness.',
+                'hero.cta.primary': 'Start Trading Now',
+                'hero.market.title': 'Markets',
+                'hero.market.copy': 'Multi-asset trading',
+                'hero.portfolio.title': 'Portfolio',
+                'hero.portfolio.copy': 'Track performance'
+            },
+            fr: {
+                'nav.home': 'Accueil',
+                'nav.trading': 'Trading en direct',
+                'nav.services': 'Services',
+                'nav.plans': 'Plans',
+                'nav.about': 'À propos',
+                'nav.contact': 'Contact',
+                'nav.faq': 'FAQ',
+                'nav.login': 'Connexion',
+                'nav.signup': 'Inscription',
+                'nav.dashboard': 'Tableau de bord',
+                'nav.logout': 'Déconnexion',
+                'hero.kicker': 'Partenaire commercial mondial',
+                'hero.line1': 'Tradez. Investissez.',
+                'hero.line2': 'Grandissez.',
+                'hero.copy': 'Accédez à plus de 1 000 instruments financiers, dont forex, métaux, indices, actions et cryptomonnaies. Tradez où que vous soyez avec Exness.',
+                'hero.cta.primary': 'Commencer à trader',
+                'hero.market.title': 'Marchés',
+                'hero.market.copy': 'Trading multi-actifs',
+                'hero.portfolio.title': 'Portefeuille',
+                'hero.portfolio.copy': 'Suivre la performance'
+            },
+            es: {
+                'nav.home': 'Inicio',
+                'nav.trading': 'Trading en vivo',
+                'nav.services': 'Servicios',
+                'nav.plans': 'Planes',
+                'nav.about': 'Nosotros',
+                'nav.contact': 'Contacto',
+                'nav.faq': 'Preguntas',
+                'nav.login': 'Iniciar sesión',
+                'nav.signup': 'Registrarse',
+                'nav.dashboard': 'Panel',
+                'nav.logout': 'Cerrar sesión',
+                'hero.kicker': 'Socio comercial global',
+                'hero.line1': 'Opera. Invierte.',
+                'hero.line2': 'Crecce.',
+                'hero.copy': 'Accede a más de 1.000 instrumentos financieros, incluidos forex, metales, índices, acciones y criptomonedas. Opera desde cualquier lugar con Exness.',
+                'hero.cta.primary': 'Empezar a operar',
+                'hero.market.title': 'Mercados',
+                'hero.market.copy': 'Trading multiactivo',
+                'hero.portfolio.title': 'Portafolio',
+                'hero.portfolio.copy': 'Rastrear rendimiento'
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const select = document.querySelector('[data-site-language]');
+            if (!select) return;
+
+            const stored = localStorage.getItem('site-language') || 'en';
+            const valid = ['en', 'fr', 'es', 'pt', 'de', 'it', 'ar'];
+            select.value = valid.includes(stored) ? stored : 'en';
+
+            const applyLanguage = (language) => {
+                const dictionary = siteTranslations[language] || siteTranslations.en;
+                document.documentElement.lang = language;
+                localStorage.setItem('site-language', language);
+
+                document.querySelectorAll('[data-i18n]').forEach((node) => {
+                    const text = dictionary[node.dataset.i18n];
+                    if (text) node.textContent = text;
+                });
+            };
+
+            select.addEventListener('change', (event) => {
+                applyLanguage(event.target.value);
+            });
+
+            applyLanguage(select.value);
+        });
+    </script>
 
     <!-- Trading-focused landing hero -->
     <section data-landing-hero class="relative min-h-[540px] text-white pt-16 pb-20 overflow-hidden bg-[#080b10]" style="background-image: linear-gradient(90deg, rgba(8, 11, 16, 0.9) 0%, rgba(8, 11, 16, 0.55) 32%, rgba(8, 11, 16, 0.08) 66%, rgba(8, 11, 16, 0.72) 100%), url('assets/images/hero-trading-bg.png'); background-size: cover; background-position: 45% center;">
@@ -365,127 +554,35 @@
                 
                 <!-- Left Column: Original UX Copy & CTAs (6 cols) -->
                 <div class="lg:col-span-5 space-y-6">
-                    <span class="inline-block text-xs md:text-sm font-semibold text-[#FFD100] tracking-wider uppercase">
+                    <span class="inline-block text-xs md:text-sm font-semibold text-[#FFD100] tracking-wider uppercase" data-i18n="hero.kicker">
                         Global Trading Partner
                     </span>
 
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                        Trade. Invest.<br>
-                        <span class="text-[#FFD100]">Grow.</span>
+                        <span data-i18n="hero.line1">Trade. Invest.</span><br>
+                        <span class="text-[#FFD100]" data-i18n="hero.line2">Grow.</span>
                     </h1>
 
-                    <p class="text-gray-300 text-base sm:text-lg leading-relaxed max-w-xl">
+                    <p class="text-gray-300 text-base sm:text-lg leading-relaxed max-w-xl" data-i18n="hero.copy">
                         Access 1,000+ financial instruments, including forex, metals, indices, stocks, and cryptocurrencies. Trade anytime, anywhere with Exness.
                     </p>
 
                     <!-- Original UX Dual CTA Buttons -->
                     <div class="flex flex-wrap items-center gap-4 pt-2">
-                        <a href="register.html" class="inline-flex items-center justify-center px-7 py-3.5 bg-white hover:bg-gray-100 text-primary-700 font-extrabold text-base rounded-lg transition-colors">
+                        <a href="register.html" data-start-trading class="inline-flex items-center justify-center px-7 py-3.5 bg-white hover:bg-gray-100 text-primary-700 font-extrabold text-base rounded-lg transition-colors" data-i18n="hero.cta.primary">
                             <i data-lucide="trending-up" class="w-5 h-5 mr-2"></i>
                             Start Trading Now
                         </a>
-                        <a href="cars.html" class="inline-flex items-center justify-center px-7 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-base rounded-lg border border-white/30 transition-colors">
-                            <i data-lucide="car" class="w-5 h-5 mr-2 text-primary-400"></i>
-                            Watch Video
-                        </a>
-                    </div>
-
-                    <!-- Original UX Trust Badges -->
-                    <div class="flex flex-wrap items-center gap-4 pt-5">
-                        <span class="inline-flex items-center space-x-2 text-gray-400 text-xs">
-                            <svg class="w-4 h-4 text-[#FFD100]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                            <span>Regulated & Safe</span>
-                        </span>
-                        <span class="inline-flex items-center space-x-2 text-gray-400 text-xs">
-                            <svg class="w-4 h-4 text-[#FFD100]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path></svg>
-                            <span>Fast Execution</span>
-                        </span>
-                        <span class="inline-flex items-center space-x-2 text-gray-400 text-xs">
-                            <svg class="w-4 h-4 text-[#FFD100]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0 .993-.241 1.929-.668 2.754l-1.524-1.525a3.997 3.997 0 00.078-2.183l1.562-1.562C17.63 8.344 16 9.818 16 10z" clip-rule="evenodd"></path></svg>
-                            <span>24/7 Support</span>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Right Column: Feature Cards -->
-                <div class="lg:col-span-4 lg:col-start-9 space-y-4">
-                    <div class="grid grid-cols-2 gap-3.5">
-                        <div class="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/15 transition-all">
-                            <div class="w-9 h-9 bg-[#FFD100]/15 rounded-lg flex items-center justify-center mb-2.5 text-[#FFD100]">
-                                <i data-lucide="candlestick-chart" class="w-4 h-4"></i>
-                            </div>
-                            <h3 class="text-white font-bold text-sm">Forex</h3>
-                            <p class="text-xs text-white/70 font-medium mt-0.5">Major, minor & exotic pairs.</p>
-                            <p class="text-[11px] text-[#FFD100] mt-2">Trade Forex <span aria-hidden="true">-&gt;</span></p>
-                        </div>
-
-                        <div class="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/15 transition-all">
-                            <div class="w-9 h-9 bg-[#FFD100]/15 rounded-lg flex items-center justify-center mb-2.5 text-[#FFD100]">
-                                <i data-lucide="landmark" class="w-4 h-4"></i>
-                            </div>
-                            <h3 class="text-white font-bold text-sm">Metals</h3>
-                            <p class="text-xs text-white/70 font-medium mt-0.5">Gold, silver and more.</p>
-                            <p class="text-[11px] text-[#FFD100] mt-2">Trade Metals <span aria-hidden="true">-&gt;</span></p>
-                        </div>
-
-                        <div class="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/15 transition-all">
-                            <div class="w-9 h-9 bg-[#FFD100]/15 rounded-lg flex items-center justify-center mb-2.5 text-[#FFD100]">
-                                <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-                            </div>
-                            <h3 class="text-white font-bold text-sm">Indices</h3>
-                            <p class="text-xs text-white/70 font-medium mt-0.5">Global indices, 24/7.</p>
-                            <p class="text-[11px] text-[#FFD100] mt-2">Trade Indices <span aria-hidden="true">-&gt;</span></p>
-                        </div>
-
-                        <div class="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/15 transition-all">
-                            <div class="w-9 h-9 bg-[#FFD100]/15 rounded-lg flex items-center justify-center mb-2.5 text-[#FFD100]">
-                                <i data-lucide="bitcoin" class="w-4 h-4"></i>
-                            </div>
-                            <h3 class="text-white font-bold text-sm">Cryptocurrencies</h3>
-                            <p class="text-xs text-white/70 font-medium mt-0.5">Leading digital assets.</p>
-                            <p class="text-[11px] text-[#FFD100] mt-2">Trade Crypto <span aria-hidden="true">-&gt;</span></p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <div class="relative h-10 bg-white overflow-hidden">
-        <svg class="absolute -top-1 left-0 w-full h-16" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0,35 C360,0 720,0 1080,20 C1240,29 1350,34 1440,35 L1440,60 L0,60 Z" fill="#ffffff"></path>
-        </svg>
-    </div>
-
-    <!-- Section 2 — Quick Actions -->
-
-    <section class="bg-white dark:bg-gray-900 py-12 border-b border-gray-200 dark:border-gray-800">
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-
-                                                                    <a href="register.html" class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg transition-all">
-
+                        <a href="services.html" class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg transition-all">
                     <div class="flex items-center justify-between">
-
                         <div>
-
-                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors">Wallet</h3>
-
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Fund or withdraw</p>
-
+                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors" data-i18n="hero.market.title">Markets</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" data-i18n="hero.market.copy">Multi-asset trading</p>
                         </div>
-
                         <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-
-                            <i data-lucide="wallet" class="w-5 h-5 text-primary-500"></i>
-
+                            <i data-lucide="bar-chart-2" class="w-5 h-5 text-primary-500"></i>
                         </div>
-
                     </div>
-
                 </a>
 
                 <a href="register.html" class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg transition-all">
@@ -494,53 +591,9 @@
 
                         <div>
 
-                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors">Investments</h3>
+                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors" data-i18n="hero.portfolio.title">Portfolio</h3>
 
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Create a plan</p>
-
-                        </div>
-
-                        <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-
-                            <i data-lucide="trending-up" class="w-5 h-5 text-primary-500"></i>
-
-                        </div>
-
-                    </div>
-
-                </a>
-
-                <a href="cars.html" class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg transition-all">
-
-                    <div class="flex items-center justify-between">
-
-                        <div>
-
-                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors">Inventory</h3>
-
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Browse vehicles</p>
-
-                        </div>
-
-                        <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-
-                            <i data-lucide="car" class="w-5 h-5 text-primary-500"></i>
-
-                        </div>
-
-                    </div>
-
-                </a>
-
-                <a href="register.html" class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg transition-all">
-
-                    <div class="flex items-center justify-between">
-
-                        <div>
-
-                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors">Portfolio</h3>
-
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Track performance</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" data-i18n="hero.portfolio.copy">Track performance</p>
 
                         </div>
 
@@ -562,169 +615,115 @@
 
 
 
-    <!-- Section 3 — Available Inventory -->
-
-    <section class="bg-primary-50 dark:bg-gray-900 py-16 lg:py-24">
-
+        <!-- Section 3 — Core Investment Markets & Services -->
+    <section class="bg-primary-50 dark:bg-gray-900 py-16 lg:py-24 border-b border-gray-200 dark:border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-            <div class="flex items-end justify-between mb-10">
-
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
                 <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-primary-500 bg-primary-500/10 px-3 py-1 rounded-full">Multi-Asset Ecosystem</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mt-3">Institutional Markets &amp; Yields</h2>
+                    <p class="mt-2 text-gray-600 dark:text-gray-400 max-w-2xl text-sm sm:text-base">
+                        Diversified trading instruments engineered for institutional precision, deep liquidity pools, and optimal capital growth.
+                    </p>
+                </div>
+                <a href="services.html" class="mt-4 md:mt-0 inline-flex items-center text-sm font-semibold text-primary-500 hover:text-primary-600">
+                    Explore all services <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                </a>
+            </div>
 
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Available Inventory</h2>
-
-                    <p class="mt-2 text-primary-500">Explore a curated selection ready for delivery.</p>
-
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Market Card 1: Cryptocurrency -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl hover:border-primary-400 dark:hover:border-primary-500 transition-all flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="coins" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Cryptocurrency</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                            Trade BTC, ETH, Solana and 120+ pairs with ultra-deep order books, cold-storage security, and instant spot settlement.
+                        </p>
+                        <div class="space-y-2 py-3 border-t border-b border-gray-100 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-300">
+                            <div class="flex justify-between"><span>Liquidity Pools:</span> <strong class="text-gray-900 dark:text-white">Tier-1 Institutional</strong></div>
+                            <div class="flex justify-between"><span>Execution Speed:</span> <strong class="text-green-500">&lt; 12ms</strong></div>
+                            <div class="flex justify-between"><span>Staking APY:</span> <strong class="text-primary-500">Up to 18.4%</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-5 flex gap-2">
+                        <a href="cryptocurrency.html" class="flex-1 text-center px-3 py-2 text-xs font-semibold rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Details</a>
+                        <a href="register.html" class="flex-1 text-center px-3 py-2 text-xs font-bold rounded-lg bg-primary-500 hover:bg-primary-600 text-white shadow-sm transition">Trade Now</a>
+                    </div>
                 </div>
 
-                <a href="cars.html" class="hidden sm:inline-flex items-center text-sm font-medium text-primary-500 hover:text-primary-600">
+                <!-- Market Card 2: Crypto Mining -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl hover:border-primary-400 dark:hover:border-primary-500 transition-all flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-primary-500/10 text-primary-500 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="cpu" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Cloud Mining</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                            Turnkey ASIC &amp; GPU cloud mining farms powered by 100% hydro-geothermal energy. Automated daily hashrate payouts.
+                        </p>
+                        <div class="space-y-2 py-3 border-t border-b border-gray-100 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-300">
+                            <div class="flex justify-between"><span>Hashrate Uptime:</span> <strong class="text-green-500">99.98% Guaranteed</strong></div>
+                            <div class="flex justify-between"><span>Payout Frequency:</span> <strong class="text-gray-900 dark:text-white">Daily at 00:00 UTC</strong></div>
+                            <div class="flex justify-between"><span>Hardware Maintenance:</span> <strong class="text-primary-500">Zero Fee</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-5 flex gap-2">
+                        <a href="cryptomining.html" class="flex-1 text-center px-3 py-2 text-xs font-semibold rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Details</a>
+                        <a href="register.html" class="flex-1 text-center px-3 py-2 text-xs font-bold rounded-lg bg-primary-500 hover:bg-primary-600 text-white shadow-sm transition">Start Mining</a>
+                    </div>
+                </div>
 
-                    View all <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                <!-- Market Card 3: Forex & Stock Indices -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl hover:border-primary-400 dark:hover:border-primary-500 transition-all flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="trending-up" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Forex &amp; Stocks</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                            Access 60+ major currency pairs and blue-chip equities with razor-thin raw spreads from 0.0 pips and flexible leverage.
+                        </p>
+                        <div class="space-y-2 py-3 border-t border-b border-gray-100 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-300">
+                            <div class="flex justify-between"><span>Raw Spreads:</span> <strong class="text-gray-900 dark:text-white">From 0.0 Pips</strong></div>
+                            <div class="flex justify-between"><span>Max Leverage:</span> <strong class="text-primary-500">Up to 1:500</strong></div>
+                            <div class="flex justify-between"><span>Trading Terminals:</span> <strong class="text-gray-900 dark:text-white">Web / MT5 / Mobile</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-5 flex gap-2">
+                        <a href="forexstock.html" class="flex-1 text-center px-3 py-2 text-xs font-semibold rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Details</a>
+                        <a href="register.html" class="flex-1 text-center px-3 py-2 text-xs font-bold rounded-lg bg-primary-500 hover:bg-primary-600 text-white shadow-sm transition">Trade Forex</a>
+                    </div>
+                </div>
 
-                </a>
-
+                <!-- Market Card 4: Institutional Real Estate -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl hover:border-primary-400 dark:hover:border-primary-500 transition-all flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="building-2" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Real Estate</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                            Fractional institutional real estate investments in prime commercial buildings, logistics hubs, and luxury developments.
+                        </p>
+                        <div class="space-y-2 py-3 border-t border-b border-gray-100 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-300">
+                            <div class="flex justify-between"><span>Target IRR:</span> <strong class="text-primary-500">14% - 22%</strong></div>
+                            <div class="flex justify-between"><span>Dividend Payouts:</span> <strong class="text-gray-900 dark:text-white">Quarterly</strong></div>
+                            <div class="flex justify-between"><span>Asset Backing:</span> <strong class="text-green-500">100% Tangible Deeds</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-5 flex gap-2">
+                        <a href="realestate.html" class="flex-1 text-center px-3 py-2 text-xs font-semibold rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Details</a>
+                        <a href="register.html" class="flex-1 text-center px-3 py-2 text-xs font-bold rounded-lg bg-primary-500 hover:bg-primary-600 text-white shadow-sm transition">Invest</a>
+                    </div>
+                </div>
             </div>
-
-
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-                                            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group">
-
-                            <!-- Photo -->
-
-                            <div class="aspect-[4/3] overflow-hidden">
-
-                                                                    <img src="dash/cars/1/6ZTwQ6GXZKW8eyLxJOIducdgXmkknldhQim7uVI7.jpg" alt="Tesla Model X" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-
-                                                            </div>
-
-                            <!-- Info -->
-
-                            <div class="p-4">
-
-                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Tesla Model X</h3>
-
-                                                                    <div class="flex items-center gap-4 mt-2 text-sm">
-
-                                                                                                                                                            </div>
-
-                                                                <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Starting at</p>
-
-                                <p class="text-xl font-bold text-gray-900 dark:text-white">$36,000.00*</p>
-
-                                <p class="text-xs text-gray-400 dark:text-gray-500">After Est. Gas Savings</p>
-
-                                <div class="mt-4 flex gap-2">
-
-                                    <a href="car-model-x.html" class="flex-1 text-center px-3 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Learn</a>
-
-                                    <a href="car-model-x.html" class="flex-1 text-center px-3 py-2 text-sm font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">Order</a>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                                            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group">
-
-                            <!-- Photo -->
-
-                            <div class="aspect-[4/3] overflow-hidden">
-
-                                                                    <img src="dash/cars/2/69ad73f750ccc.jpg" alt="Tesla Model 3 Long Range" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-
-                                                            </div>
-
-                            <!-- Info -->
-
-                            <div class="p-4">
-
-                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Tesla Model 3 Long Range</h3>
-
-                                                                    <div class="flex items-center gap-4 mt-2 text-sm">
-
-                                                                                                                                                            </div>
-
-                                                                <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Starting at</p>
-
-                                <p class="text-xl font-bold text-gray-900 dark:text-white">$47,240.00*</p>
-
-                                <p class="text-xs text-gray-400 dark:text-gray-500">After Est. Gas Savings</p>
-
-                                <div class="mt-4 flex gap-2">
-
-                                    <a href="car-model-3-long-range.html" class="flex-1 text-center px-3 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Learn</a>
-
-                                    <a href="car-model-3-long-range.html" class="flex-1 text-center px-3 py-2 text-sm font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">Order</a>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                                            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group">
-
-                            <!-- Photo -->
-
-                            <div class="aspect-[4/3] overflow-hidden">
-
-                                                                    <img src="dash/cars/3/69ad796b5849c.jpg" alt="Tesla Model X Plaid" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-
-                                                            </div>
-
-                            <!-- Info -->
-
-                            <div class="p-4">
-
-                                <h3 class="font-bold text-lg text-gray-900 dark:text-white">Tesla Model X Plaid</h3>
-
-                                                                    <div class="flex items-center gap-4 mt-2 text-sm">
-
-                                                                                                                                                            </div>
-
-                                                                <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Starting at</p>
-
-                                <p class="text-xl font-bold text-gray-900 dark:text-white">$94,990.00*</p>
-
-                                <p class="text-xs text-gray-400 dark:text-gray-500">After Est. Gas Savings</p>
-
-                                <div class="mt-4 flex gap-2">
-
-                                    <a href="car-model-x-plaid.html" class="flex-1 text-center px-3 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Learn</a>
-
-                                    <a href="car-model-x-plaid.html" class="flex-1 text-center px-3 py-2 text-sm font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">Order</a>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                                    </div>
-
-            
-
-            <div class="sm:hidden mt-6 text-center">
-
-                <a href="cars.html" class="inline-flex items-center text-sm font-medium text-primary-500">
-
-                    View all vehicles <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
-
-                </a>
-
-            </div>
-
         </div>
-
     </section>
 
-
-
-    <!-- Section 4 — Red Wave Separator -->
+    <!-- Section 4 â€” Red Wave Separator -->
 
     <div class="relative h-32 lg:h-48 bg-gradient-to-r from-primary-600 to-primary-800">
 
@@ -744,7 +743,7 @@
 
 
 
-    <!-- Section 5 — Stock Markets -->
+    <!-- Section 5 â€” Stock Markets -->
 
     <section class="bg-gray-900 py-16 lg:py-24">
 
@@ -920,13 +919,13 @@
 
 
 
-    <!-- Section 6 — Red Banner Separator -->
+    <!-- Section 6 â€” Red Banner Separator -->
 
     <div class="h-2 bg-primary-500"></div>
 
 
 
-    <!-- Section 7 — Market News -->
+    <!-- Section 7 â€” Market News -->
 
     <section class="bg-white dark:bg-gray-900 py-16 lg:py-24">
 
@@ -982,7 +981,7 @@
 
 
 
-    <!-- Section 8 — Investment Plans -->
+    <!-- Section 8 â€” Investment Plans -->
 
     <section class="bg-gray-100 dark:bg-gray-800 py-16 lg:py-24">
 
@@ -2164,7 +2163,7 @@
 
 
 
-    <!-- Section 9 — Stats -->
+    <!-- Section 9 â€” Stats -->
 
     <section class="bg-gray-900 py-16">
 
@@ -2220,7 +2219,7 @@
 
 
 
-    <!-- Section 10 — Testimonials -->
+    <!-- Section 10 â€” Testimonials -->
 
     <section class="bg-gray-800 py-16 lg:py-24">
 
@@ -2280,7 +2279,7 @@
 
                         </div>
 
-                        <p class="text-gray-400 italic">"Outstanding customer support and the car marketplace is a game changer. I purchased my EV and manage my portfolio all in one place."</p>
+                        <p class="text-gray-400 italic">"Outstanding customer support and algorithmic execution is a game changer. I purchased my EV and manage my portfolio all in one place."</p>
 
                     </div>
 
@@ -2292,9 +2291,9 @@
 
 
 
-    <!-- Section 11 — CTA / Get Started -->
+    <!-- Section 11 â€” CTA / Get Started -->
 
-    <section class="bg-gradient-to-r from-primary-500 to-primary-700 py-16 lg:py-24">
+    <section data-landing-guest-content class="bg-gradient-to-r from-primary-500 to-primary-700 py-16 lg:py-24">
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -2392,7 +2391,7 @@
 
                     <img src="assets/images/exness-logo.png" alt="EXNESS" class="h-8 w-auto mb-4 brightness-200">
 
-                    <p class="text-sm text-gray-500 mb-4">supportt@iwebbtech.top</p>
+                    <p class="text-sm text-gray-500 mb-4">officialexnessbrokeragetrading@gmail.com</p>
 
                     <div class="flex space-x-4">
 
@@ -2420,7 +2419,7 @@
 
                         <li><a href="contact.html" class="text-sm hover:text-white transition-colors">Contact</a></li>
 
-                        <li><a href="faq.html" class="text-sm hover:text-white transition-colors">FAQ</a></li>
+                        <li><a href="faqs.html" class="text-sm hover:text-white transition-colors">FAQ</a></li>
 
                     </ul>
 
@@ -2621,7 +2620,7 @@
                 { city: "Chicago", action: "just withdrew", amount: "$1,250" },
                 { city: "London", action: "just invested", amount: "$10,500" },
                 { city: "Zurich", action: "just invested", amount: "$24,000" },
-                { city: "Dubai", action: "just ordered", amount: "Tesla Model X Plaid" },
+                { city: "Dubai", action: "just deposited", amount: "3.5 BTC" },
                 { city: "Singapore", action: "just deposited", amount: "2.5 BTC" },
                 { city: "Tokyo", action: "just invested", amount: "$8,200" }
             ];

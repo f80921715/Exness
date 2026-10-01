@@ -41,33 +41,25 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <a href="index.html" class="flex-shrink-0">
-                    <img src="assets/images/exness-logo.png" alt="EXNESS" class="h-8 w-auto">
+                    <img src="ChatGPT%20Image%20Sep%2013%2C%202026%2C%2003_11_05%20AM.png" alt="EXNESS" class="h-8 w-auto">
                 </a>
                 <nav class="hidden md:flex items-center space-x-8">
                     <a href="index.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors">Home</a>
-                    <a href="inventory.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors">Inventory</a>
+                    <a href="services.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors">Inventory</a>
                     <a href="trading.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors">Live Trading</a>
                     <a href="about.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors">About</a>
                     <a href="contact.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors">Contact</a>
-                    <a href="faq.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors">FAQ</a>
+                    <a href="faqs.html" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors">FAQ</a>
                 </nav>
 
                 <!-- Desktop Right Controls -->
                 <div class="hidden md:flex items-center space-x-4">
-                    <button @click="$store.theme.toggle($event)" type="button" class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
-                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
-                    </button>
                     <a href="login.html" class="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary-500 transition-colors">Login</a>
                     <a href="register.html" class="px-5 py-2 text-sm font-semibold text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">Sign Up</a>
                 </div>
 
                 <!-- Mobile Controls -->
                 <div class="flex items-center md:hidden space-x-2">
-                    <button @click="$store.theme.toggle($event)" class="p-2 rounded-lg text-gray-500 dark:text-gray-400">
-                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
-                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
-                    </button>
                     <button @click="mobileOpen = !mobileOpen" class="p-2 rounded-lg text-gray-500 dark:text-gray-400">
                         <i data-lucide="menu" class="w-6 h-6" x-show="!mobileOpen"></i>
                         <i data-lucide="x" class="w-6 h-6" x-show="mobileOpen" x-cloak></i>
@@ -76,25 +68,44 @@
             </div>
         </div>
 
-        <!-- Mobile Menu -->
+                <!-- Mobile Menu Dropdown with transition -->
         <div x-show="mobileOpen" x-cloak
-             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter="transition ease-out duration-250"
              x-transition:enter-start="opacity-0 -translate-y-2"
              x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 -translate-y-2"
-             class="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-            <div class="px-4 py-4 space-y-2">
-                <a href="index.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Home</a>
-                <a href="inventory.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Inventory</a>
-                <a href="trading.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Live Trading</a>
-                <a href="about.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">About</a>
-                <a href="contact.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Contact</a>
-                <a href="faq.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">FAQ</a>
-                <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4 flex space-x-3">
-                    <a href="login.html" class="flex-1 text-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium">Login</a>
-                    <a href="register.html" class="flex-1 text-center px-4 py-2 bg-primary-500 text-white rounded-lg font-medium">Sign Up</a>
+             class="lg:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-5 space-y-2">
+            <a href="index.html" class="block px-3 py-2 text-base font-semibold text-primary-500 rounded-lg">Home</a>
+            <a href="trading.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Live Trading</a>
+            
+            <div x-data="{ subOpen: false }">
+                <button @click="subOpen = !subOpen" class="w-full flex items-center justify-between px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <span>Services</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" :class="{ 'rotate-180': subOpen }"></i>
+                </button>
+                <div x-show="subOpen" class="pl-5 space-y-1.5 py-1">
+                    <a href="services.html" class="block py-1.5 text-sm font-medium text-primary-500">All Services</a>
+                    <a href="cryptocurrency.html" class="block py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-400">Cryptocurrency</a>
+                    <a href="cryptomining.html" class="block py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-400">Crypto Mining</a>
+                    <a href="forexstock.html" class="block py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-400">Forex &amp; Stocks</a>
+                    <a href="realestate.html" class="block py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-400">Real Estate</a>
+                </div>
+            </div>
+
+            <a href="invest.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Investment Plans</a>
+            <a href="about.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">About</a>
+            <a href="contact.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">Contact</a>
+            <a href="faqs.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">FAQ</a>
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex space-x-3">
+                <div data-landing-guest-mobile class="flex w-full space-x-3">
+                    <a href="login.html" class="flex-1 text-center py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium">Login</a>
+                    <a href="register.html" class="flex-1 text-center py-2.5 rounded-lg bg-primary-500 text-white font-bold">Sign Up</a>
+                </div>
+                <div data-landing-user-mobile hidden class="flex w-full items-center justify-between gap-3">
+                    <a href="dashboard/index.html" class="flex-1 text-center py-2.5 rounded-lg bg-primary-500 text-white font-bold">Dashboard</a>
+                    <button type="button" data-landing-logout class="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium">Log out</button>
                 </div>
             </div>
         </div>
@@ -175,10 +186,10 @@
                 </a>
             </div>
 
-            <!-- Tier 4: Tesla VIP -->
+            <!-- Tier 4: Institutional VIP -->
             <div class="bg-gradient-to-b from-gray-900 to-black text-white border border-gray-700 rounded-2xl p-6 shadow-2xl flex flex-col justify-between">
                 <div>
-                    <span class="text-xs font-bold uppercase tracking-wider text-primary-400 bg-primary-900/80 border border-primary-800 px-3 py-1 rounded-full">Tesla VIP Tier</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-primary-400 bg-primary-900/80 border border-primary-800 px-3 py-1 rounded-full">Institutional VIP Tier</span>
                     <h3 class="text-2xl font-black text-white mt-4">85% ROI</h3>
                     <p class="text-xs text-gray-400 mt-1">Duration: 30 Days</p>
 
@@ -239,10 +250,10 @@
     <!-- Footer -->
     <footer class="bg-black text-gray-400 py-12 border-t border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs">
-            <p>© 2026 EXNESS. All rights reserved.</p>
+            <p>Â© 2026 EXNESS. All rights reserved.</p>
             <div class="mt-4 sm:mt-0 flex space-x-4">
                 <a href="index.html" class="hover:text-white">Home</a>
-                <a href="inventory.html" class="hover:text-white">Inventory</a>
+                <a href="services.html" class="hover:text-white">Inventory</a>
                 <a href="contact.html" class="hover:text-white">Contact</a>
             </div>
         </div>
@@ -269,7 +280,7 @@
                 { city: "Chicago", action: "just withdrew", amount: "$1,250" },
                 { city: "London", action: "just invested", amount: "$10,500" },
                 { city: "Zurich", action: "just invested", amount: "$24,000" },
-                { city: "Dubai", action: "just ordered", amount: "Tesla Model X Plaid" },
+                { city: "Dubai", action: "just deposited", amount: "3.5 BTC" },
                 { city: "Singapore", action: "just deposited", amount: "2.5 BTC" },
                 { city: "Tokyo", action: "just invested", amount: "$8,200" }
             ];

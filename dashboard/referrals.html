@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Referrals & Affiliate - EXNESS</title>
+    <title>Referrals - DisperstockPip</title>
     <link rel="icon" type="image/png" href="../assets/images/title-logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,12 +18,12 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { primary: { 500: '#FFD100', 600: '#E5BC00' } }
+                    colors: { primary: { 50:'#FFFDF0',100:'#FFF9C2',200:'#FFF085',300:'#FFE247',400:'#FFD100',500:'#FFD100',600:'#E5BC00',700:'#B79000',800:'#8A6900',900:'#5C4400' } }
                 }
             }
         }
     </script>
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css?v=dashboard-drawer-labels-20260929">
     <script src="../assets/js/lucide.min.js"></script>
     <script src="../assets/js/icons.js"></script>
     <script defer src="../assets/js/alpine.min.js"></script>
@@ -35,63 +35,119 @@
             Alpine.store('theme', {
                 dark: localStorage.getItem('theme') === 'dark',
                 toggle(trigger) {
-                    if (window.toggleDashboardTheme) {
-                        window.toggleDashboardTheme(trigger);
-                    } else {
-                        this.dark = !this.dark;
-                        localStorage.setItem('theme', this.dark ? 'dark' : 'light');
-                        document.documentElement.classList.toggle('dark', this.dark);
-                    }
+                    if (window.toggleDashboardTheme) { window.toggleDashboardTheme(trigger); return; }
+                    this.dark = !this.dark;
+                    localStorage.setItem('theme', this.dark ? 'dark' : 'light');
+                    document.documentElement.classList.toggle('dark', this.dark);
                 }
+            });
+            Alpine.store('dashboard', {
+                sidebarOpen: false
             });
         });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="../assets/js/ios-transitions.js" defer></script>
     <script src="../assets/js/fast-nav.js" defer></script>
 </head>
-<body class="bg-gray-50 dark:bg-[#0c0c0c] text-gray-900 dark:text-gray-100 font-sans antialiased min-h-screen flex transition-colors">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white dark:bg-[#141414] border-r border-gray-200 dark:border-gray-800 flex flex-col justify-between hidden lg:flex">
-        <div>
-            <div class="h-16 px-6 flex items-center border-b border-gray-100 dark:border-gray-800">
-                <a href="../index.html"><img src="../assets/images/exness-logo.png" alt="Logo" class="h-8 w-auto brightness-0 dark:invert"></a>
+
+<body class="reference-dashboard font-sans antialiased min-h-screen flex transition-colors">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div x-show="$store.dashboard.sidebarOpen" @click="$store.dashboard.sidebarOpen = false" x-cloak class="fixed inset-x-0 top-12 bottom-0 z-40 bg-black/60 backdrop-blur-sm"></div>
+
+    <!-- Left Sidebar -->
+    <aside id="dashboard-sidebar" x-cloak :class="$store.dashboard.sidebarOpen ? 'translate-x-0' : '-translate-x-full'" :aria-hidden="(window.innerWidth < 1024 && !$store.dashboard.sidebarOpen).toString()" class="reference-sidebar fixed top-12 bottom-0 left-0 z-50 flex flex-col justify-between transition-transform duration-300 max-h-screen overflow-hidden">
+        <div class="flex-1 overflow-y-auto min-h-0 py-4 px-3 space-y-3">
+            <!-- Profile Badge -->
+            <div class="reference-sidebar-user flex items-center gap-3 p-2.5 rounded-lg">
+                <div class="w-10 h-10 rounded bg-[#253052] border border-blue-400/40 flex items-center justify-center font-black text-white text-xs shadow-sm shrink-0">
+                    <span data-auth-initials>DSP</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="font-bold text-white text-xs truncate" data-auth-name>Investor</div>
+                    <div class="text-[10px] text-cyan-400 font-medium flex items-center gap-1 mt-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> activated
+                    </div>
+                </div>
             </div>
-            <nav class="p-4 space-y-1.5 text-sm font-medium">
-                <a href="index.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span></a>
-                <a href="trades.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="trending-up" class="w-5 h-5"></i><span>Live Trading</span></a>
-                <a href="investments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="pie-chart" class="w-5 h-5"></i><span>Investment Plans</span></a>
-                <a href="cars.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="car" class="w-5 h-5"></i><span>Tesla EV Orders</span></a>
-                <a href="deposit.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="arrow-down-circle" class="w-5 h-5"></i><span>Deposit Crypto</span></a>
-                <a href="withdraw.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="arrow-up-circle" class="w-5 h-5"></i><span>Withdraw Profits</span></a>
-                <a href="transactions.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="history" class="w-5 h-5"></i><span>Transactions</span></a>
-                <a href="referrals.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-primary-500 text-white font-semibold shadow-md"><i data-lucide="users" class="w-5 h-5"></i><span>Referrals & Earn</span></a>
-                <a href="profile.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-800/60 transition"><i data-lucide="shield" class="w-5 h-5"></i><span>Profile & Security</span></a>
+
+            <!-- Navigation -->
+            <nav @click="$store.dashboard.sidebarOpen = false" class="space-y-1 text-xs font-semibold">
+                <a href="index.html" class="sidebar-nav-item">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="profile.html" class="sidebar-nav-item">
+                    <i data-lucide="user"></i>
+                    <span>Account</span>
+                </a>
+                <a href="deposit.html" class="sidebar-nav-item">
+                    <i data-lucide="arrow-down-circle"></i>
+                    <span>Deposit</span>
+                </a>
+                <a href="withdraw.html" class="sidebar-nav-item">
+                    <i data-lucide="arrow-up-circle"></i>
+                    <span>Withdraw</span>
+                </a>
+                <a href="transactions.html" class="sidebar-nav-item">
+                    <i data-lucide="clock"></i>
+                    <span>History</span>
+                </a>
+                <a href="transactions.html" class="sidebar-nav-item">
+                    <i data-lucide="receipt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="investments.html" class="sidebar-nav-item">
+                    <i data-lucide="arrow-up-right"></i>
+                    <span>Account Upgrade</span>
+                </a>
+                <a href="trades.html" class="sidebar-nav-item">
+                    <i data-lucide="bar-chart-2"></i>
+                    <span>Signal Purchase</span>
+                </a>
+                <a href="profile.html" class="sidebar-nav-item">
+                    <i data-lucide="settings"></i>
+                    <span>Account Settings</span>
+                </a>
+                <a href="javascript:void(0)" data-logout-link class="sidebar-nav-item text-red-400 hover:text-red-300">
+                    <i data-lucide="log-out"></i>
+                    <span>Logout</span>
+                </a>
             </nav>
         </div>
-        <div class="p-4 border-t border-gray-100 dark:border-gray-800">
-            <a href="javascript:void(0)" data-logout-link class="flex items-center space-x-3 px-3.5 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 rounded-xl transition"><i data-lucide="log-out" class="w-5 h-5"></i><span>Log out</span></a>
+
+        <!-- Sidebar Footer -->
+        <div class="p-3 border-t border-white/10 shrink-0">
+            <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] text-xs font-semibold hover:bg-[#25D366]/25 transition">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24"/></svg>
+                <span>Contact us!</span>
+            </a>
         </div>
     </aside>
 
-    <!-- Content -->
-    <div class="flex-1 flex flex-col min-w-0" x-data="{ copied: false, link: 'https://iwebbtech.top/register?ref=AW89302',
-        copyLink() {
-            navigator.clipboard.writeText(this.link);
-            this.copied = true;
-            setTimeout(() => this.copied = false, 2000);
-        }
-    }">
-        <header class="relative min-h-16 bg-white dark:bg-[#141414] border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-            <h1 class="hidden sm:block text-base font-bold">Affiliate &amp; Partner Program</h1>
-            <span class="sm:hidden absolute left-1/2 -translate-x-1/2 text-base font-bold tracking-tight">Referrals</span>
-            <div class="flex items-center space-x-3 ml-auto">
-                <button @click="$store.theme.toggle($event)" class="theme-btn p-2 text-gray-400 hover:text-white rounded-full">
-                    <span x-show="!$store.theme.dark"><i data-lucide="sun" class="w-5 h-5"></i></span>
-                    <span x-show="$store.theme.dark"><i data-lucide="moon" class="w-5 h-5"></i></span>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0" x-data="{}">
+        <!-- Top Navigation Bar -->
+        <header class="reference-topbar flex h-12 items-center justify-between sticky top-0 z-30 px-3 sm:px-6">
+            <div class="flex items-center space-x-3">
+                <a href="../index.html" class="reference-brand" aria-label="Exness home">
+                    <img src="../ChatGPT%20Image%20Sep%2013%2C%202026%2C%2003_11_05%20AM.png" alt="Exness">
+                </a>
+                <button @click="$store.dashboard.sidebarOpen = !$store.dashboard.sidebarOpen" :aria-label="$store.dashboard.sidebarOpen ? 'Close dashboard menu' : 'Open dashboard menu'" :aria-expanded="$store.dashboard.sidebarOpen.toString()" aria-controls="dashboard-sidebar" class="dashboard-menu-toggle relative z-[70] grid h-9 w-9 place-items-center rounded-lg p-1.5 text-gray-300 hover:bg-white/10 hover:text-white">
+                    <i data-lucide="menu" x-show="!$store.dashboard.sidebarOpen" x-transition class="w-5 h-5"></i>
+                    <i data-lucide="x" x-show="$store.dashboard.sidebarOpen" x-transition x-cloak class="w-5 h-5"></i>
                 </button>
+            </div>
+            <div class="dashboard-header-actions">
+                <label class="reference-lang-control"><span data-i18n="nav.language">language:</span><select data-dashboard-language aria-label="Dashboard language"></select></label>
+                <a href="javascript:void(0)" data-logout-link title="Logout" aria-label="Logout" class="text-gray-400 hover:text-red-400 p-1 transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </a>
             </div>
         </header>
 
-        <main class="p-6 sm:p-8 space-y-6 flex-1 max-w-5xl mx-auto w-full">
+<main class="p-6 sm:p-8 space-y-6 flex-1 max-w-5xl mx-auto w-full">
             <!-- Summary Stats -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div class="p-6 bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm">
@@ -121,10 +177,19 @@
                 </div>
             </div>
         </main>
-        <nav class="lg:hidden fixed bottom-4 left-4 right-4 z-40 rounded-3xl border border-gray-200 dark:border-white/10 bg-white/95 dark:bg-[#181a24]/95 px-4 py-3 shadow-2xl backdrop-blur-xl" aria-label="Mobile dashboard navigation"><div class="flex items-center justify-around"><a href="index.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="text-[9px] font-bold">Home</span></a><a href="transactions.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="history" class="w-4 h-4"></i><span class="text-[9px] font-bold">Activity</span></a><a href="deposit.html" class="-mt-7 flex h-12 w-12 items-center justify-center rounded-full border-4 border-gray-50 dark:border-[#0c0c0c] bg-primary-500 text-black shadow-lg" aria-label="Deposit"><i data-lucide="plus" class="w-5 h-5"></i></a><a href="trades.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="trending-up" class="w-4 h-4"></i><span class="text-[9px] font-bold">Live Trading</span></a><a href="profile.html" class="flex flex-col items-center gap-1 text-gray-500"><i data-lucide="user" class="w-4 h-4"></i><span class="text-[9px] font-bold">Profile</span></a></div></nav>
+
+        <!-- Mobile Bottom Nav -->
+        <nav class="lg:hidden fixed bottom-4 left-4 right-4 z-40 rounded-3xl border border-white/10 bg-[#181a24]/95 px-4 py-3 shadow-2xl backdrop-blur-xl" aria-label="Mobile navigation">
+            <div class="flex items-center justify-around">
+                <a href="index.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="text-[9px] font-bold">Home</span></a>
+                <a href="transactions.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white"><i data-lucide="history" class="w-4 h-4"></i><span class="text-[9px] font-bold">Activity</span></a>
+                <a href="deposit.html" class="-mt-7 flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#0c0c0c] bg-primary-500 text-black shadow-lg" aria-label="Deposit"><i data-lucide="plus" class="w-5 h-5"></i></a>
+                <a href="trades.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white"><i data-lucide="trending-up" class="w-4 h-4"></i><span class="text-[9px] font-bold">Trading</span></a>
+                <a href="profile.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white"><i data-lucide="user" class="w-4 h-4"></i><span class="text-[9px] font-bold">Profile</span></a>
+            </div>
+        </nav>
     </div>
+
     <script>document.addEventListener('DOMContentLoaded', () => { if(window.lucide) lucide.createIcons(); });</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-    <script src="../assets/js/ios-transitions.js" defer></script>
 </body>
 </html>

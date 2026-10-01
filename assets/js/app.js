@@ -96,13 +96,13 @@ const liveNotifications = [
     { city: "Moscow", action: "just invested", amount: "$5,400", type: "invest" },
     { city: "Chicago", action: "just withdrew", amount: "$1,250", type: "withdraw" },
     { city: "London", action: "just invested", amount: "$12,000", type: "invest" },
-    { city: "Tokyo", action: "just reserved", amount: "Tesla Model X", type: "car" },
+    { city: "Tokyo", action: "just closed trade", amount: "+$4,850", type: "profit" },
     { city: "Zurich", action: "just invested", amount: "$25,000", type: "invest" },
-    { city: "Dubai", action: "just ordered", amount: "Tesla Model X Plaid", type: "car" },
+    { city: "Dubai", action: "just deposited", amount: "3.5 BTC", type: "crypto" },
     { city: "Singapore", action: "just deposited", amount: "2.4 BTC", type: "crypto" },
     { city: "Toronto", action: "just withdrew", amount: "$3,800", type: "withdraw" },
     { city: "Frankfurt", action: "just invested", amount: "$8,500", type: "invest" },
-    { city: "Sydney", action: "just reserved", amount: "Tesla Cybertruck", type: "car" }
+    { city: "Sydney", action: "just earned", amount: "+$7,200", type: "profit" }
 ];
 
 // Alpine.js Global Stores & Logic

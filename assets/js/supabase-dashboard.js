@@ -4,15 +4,245 @@
     const client = window.supabaseClient;
     if (!client) return;
 
+    const DASHBOARD_LANGUAGES = [
+        ['af', 'Afrikaans', 'ZAR'], ['sq', 'Albanian', 'ALL'], ['am', 'Amharic', 'ETB'],
+        ['ar', 'Arabic', 'SAR'], ['hy', 'Armenian', 'AMD'], ['az', 'Azerbaijani', 'AZN'],
+        ['eu', 'Basque', 'EUR'], ['be', 'Belarusian', 'BYN'], ['bn', 'Bengali', 'BDT'],
+        ['bs', 'Bosnian', 'BAM'], ['bg', 'Bulgarian', 'BGN'], ['ca', 'Catalan', 'EUR'],
+        ['ceb', 'Cebuano', 'PHP'], ['ny', 'Chichewa', 'MWK'], ['zh-CN', 'Chinese (Simplified)', 'CNY'],
+        ['zh-TW', 'Chinese (Traditional)', 'TWD'], ['co', 'Corsican', 'EUR'], ['hr', 'Croatian', 'EUR'],
+        ['cs', 'Czech', 'CZK'], ['da', 'Danish', 'DKK'], ['nl', 'Dutch', 'EUR'],
+        ['en', 'English', 'USD'], ['eo', 'Esperanto', 'EUR'], ['et', 'Estonian', 'EUR'],
+        ['tl', 'Filipino', 'PHP'], ['fi', 'Finnish', 'EUR'], ['fr', 'French', 'EUR'],
+        ['fy', 'Frisian', 'EUR'], ['gl', 'Galician', 'EUR'], ['ka', 'Georgian', 'GEL'],
+        ['de', 'German', 'EUR'], ['el', 'Greek', 'EUR'], ['gu', 'Gujarati', 'INR'],
+        ['ht', 'Haitian Creole', 'HTG'], ['ha', 'Hausa', 'NGN'], ['haw', 'Hawaiian', 'USD'],
+        ['iw', 'Hebrew', 'ILS'], ['hi', 'Hindi', 'INR'], ['hmn', 'Hmong', 'USD'],
+        ['hu', 'Hungarian', 'HUF'], ['is', 'Icelandic', 'ISK'], ['ig', 'Igbo', 'NGN'],
+        ['id', 'Indonesian', 'IDR'], ['ga', 'Irish', 'EUR'], ['it', 'Italian', 'EUR'],
+        ['ja', 'Japanese', 'JPY'], ['jw', 'Javanese', 'IDR'], ['kn', 'Kannada', 'INR'],
+        ['kk', 'Kazakh', 'KZT'], ['km', 'Khmer', 'KHR'], ['ko', 'Korean', 'KRW'],
+        ['ku', 'Kurdish (Kurmanji)', 'TRY'], ['ky', 'Kyrgyz', 'KGS'], ['lo', 'Lao', 'LAK'],
+        ['la', 'Latin', 'EUR'], ['lv', 'Latvian', 'EUR'], ['lt', 'Lithuanian', 'EUR'],
+        ['lb', 'Luxembourgish', 'EUR'], ['mk', 'Macedonian', 'MKD'], ['mg', 'Malagasy', 'MGA'],
+        ['ms', 'Malay', 'MYR'], ['ml', 'Malayalam', 'INR'], ['mt', 'Maltese', 'EUR'],
+        ['mi', 'Maori', 'NZD'], ['mr', 'Marathi', 'INR'], ['mn', 'Mongolian', 'MNT'],
+        ['my', 'Myanmar (Burmese)', 'MMK'], ['ne', 'Nepali', 'NPR'], ['no', 'Norwegian', 'NOK'],
+        ['ps', 'Pashto', 'AFN'], ['fa', 'Persian', 'IRR'], ['pl', 'Polish', 'PLN'],
+        ['pt', 'Portuguese', 'EUR'], ['pa', 'Punjabi', 'INR'], ['ro', 'Romanian', 'RON'],
+        ['ru', 'Russian', 'RUB'], ['sm', 'Samoan', 'WST'], ['gd', 'Scottish Gaelic', 'GBP'],
+        ['sr', 'Serbian', 'RSD'], ['st', 'Sesotho', 'ZAR'], ['sn', 'Shona', 'ZWL'],
+        ['sd', 'Sindhi', 'PKR'], ['si', 'Sinhala', 'LKR'], ['sk', 'Slovak', 'EUR'],
+        ['sl', 'Slovenian', 'EUR'], ['so', 'Somali', 'SOS'], ['es', 'Spanish', 'EUR'],
+        ['su', 'Sundanese', 'IDR'], ['sw', 'Swahili', 'KES'], ['sv', 'Swedish', 'SEK'],
+        ['tg', 'Tajik', 'TJS'], ['ta', 'Tamil', 'INR'], ['te', 'Telugu', 'INR'],
+        ['th', 'Thai', 'THB'], ['tr', 'Turkish', 'TRY'], ['uk', 'Ukrainian', 'UAH'],
+        ['ur', 'Urdu', 'PKR'], ['uz', 'Uzbek', 'UZS'], ['vi', 'Vietnamese', 'VND'],
+        ['cy', 'Welsh', 'GBP'], ['xh', 'Xhosa', 'ZAR'], ['yi', 'Yiddish', 'ILS'],
+        ['yo', 'Yoruba', 'NGN'], ['zu', 'Zulu', 'ZAR']
+    ];
+    const DASHBOARD_LANGUAGE_CURRENCIES = Object.fromEntries(
+        DASHBOARD_LANGUAGES.map(([code, , currency]) => [code, currency])
+    );
+    const DASHBOARD_LANGUAGE_STORAGE_PREFIX = 'dashboard-language:';
+    const EXCHANGE_RATE_CACHE_KEY = 'dashboard-usd-exchange-rates-v1';
+    const DASHBOARD_TRANSLATIONS = {
+        en: {
+            'nav.dashboard': 'Dashboard',
+            'nav.account': 'Account',
+            'nav.deposit': 'Deposit',
+            'nav.withdraw': 'Withdraw',
+            'nav.history': 'History',
+            'nav.transactions': 'Transactions',
+            'nav.upgrade': 'Account Upgrade',
+            'nav.signal': 'Signal Purchase',
+            'nav.news': 'News',
+            'nav.settings': 'Account Settings',
+            'nav.logout': 'Logout',
+            'nav.analysis': 'Live Analysis',
+            'nav.loading': 'Loading..',
+            'nav.username': 'Username :',
+            'nav.contact': 'Contact us!',
+            'nav.trade': 'Trade Smarter. Anywhere.',
+            'nav.accountLabel': 'Account',
+            'nav.depositLabel': 'Deposit',
+            'nav.withdrawLabel': 'Withdraw',
+            'nav.mailLabel': 'Mail Us',
+            'nav.settingsLabel': 'Settings',
+            'nav.language': 'language:'
+        },
+        fr: {
+            'nav.dashboard': 'Tableau de bord',
+            'nav.account': 'Compte',
+            'nav.deposit': 'Dépôt',
+            'nav.withdraw': 'Retrait',
+            'nav.history': 'Historique',
+            'nav.transactions': 'Transactions',
+            'nav.upgrade': 'Mise à niveau du compte',
+            'nav.signal': 'Achat de signal',
+            'nav.news': 'Actualités',
+            'nav.settings': 'Paramètres du compte',
+            'nav.logout': 'Déconnexion',
+            'nav.analysis': 'Analyse en direct',
+            'nav.loading': 'Chargement..',
+            'nav.username': 'Nom d’utilisateur :',
+            'nav.contact': 'Contactez-nous !',
+            'nav.trade': 'Tradez plus intelligemment. Partout.',
+            'nav.accountLabel': 'Compte',
+            'nav.depositLabel': 'Dépôt',
+            'nav.withdrawLabel': 'Retrait',
+            'nav.mailLabel': 'Mail',
+            'nav.settingsLabel': 'Réglages',
+            'nav.language': 'langue:'
+        },
+        es: {
+            'nav.dashboard': 'Panel',
+            'nav.account': 'Cuenta',
+            'nav.deposit': 'Depósito',
+            'nav.withdraw': 'Retiro',
+            'nav.history': 'Historial',
+            'nav.transactions': 'Transacciones',
+            'nav.upgrade': 'Actualización de cuenta',
+            'nav.signal': 'Compra de señales',
+            'nav.news': 'Noticias',
+            'nav.settings': 'Ajustes de la cuenta',
+            'nav.logout': 'Cerrar sesión',
+            'nav.analysis': 'Análisis en vivo',
+            'nav.loading': 'Cargando..',
+            'nav.username': 'Usuario :',
+            'nav.contact': '¡Contáctanos!',
+            'nav.trade': 'Opera mejor. En cualquier lugar.',
+            'nav.accountLabel': 'Cuenta',
+            'nav.depositLabel': 'Depósito',
+            'nav.withdrawLabel': 'Retiro',
+            'nav.mailLabel': 'Correo',
+            'nav.settingsLabel': 'Ajustes',
+            'nav.language': 'idioma:'
+        }
+    };
+    let usdExchangeRates = { USD: 1 };
+    let languageApplyTimer = null;
+
+    function storedDashboardLanguage(user = currentUser) {
+        if (!user?.id) return null;
+        try {
+            const language = localStorage.getItem(`${DASHBOARD_LANGUAGE_STORAGE_PREFIX}${user.id}`);
+            return DASHBOARD_LANGUAGE_CURRENCIES[language] ? language : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function dashboardLanguage(user = currentUser) {
+        return storedDashboardLanguage(user) || user?.user_metadata?.language || 'en';
+    }
+
+    function dashboardCurrency(user = currentUser) {
+        const language = storedDashboardLanguage(user);
+        if (language) return currencyForDashboardLanguage(language);
+        const profileLanguage = user?.user_metadata?.language;
+        if (DASHBOARD_LANGUAGE_CURRENCIES[profileLanguage]) return currencyForDashboardLanguage(profileLanguage);
+        const country = user?.user_metadata?.country;
+        return user?.user_metadata?.currency || (country && window.accountPreferences?.currencyForCountry(country)) || 'USD';
+    }
+
+    function saveDashboardLanguage(user, language) {
+        if (!user?.id || !DASHBOARD_LANGUAGE_CURRENCIES[language]) return;
+        localStorage.setItem(`${DASHBOARD_LANGUAGE_STORAGE_PREFIX}${user.id}`, language);
+    }
+
+    function applyStoredDashboardPreference(user) {
+        const language = storedDashboardLanguage(user);
+        if (!language) return user;
+        return {
+            ...user,
+            user_metadata: {
+                ...user.user_metadata,
+                language,
+                currency: currencyForDashboardLanguage(language)
+            }
+        };
+    }
+
+    function currencyForDashboardLanguage(language) {
+        return DASHBOARD_LANGUAGE_CURRENCIES[language] || 'USD';
+    }
+
+    function setUsdExchangeRates(rates) {
+        if (!rates || typeof rates !== 'object' || Number(rates.USD) !== 1) return false;
+        usdExchangeRates = rates;
+        if (currentAccountData) hydrateUI();
+        return true;
+    }
+
+    async function loadUsdExchangeRates() {
+        let cachedRates = null;
+        try {
+            const cached = JSON.parse(localStorage.getItem(EXCHANGE_RATE_CACHE_KEY) || 'null');
+            if (cached?.rates && setUsdExchangeRates(cached.rates)) {
+                cachedRates = cached.rates;
+                if (Number(cached.expiresAt) > Date.now()) return;
+            }
+        } catch (error) {
+            cachedRates = null;
+        }
+
+        try {
+            const response = await fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' });
+            if (!response.ok) throw new Error(`Exchange rates returned HTTP ${response.status}`);
+            const payload = await response.json();
+            if (payload.result !== 'success' || !setUsdExchangeRates(payload.rates)) {
+                throw new Error('Exchange rate response was invalid.');
+            }
+            const expiresAt = (Number(payload.time_next_update_unix) || Date.now() / 1000 + 86400) * 1000;
+            localStorage.setItem(EXCHANGE_RATE_CACHE_KEY, JSON.stringify({ rates: payload.rates, expiresAt }));
+        } catch (error) {
+            if (!cachedRates) console.warn('Live currency conversion is unavailable; displaying USD amounts.', error);
+        }
+    }
+
+    function convertedCurrencyAmount(amount) {
+        const requestedCurrency = dashboardCurrency();
+        const rate = Number(usdExchangeRates[requestedCurrency]);
+        if (requestedCurrency !== 'USD' && (!Number.isFinite(rate) || rate <= 0)) {
+            return { amount: Number(amount) || 0, currency: 'USD' };
+        }
+        return {
+            amount: (Number(amount) || 0) * (requestedCurrency === 'USD' ? 1 : rate),
+            currency: requestedCurrency
+        };
+    }
+
     // Helper: format currency
     function formatUSD(amount) {
-        const num = Number(amount) || 0;
-        return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const converted = convertedCurrencyAmount(amount);
+        try {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: converted.currency,
+                currencyDisplay: 'narrowSymbol'
+            }).format(converted.amount);
+        } catch (error) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(amount) || 0);
+        }
     }
 
     function formatShortUSD(amount) {
-        const num = Number(amount) || 0;
-        return '$' + num.toLocaleString('en-US');
+        const converted = convertedCurrencyAmount(amount);
+        try {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: converted.currency,
+                currencyDisplay: 'narrowSymbol',
+                maximumFractionDigits: 0
+            }).format(converted.amount);
+        } catch (error) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 0
+            }).format(Number(amount) || 0);
+        }
     }
 
     function formatDate(d) {
@@ -55,16 +285,15 @@
         const name = displayName(user);
         return {
             balance: 0.00,
+            bonusBalance: 0.00,
             activeInvest: 0.00,
             totalProfit: 0.00,
             totalWithdrawn: 0.00,
             activePlan: null,
-            activeCarOrder: null,
             deposits: [],
             withdrawals: [],
             trades: [],
             investments: [],
-            carOrders: [],
             transactions: [],
             notifications: [
                 {
@@ -91,7 +320,7 @@
         const existing = document.querySelector('[data-suspended-banner]');
         if (existing) {
             existing.innerHTML = accountTopUpRequired
-                ? 'Your account is ineligible to trade. Top-up now to trade.'
+                ? 'Top up your account to continue trading.'
                 : 'Your account has been suspended because it does not follow our safety guidelines.';
             existing.style.background = accountTopUpRequired ? '#f59e0b' : '#dc2626';
             applySuspendedBannerLayout(existing);
@@ -122,7 +351,7 @@
         banner.style.margin = '0';
         banner.style.overflow = 'hidden';
         banner.innerHTML = accountTopUpRequired
-            ? 'Your account is ineligible to trade. Top-up now to trade.'
+            ? 'Top up your account to continue trading.'
             : 'Your account has been suspended because it does not follow our safety guidelines.';
 
         document.body.appendChild(banner);
@@ -157,7 +386,7 @@
         if (profileStatus) {
             profileStatus.hidden = !isRestricted;
             if (accountTopUpRequired) {
-                profileStatus.innerHTML = '<div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-700 dark:text-amber-300"><div class="flex items-center gap-3"><i data-lucide="shield-alert" class="h-5 w-5"></i><div><p class="text-sm font-black">Top-up required</p><p class="text-xs text-amber-700/80 dark:text-amber-300/80">Your account is ineligible to trade. Top-up now to trade.</p></div></div></div>';
+                profileStatus.innerHTML = '<div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-700 dark:text-amber-300"><div class="flex items-center gap-3"><i data-lucide="shield-alert" class="h-5 w-5"></i><div><p class="text-sm font-black">Top-up required</p><p class="text-xs text-amber-700/80 dark:text-amber-300/80">Top up your account to continue trading.</p></div></div></div>';
             } else if (accountSuspended) {
                 profileStatus.innerHTML = '<div class="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-red-700 dark:text-red-300"><div class="flex items-center gap-3"><i data-lucide="shield-alert" class="h-5 w-5"></i><div><p class="text-sm font-black">Account suspended</p><p class="text-xs text-red-700/80 dark:text-red-300/80">Your account has been suspended because it does not follow our safety guidelines.</p></div></div></div>';
             }
@@ -205,7 +434,6 @@
             data.totalProfit = data.totalProfit ?? cloudData.totalProfit ?? 0;
             data.totalWithdrawn = data.totalWithdrawn ?? cloudData.totalWithdrawn ?? 0;
             data.activePlan = data.activePlan || cloudData.activePlan || null;
-            data.activeCarOrder = data.activeCarOrder || cloudData.activeCarOrder || null;
             if ((!data.transactions || data.transactions.length === 0) && cloudData.transactions?.length) {
                 data.transactions = cloudData.transactions;
             }
@@ -218,12 +446,13 @@
             data = createDefaultAccountData(user);
         }
 
+        data.bonusBalance = Number(data.bonusBalance ?? data.bonus) || 0;
+
         // Ensure all arrays exist
         data.deposits = data.deposits || [];
         data.withdrawals = data.withdrawals || [];
         data.trades = data.trades || [];
         data.investments = data.investments || [];
-        data.carOrders = data.carOrders || [];
         data.transactions = data.transactions || [];
         data.notifications = data.notifications || [];
 
@@ -393,7 +622,7 @@
         // 2. WITHDRAWAL
         withdraw({ amount, network, address }) {
             if (accountSuspended || accountTopUpRequired) {
-                showAppleToast('Your account is ineligible to trade. Top-up now to trade.', 'error');
+                showAppleToast('Top up your account to continue trading.', 'error');
                 return false;
             }
 
@@ -486,7 +715,7 @@
         // 3. EXECUTE TRADE
         trade({ symbol, side, amount, leverage, orderType }) {
             if (accountSuspended || accountTopUpRequired) {
-                showAppleToast('Your account is ineligible to trade. Top-up now to trade.', 'error');
+                showAppleToast('Top up your account to continue trading.', 'error');
                 return false;
             }
 
@@ -502,14 +731,14 @@
             }
 
             const levNum = parseInt(leverage) || 1;
-            const entryPrices = { 'TSLA': 248.50, 'NVDA': 118.20, 'BTC': 59420.00, 'ETH': 2480.00 };
+            const entryPrices = { 'EURUSD': 1.17489, 'GOLD': 2650.00, 'BTC': 59420.00, 'ETH': 2480.00 };
             const entry = entryPrices[symbol] || 248.50;
             const transactionId = 'TX-' + Math.floor(1000000 + Math.random() * 9000000);
 
             const tradeRecord = {
                 id: 'pos_' + Date.now(),
                 txid: transactionId,
-                symbol: symbol || 'TSLA',
+                symbol: symbol || 'EURUSD',
                 side: side || 'buy',
                 amount: num,
                 leverage: `${levNum}x`,
@@ -687,72 +916,7 @@
             return true;
         },
 
-        // 6. TESLA EV VEHICLE ORDER
-        orderCar({ model, price, deposit, color, vin }) {
-            if (accountSuspended) {
-                showAppleToast('Your account is suspended and EV orders are disabled.', 'error');
-                return false;
-            }
-
-            const dep = parseFloat(deposit) || 250;
-            const pr = parseFloat(price) || 94990;
-
-            const order = {
-                id: 'order_' + Date.now(),
-                orderNumber: 'TSLA-' + Math.floor(10000 + Math.random() * 90000),
-                model: model || 'Tesla Model X Plaid',
-                price: pr,
-                depositPaid: dep,
-                color: color || 'Solid Black',
-                vin: vin || '5YJSA1E28PF993810',
-                status: 'In Transit',
-                progress: 75,
-                date: new Date().toISOString()
-            };
-
-            currentAccountData.activeCarOrder = order;
-            currentAccountData.carOrders.unshift(order);
-
-            currentAccountData.transactions.unshift({
-                id: order.id,
-                txid: order.orderNumber,
-                type: 'Tesla EV Order',
-                asset: order.model,
-                amount: dep,
-                formattedAmount: `-${formatUSD(dep)} Earnest`,
-                date: `${formatDate()} · ${formatTime()}`,
-                status: 'Confirmed',
-                isPositive: false
-            });
-
-            currentAccountData.notifications.unshift({
-                id: 'notif_' + Date.now(),
-                title: 'Tesla EV Order Confirmed',
-                detail: `Your ${order.model} order (${order.orderNumber}) is confirmed and in transit.`,
-                icon: 'car',
-                time: 'Just now',
-                unread: true
-            });
-
-            if (currentUser) {
-                client.from('transactions').insert({
-                    user_id: currentUser.id,
-                    txid: order.orderNumber,
-                    type: 'Tesla EV Order',
-                    asset: order.model,
-                    amount: dep,
-                    status: 'confirmed',
-                    is_positive: false
-                }).then(() => {}).catch(() => {});
-            }
-
-            persistAccountData();
-            hydrateUI();
-            showAppleToast(`Vehicle reserved! Order ${order.orderNumber}`);
-            return true;
-        },
-
-        // 7. NOTIFICATIONS READ/UNREAD
+        // 6. NOTIFICATIONS READ/UNREAD
         markNotificationRead(id) {
             const notif = currentAccountData.notifications.find((n) => n.id === id);
             if (notif) {
@@ -781,7 +945,12 @@
 
         updateSuspendedStatusUI();
         const phone = currentUser.user_metadata?.phone || '';
+        const country = currentUser.user_metadata?.country || '';
+        const language = dashboardLanguage(currentUser);
+        const currency = dashboardCurrency(currentUser);
         const avatar = localStorage.getItem(avatarStorageKey(currentUser));
+
+        hydrateBankWithdrawalProfile(country, fullName);
 
         // 1. Profile information
         document.querySelectorAll('[data-auth-name]').forEach((el) => {
@@ -797,6 +966,10 @@
             else el.textContent = currentUser.email || '';
         });
         document.querySelectorAll('[data-auth-phone]').forEach((el) => { el.value = phone; });
+        document.querySelectorAll('[data-auth-country]').forEach((el) => { el.value = country; });
+        document.querySelectorAll('[data-auth-currency]').forEach((el) => { el.value = currency; });
+        document.querySelectorAll('[data-auth-language]').forEach((el) => { el.value = language; });
+        document.querySelectorAll('[data-dashboard-language]').forEach((el) => { el.value = language; });
         document.querySelectorAll('[data-auth-initials]').forEach((el) => { el.textContent = initials(fullName); });
         document.querySelectorAll('[data-auth-avatar]').forEach((el) => {
             if (avatar) {
@@ -822,6 +995,9 @@
         });
         document.querySelectorAll('[data-auth-withdrawn]').forEach((el) => {
             el.textContent = formatUSD(data.totalWithdrawn);
+        });
+        document.querySelectorAll('[data-auth-bonus]').forEach((el) => {
+            el.textContent = formatUSD(data.bonusBalance ?? data.bonus ?? 0);
         });
 
         // Also update plain text balance headers in dashboard/index.html and dashboard/withdraw.html
@@ -865,8 +1041,11 @@
         // 7. Update Active Investment Plan Status Card
         hydrateActivePlan(data.activePlan);
 
-        // 8. Update Active Car Order
-        hydrateActiveCarOrder(data.activeCarOrder);
+        // 8. Update Trading Activity
+        document.querySelectorAll('[data-auth-trade-count]').forEach((el) => {
+            const count = Array.isArray(data.trades) ? data.trades.length : 0;
+            el.textContent = `${count} ${count === 1 ? 'trade' : 'trades'}`;
+        });
 
         // 9. Update Referral Link
         hydrateReferralLink(currentUser);
@@ -894,7 +1073,15 @@
         }
 
         tableBody.innerHTML = transactions.map((t) => {
-            const color = t.isPositive ? 'text-green-500' : 'text-primary-500';
+            const isPositive = t.isPositive ?? t.is_positive;
+            const color = isPositive ? 'text-green-500' : 'text-primary-500';
+            const storedAmount = String(t.formattedAmount || '');
+            const sign = storedAmount.startsWith('+') || isPositive === true
+                ? '+'
+                : storedAmount.startsWith('-') || isPositive === false
+                ? '-'
+                : '';
+            const formattedAmount = `${sign}${formatUSD(Math.abs(Number(t.amount) || 0))}`;
             const normalizedStatus = normalizeTransactionStatus(t.status);
             const badgeBg = normalizedStatus === 'Confirmed'
                 ? 'bg-green-100 dark:bg-green-950/60 text-green-600 dark:text-green-300'
@@ -907,7 +1094,7 @@
                     <td class="py-3 px-4 font-mono text-gray-500 text-xs">${escapeHtml(t.txid || 'TX-90281')}</td>
                     <td class="py-3 px-4 font-bold text-xs">${escapeHtml(t.type)}</td>
                     <td class="py-3 px-4 text-xs text-gray-600 dark:text-gray-300">${escapeHtml(t.asset)}</td>
-                    <td class="py-3 px-4 font-bold text-xs ${color}">${escapeHtml(t.formattedAmount || formatUSD(t.amount))}</td>
+                    <td class="py-3 px-4 font-bold text-xs ${color}">${escapeHtml(formattedAmount)}</td>
                     <td class="py-3 px-4 text-xs text-gray-400">${escapeHtml(t.date)}</td>
                     <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeBg}">${normalizedStatus}</span></td>
                 </tr>`;
@@ -989,23 +1176,6 @@
         }
     }
 
-    // Dynamic Tesla EV Order Hydration
-    function hydrateActiveCarOrder(order) {
-        const carCard = document.querySelector('[data-active-car-card]');
-        if (!carCard) return;
-
-        if (order) {
-            carCard.hidden = false;
-            carCard.style.removeProperty('display');
-            document.querySelectorAll('[data-car-model]').forEach((el) => el.textContent = order.model);
-            document.querySelectorAll('[data-car-order-number]').forEach((el) => el.textContent = `Order #${order.orderNumber}`);
-            document.querySelectorAll('[data-car-price]').forEach((el) => el.textContent = formatUSD(order.price));
-            document.querySelectorAll('[data-car-vin]').forEach((el) => el.textContent = order.vin);
-        } else {
-            carCard.hidden = true;
-        }
-    }
-
     // Dynamic Referral Link
     function hydrateReferralLink(user) {
         const input = document.querySelector('[data-referral-input]');
@@ -1024,6 +1194,106 @@
                 showAppleToast('Referral link copied to clipboard!');
             };
         }
+    }
+
+    function hydrateBankWithdrawalProfile(country) {
+        const countryInput = document.querySelector('[data-withdraw-country]');
+        if (countryInput && countryInput.value !== country) {
+            countryInput.value = country;
+            countryInput.defaultValue = country;
+        }
+    }
+
+    async function loadRegisteredCountryBanks(bankSelect, statusElement) {
+        const country = currentUser?.user_metadata?.country?.trim() || '';
+        bankSelect.disabled = true;
+        bankSelect.replaceChildren(new Option(country ? 'Loading banks...' : 'Set country in Account Settings first', ''));
+        if (!country) {
+            statusElement.textContent = 'Add your registered country in Account Settings to load its banks.';
+            return;
+        }
+
+        statusElement.textContent = `Loading banks for ${country}...`;
+        let result;
+        try {
+            result = await client.functions.invoke('bank-services', {
+                body: { action: 'banks' }
+            });
+        } catch (error) {
+            bankSelect.replaceChildren(new Option('Bank list unavailable', ''));
+            statusElement.textContent = error.message || 'Unable to connect to bank verification.';
+            return;
+        }
+        const { data, error } = result;
+        if (error || !Array.isArray(data?.banks) || data.banks.length === 0) {
+            bankSelect.replaceChildren(new Option('Bank list unavailable', ''));
+            statusElement.textContent = error?.message || data?.error || `Bank verification is unavailable for ${country}.`;
+            return;
+        }
+
+        bankSelect.replaceChildren(new Option('Select your bank', ''));
+        data.banks.forEach((bank) => bankSelect.add(new Option(bank.name, bank.code)));
+        bankSelect.disabled = false;
+        statusElement.textContent = `Select your bank in ${country}, then enter the account number to verify its name.`;
+    }
+
+    function setupBankAccountLookup(form) {
+        const bankSelect = form.querySelector('[data-country-bank]');
+        const accountNumberInput = form.querySelector('[name="accountNumber"]');
+        const accountNameInput = form.querySelector('[data-bank-account-name]');
+        const statusElement = form.querySelector('[data-bank-lookup-status]');
+        if (!bankSelect || !accountNumberInput || !accountNameInput || !statusElement) return;
+
+        let lookupTimer = 0;
+        let lookupSequence = 0;
+        const clearResolvedName = () => {
+            accountNameInput.value = '';
+            delete accountNameInput.dataset.verifiedKey;
+        };
+        const resolveAccountName = async () => {
+            window.clearTimeout(lookupTimer);
+            const sequence = ++lookupSequence;
+            const bankCode = bankSelect.value;
+            const accountNumber = accountNumberInput.value.replace(/[\s-]/g, '');
+            clearResolvedName();
+            if (!bankCode || !/^\d{6,34}$/.test(accountNumber)) {
+                statusElement.textContent = 'Choose your bank and enter a valid account number to look up the account name.';
+                return;
+            }
+
+            statusElement.textContent = 'Verifying account...';
+            let result;
+            try {
+                result = await client.functions.invoke('bank-services', {
+                    body: { action: 'resolve', bankCode, accountNumber }
+                });
+            } catch (error) {
+                if (sequence === lookupSequence) statusElement.textContent = error.message || 'Unable to verify this account.';
+                return;
+            }
+            const { data, error } = result;
+            if (sequence !== lookupSequence) return;
+            if (error || !data?.accountName) {
+                statusElement.textContent = error?.message || data?.error || 'The bank could not verify that account.';
+                return;
+            }
+
+            accountNameInput.value = data.accountName;
+            accountNameInput.dataset.verifiedKey = `${bankCode}:${accountNumber}`;
+            statusElement.textContent = 'Account name verified by the bank.';
+        };
+
+        const scheduleLookup = () => {
+            window.clearTimeout(lookupTimer);
+            lookupSequence += 1;
+            clearResolvedName();
+            statusElement.textContent = 'Account details changed. Verifying...';
+            lookupTimer = window.setTimeout(resolveAccountName, 450);
+        };
+        bankSelect.addEventListener('change', scheduleLookup);
+        accountNumberInput.addEventListener('input', scheduleLookup);
+        accountNumberInput.addEventListener('blur', resolveAccountName);
+        loadRegisteredCountryBanks(bankSelect, statusElement);
     }
 
     // Setup forms across dashboard
@@ -1051,16 +1321,53 @@
         }
 
         // 2. WITHDRAW PAGE
-        const withdrawForm = document.querySelector('form[data-withdraw-form]');
-        if (withdrawForm) {
-            withdrawForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const amount = withdrawForm.querySelector('input[type="number"]')?.value;
-                const network = withdrawForm.querySelector('select')?.value || 'USDT (TRC-20)';
-                const address = withdrawForm.querySelector('input[type="text"]')?.value || '';
+        document.querySelectorAll('form[data-withdraw-form]').forEach((withdrawForm) => {
+            const formType = withdrawForm.dataset.withdrawForm;
+            const amountInput = withdrawForm.querySelector('[name="amount"]');
+            const maxButtons = withdrawForm.querySelectorAll('[data-withdraw-all]');
+            maxButtons.forEach((button) => button.addEventListener('click', () => {
+                amountInput.value = Number(brokerAccount.getData()?.balance || 0);
+            }));
+
+            const bankSelect = withdrawForm.querySelector('[data-country-bank]');
+            if (formType === 'bank') setupBankAccountLookup(withdrawForm);
+
+            withdrawForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = new FormData(withdrawForm);
+                const amount = formData.get('amount');
+                let network = '';
+                let address = '';
+
+                if (formType === 'bank') {
+                    const country = currentUser?.user_metadata?.country?.trim() || '';
+                    const bankName = bankSelect?.selectedOptions[0]?.textContent?.trim() || '';
+                    const bankCode = bankSelect?.value || '';
+                    const accountNameInput = withdrawForm.querySelector('[data-bank-account-name]');
+                    const accountName = accountNameInput?.value.trim() || '';
+                    const accountNumber = String(formData.get('accountNumber') || '').replace(/[\s-]/g, '');
+                    const verifiedKey = `${bankCode}:${accountNumber}`;
+                    if (!country || !bankCode || !accountNumber || !accountName || accountNameInput?.dataset.verifiedKey !== verifiedKey) {
+                        showAppleToast('Enter a bank and account number and wait for account verification.', 'error');
+                        return;
+                    }
+                    network = `Bank Wire - ${country} - ${bankName}`;
+                    address = `Account name: ${accountName} | Account / IBAN: ${accountNumber}`;
+                } else {
+                    network = String(formData.get('network') || 'USDT (TRC-20)');
+                    address = String(formData.get('address') || '').trim();
+                }
 
                 if (brokerAccount.withdraw({ amount, network, address })) {
                     withdrawForm.reset();
+                    if (formType === 'bank') {
+                        const country = currentUser?.user_metadata?.country || '';
+                        hydrateBankWithdrawalProfile(country);
+                        const nameInput = withdrawForm.querySelector('[data-bank-account-name]');
+                        if (nameInput) delete nameInput.dataset.verifiedKey;
+                        const statusElement = withdrawForm.querySelector('[data-bank-lookup-status]');
+                        if (statusElement) statusElement.textContent = 'Choose your bank and enter the account number to look up the registered account name.';
+                    }
                     const successAlert = document.querySelector('[data-withdraw-success]');
                     if (successAlert) {
                         successAlert.hidden = false;
@@ -1068,7 +1375,7 @@
                     }
                 }
             });
-        }
+        });
 
         // 3. TRADES PAGE
         const tradeForm = document.querySelector('form[data-trade-form]');
@@ -1078,7 +1385,7 @@
                 const amount = tradeForm.querySelector('input[type="number"]')?.value;
                 const side = tradeForm.dataset.side || 'buy';
                 const leverage = tradeForm.dataset.leverage || '1x';
-                const symbol = 'TSLA';
+                const symbol = 'EURUSD';
 
                 if (brokerAccount.trade({ symbol, side, amount, leverage })) {
                     tradeForm.reset();
@@ -1101,6 +1408,16 @@
         const form = document.querySelector('[data-profile-form]');
         if (!form) return;
 
+        const currencyInput = form.querySelector('[data-auth-currency]');
+        const languageInput = form.querySelector('[data-auth-language]');
+        if (languageInput) {
+            languageInput.replaceChildren(...DASHBOARD_LANGUAGES.map(([code, name]) => new Option(name, code)));
+            languageInput.value = user.user_metadata?.language || 'en';
+        }
+        languageInput?.addEventListener('change', () => {
+            if (currencyInput) currencyInput.value = currencyForDashboardLanguage(languageInput.value);
+        });
+
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const submit = form.querySelector('button[type="submit"]');
@@ -1109,12 +1426,20 @@
             const username = form.querySelector('[data-auth-username]')?.value.trim() || '';
             const fullName = form.querySelector('[data-auth-name]')?.value.trim() || '';
             const phone = form.querySelector('[data-auth-phone]')?.value.trim() || '';
-
+            const country = form.querySelector('[data-auth-country]')?.value.trim() || '';
+            const language = form.querySelector('[data-auth-language]')?.value || 'en';
+            const previousLanguage = currentUser?.user_metadata?.language || 'en';
+            const currency = language !== previousLanguage
+                ? currencyForDashboardLanguage(language)
+                : form.querySelector('[data-auth-currency]')?.value || 'USD';
             const { data, error } = await client.auth.updateUser({
                 data: {
                     username: username,
                     full_name: fullName,
                     phone: phone,
+                    country: country,
+                    currency: currency,
+                    language: language,
                     account_data: currentAccountData
                 }
             });
@@ -1123,6 +1448,8 @@
                 showAppleToast(error.message, 'error');
             } else if (data.user) {
                 currentUser = data.user;
+                if (language !== previousLanguage) saveDashboardLanguage(currentUser, language);
+                window.accountPreferences?.setLanguagePreference(language);
                 hydrateUI();
                 showAppleToast('Profile updated successfully!');
                 const saved = document.querySelector('[data-profile-saved]');
@@ -1130,9 +1457,100 @@
                     saved.hidden = false;
                     setTimeout(() => saved.hidden = true, 3000);
                 }
+                if (language !== previousLanguage) applyDashboardLanguage(language);
             }
             if (submit) submit.disabled = false;
         });
+    }
+
+    function setupDashboardLanguageSelector() {
+        const header = document.querySelector('.reference-topbar');
+        let select = document.querySelector('[data-dashboard-language]');
+
+        if (!select && header) {
+            const actions = header.querySelector(':scope > div:last-child');
+            if (actions) {
+                const label = document.createElement('label');
+                label.className = 'reference-lang-control';
+                label.innerHTML = '<span>language:</span><select data-dashboard-language aria-label="Dashboard language"></select>';
+                select = label.querySelector('select');
+                actions.prepend(label);
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+        if (!select) return;
+
+        if (select.options.length !== DASHBOARD_LANGUAGES.length || select.options[0]?.value !== DASHBOARD_LANGUAGES[0][0]) {
+            select.replaceChildren(...DASHBOARD_LANGUAGES.map(([code, name]) => new Option(name, code)));
+        }
+
+        const language = dashboardLanguage();
+        select.value = language;
+        document.documentElement.lang = language;
+        applyDashboardLanguage(language, 0);
+        window.accountPreferences?.setLanguagePreference(language);
+
+        if (select.dataset.languageHandlerAttached) return;
+        select.dataset.languageHandlerAttached = 'true';
+        select.addEventListener('change', () => {
+            const nextLanguage = select.value;
+            const nextCurrency = currencyForDashboardLanguage(nextLanguage);
+            const previousLanguage = dashboardLanguage();
+            if (nextLanguage === previousLanguage) return;
+
+            try {
+                saveDashboardLanguage(currentUser, nextLanguage);
+                currentUser = {
+                    ...currentUser,
+                    user_metadata: {
+                        ...currentUser.user_metadata,
+                        language: nextLanguage,
+                        currency: nextCurrency
+                    }
+                };
+                window.currentSupabaseUser = currentUser;
+                window.accountPreferences?.setLanguagePreference(nextLanguage);
+                hydrateUI();
+                applyDashboardLanguage(nextLanguage);
+            } catch (error) {
+                select.value = previousLanguage;
+                console.warn('Could not save dashboard language preference:', error);
+            }
+        });
+    }
+
+    function applyDashboardLanguage(language, delay = 0) {
+        window.clearTimeout(languageApplyTimer);
+        languageApplyTimer = window.setTimeout(() => {
+            document.documentElement.lang = language;
+            localStorage.setItem('dashboard-language', language);
+
+            const translations = DASHBOARD_TRANSLATIONS[language] || DASHBOARD_TRANSLATIONS.en;
+            const navigationKeys = {
+                'Dashboard': 'nav.dashboard',
+                'Account': 'nav.account',
+                'Deposit': 'nav.deposit',
+                'Withdraw': 'nav.withdraw',
+                'History': 'nav.history',
+                'Transactions': 'nav.transactions',
+                'Account Upgrade': 'nav.upgrade',
+                'Signal Purchase': 'nav.signal',
+                'News': 'nav.news',
+                'Account Settings': 'nav.settings',
+                'Logout': 'nav.logout'
+            };
+            document.querySelectorAll('#dashboard-sidebar nav a span').forEach((node) => {
+                const key = node.dataset.i18n || navigationKeys[node.textContent.trim()];
+                if (key) node.dataset.i18n = key;
+            });
+
+            document.querySelectorAll('[data-i18n]').forEach((node) => {
+                const key = node.dataset.i18n;
+                if (translations[key]) {
+                    node.textContent = translations[key];
+                }
+            });
+        }, delay);
     }
 
     function setupLogoutLinks() {
@@ -1159,16 +1577,18 @@
             if (window.lucide) window.lucide.createIcons();
         }
 
+        let closeTimer = null;
         const close = () => {
             dialog.classList.add('logout-closing');
-            dialog.addEventListener('animationend', function handler() {
-                dialog.removeEventListener('animationend', handler);
+            window.clearTimeout(closeTimer);
+            closeTimer = window.setTimeout(() => {
                 dialog.hidden = true;
                 dialog.classList.remove('logout-closing');
-            });
+            }, 220);
         };
         const open = (event) => {
             event.preventDefault();
+            window.clearTimeout(closeTimer);
             dialog.classList.remove('logout-closing');
             dialog.hidden = false;
         };
@@ -1279,7 +1699,7 @@
         try {
             const { data: profile, error: profileErr } = await client
                 .from('profiles')
-                .select('balance, status, total_withdrawn, active_invest, total_profit, updated_at')
+                .select('balance, bonus_balance, status, total_withdrawn, active_invest, total_profit, updated_at')
                 .eq('id', currentUser.id)
                 .maybeSingle();
 
@@ -1297,6 +1717,7 @@
                 if (typeof profile.total_profit !== 'undefined') {
                     currentAccountData.totalProfit = Number(profile.total_profit) || 0;
                 }
+                currentAccountData.bonusBalance = Number(profile.bonus_balance) || 0;
 
                 const nextStatus = String(profile.status || 'active').toLowerCase() === 'suspended';
                 const nextTopUpStatus = String(profile.status || 'active').toLowerCase() === 'topup_required';
@@ -1421,7 +1842,7 @@
             return;
         }
 
-        currentUser = data.session.user;
+        currentUser = applyStoredDashboardPreference(data.session.user);
         window.currentSupabaseUser = currentUser;
 
         try {
@@ -1446,18 +1867,20 @@
 
         // Hydrate DOM
         hydrateUI();
+        setupDashboardLanguageSelector();
         setupProfileForm(currentUser);
         setupAvatarPicker(currentUser);
         setupLogoutLinks();
         setupPageForms();
+        loadUsdExchangeRates();
 
         client.auth.onAuthStateChange(async (_event, session) => {
             if (!session) {
                 window.location.replace('../login.html');
                 return;
             }
-            currentUser = session.user;
-            window.currentSupabaseUser = session.user;
+            currentUser = applyStoredDashboardPreference(session.user);
+            window.currentSupabaseUser = currentUser;
 
             try {
                 const { data: profileData, error: profileError } = await client
