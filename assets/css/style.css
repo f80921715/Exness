@@ -677,6 +677,11 @@ body.reference-dashboard header.reference-topbar > div:first-child > * {
   body:not(.reference-dashboard) header .max-w-7xl > div[class*="justify-between"] > div[class~="hidden"][class~="md:flex"] {
     margin-left: auto;
   }
+
+  body.landing-page header.landing-header .max-w-7xl > div[class*="justify-between"] > .landing-mobile-controls {
+    order: 1 !important;
+    margin-left: auto;
+  }
 }
 
 body.reference-dashboard .reference-brand {
@@ -1832,7 +1837,7 @@ button [data-lucide="x"] {
   }
 
   .landing-page .landing-header img {
-    height: 1.65rem;
+    height: 2.5rem;
   }
 
   .landing-page .landing-header .flex.items-center.lg\:hidden {
