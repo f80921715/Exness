@@ -544,28 +544,45 @@
         if (!record) return false;
 
         try {
-            const { data, error } = await client
+            let profileUpdate = client
                 .from('profiles')
                 .update({
                     status: nextStatus,
                     updated_at: new Date().toISOString()
                 })
-                .eq('id', userId)
-                .select();
+                .eq('id', userId);
+
+            if (actionLabel === 'topup_release') {
+                profileUpdate = profileUpdate.eq('status', 'topup_required');
+            }
+
+            const { data, error } = await profileUpdate.select();
 
             if (error) {
                 throw error;
             }
+            if (!Array.isArray(data) || data.length === 0) {
+                throw new Error(actionLabel === 'topup_release'
+                    ? 'This account no longer requires a top-up, or its status could not be updated.'
+                    : 'No account was updated. Refresh the admin page and try again.');
+            }
 
-            const updatedUser = Array.isArray(data) && data[0] ? data[0] : { ...record, status: nextStatus };
+            const updatedUser = data[0];
             adminState.users = adminState.users.map((user) => user.id === userId ? { ...user, ...updatedUser } : user);
             adminState.selectedUser = { ...adminState.selectedUser, ...updatedUser };
 
+            const actionName = actionLabel === 'suspend'
+                ? 'suspended user'
+                : actionLabel === 'topup_required'
+                ? 'restricted user trading'
+                : actionLabel === 'topup_release'
+                ? 'released top-up restriction'
+                : 'activated user';
             await recordAdminAction(
                 adminState.currentUser.id,
-                actionLabel === 'suspend' ? 'suspended user' : actionLabel === 'topup_required' ? 'restricted user trading' : 'activated user',
+                actionName,
                 userId,
-                `Admin ${actionLabel === 'suspend' ? 'suspended' : actionLabel === 'topup_required' ? 'restricted trading for' : 'activated'} user ${record.email || 'account'} from ${record.status || 'active'} to ${nextStatus}.${reason ? ` Reason: ${reason}` : ''}`
+                `Admin ${actionLabel === 'suspend' ? 'suspended' : actionLabel === 'topup_required' ? 'restricted trading for' : actionLabel === 'topup_release' ? 'released the top-up restriction for' : 'activated'} user ${record.email || 'account'} from ${record.status || 'active'} to ${nextStatus}.${reason ? ` Reason: ${reason}` : ''}`
             );
 
             showAdminToast(
@@ -573,8 +590,12 @@
                     ? 'User suspended successfully.'
                     : actionLabel === 'topup_required'
                     ? 'Trading restricted until the user tops up.'
+                    : actionLabel === 'topup_release'
+                    ? 'Top-up restriction released successfully.'
                     : 'User activated successfully.'
             );
+            calculateMetrics();
+            renderAdminDashboard();
             renderUsersTable();
             renderUserDetailsPanel();
             return true;
@@ -937,7 +958,7 @@
         },
 
         async releaseTopUp(userId, reason) {
-            return toggleUserAccountStatus(userId, 'active', 'activate', reason);
+            return toggleUserAccountStatus(userId, 'active', 'topup_release', reason);
         },
 
         filterUsers(query) {
