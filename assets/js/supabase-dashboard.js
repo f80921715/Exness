@@ -950,7 +950,7 @@
         const currency = dashboardCurrency(currentUser);
         const avatar = localStorage.getItem(avatarStorageKey(currentUser));
 
-        hydrateBankWithdrawalProfile(country, fullName);
+        hydrateBankWithdrawalProfile(fullName);
 
         // 1. Profile information
         document.querySelectorAll('[data-auth-name]').forEach((el) => {
@@ -1196,104 +1196,11 @@
         }
     }
 
-    function hydrateBankWithdrawalProfile(country) {
-        const countryInput = document.querySelector('[data-withdraw-country]');
-        if (countryInput && countryInput.value !== country) {
-            countryInput.value = country;
-            countryInput.defaultValue = country;
-        }
-    }
-
-    async function loadRegisteredCountryBanks(bankSelect, statusElement) {
-        const country = currentUser?.user_metadata?.country?.trim() || '';
-        bankSelect.disabled = true;
-        bankSelect.replaceChildren(new Option(country ? 'Loading banks...' : 'Set country in Account Settings first', ''));
-        if (!country) {
-            statusElement.textContent = 'Add your registered country in Account Settings to load its banks.';
-            return;
-        }
-
-        statusElement.textContent = `Loading banks for ${country}...`;
-        let result;
-        try {
-            result = await client.functions.invoke('bank-services', {
-                body: { action: 'banks' }
-            });
-        } catch (error) {
-            bankSelect.replaceChildren(new Option('Bank list unavailable', ''));
-            statusElement.textContent = error.message || 'Unable to connect to bank verification.';
-            return;
-        }
-        const { data, error } = result;
-        if (error || !Array.isArray(data?.banks) || data.banks.length === 0) {
-            bankSelect.replaceChildren(new Option('Bank list unavailable', ''));
-            statusElement.textContent = error?.message || data?.error || `Bank verification is unavailable for ${country}.`;
-            return;
-        }
-
-        bankSelect.replaceChildren(new Option('Select your bank', ''));
-        data.banks.forEach((bank) => bankSelect.add(new Option(bank.name, bank.code)));
-        bankSelect.disabled = false;
-        statusElement.textContent = `Select your bank in ${country}, then enter the account number to verify its name.`;
-    }
-
-    function setupBankAccountLookup(form) {
-        const bankSelect = form.querySelector('[data-country-bank]');
-        const accountNumberInput = form.querySelector('[name="accountNumber"]');
-        const accountNameInput = form.querySelector('[data-bank-account-name]');
-        const statusElement = form.querySelector('[data-bank-lookup-status]');
-        if (!bankSelect || !accountNumberInput || !accountNameInput || !statusElement) return;
-
-        let lookupTimer = 0;
-        let lookupSequence = 0;
-        const clearResolvedName = () => {
-            accountNameInput.value = '';
-            delete accountNameInput.dataset.verifiedKey;
-        };
-        const resolveAccountName = async () => {
-            window.clearTimeout(lookupTimer);
-            const sequence = ++lookupSequence;
-            const bankCode = bankSelect.value;
-            const accountNumber = accountNumberInput.value.replace(/[\s-]/g, '');
-            clearResolvedName();
-            if (!bankCode || !/^\d{6,34}$/.test(accountNumber)) {
-                statusElement.textContent = 'Choose your bank and enter a valid account number to look up the account name.';
-                return;
-            }
-
-            statusElement.textContent = 'Verifying account...';
-            let result;
-            try {
-                result = await client.functions.invoke('bank-services', {
-                    body: { action: 'resolve', bankCode, accountNumber }
-                });
-            } catch (error) {
-                if (sequence === lookupSequence) statusElement.textContent = error.message || 'Unable to verify this account.';
-                return;
-            }
-            const { data, error } = result;
-            if (sequence !== lookupSequence) return;
-            if (error || !data?.accountName) {
-                statusElement.textContent = error?.message || data?.error || 'The bank could not verify that account.';
-                return;
-            }
-
-            accountNameInput.value = data.accountName;
-            accountNameInput.dataset.verifiedKey = `${bankCode}:${accountNumber}`;
-            statusElement.textContent = 'Account name verified by the bank.';
-        };
-
-        const scheduleLookup = () => {
-            window.clearTimeout(lookupTimer);
-            lookupSequence += 1;
-            clearResolvedName();
-            statusElement.textContent = 'Account details changed. Verifying...';
-            lookupTimer = window.setTimeout(resolveAccountName, 450);
-        };
-        bankSelect.addEventListener('change', scheduleLookup);
-        accountNumberInput.addEventListener('input', scheduleLookup);
-        accountNumberInput.addEventListener('blur', resolveAccountName);
-        loadRegisteredCountryBanks(bankSelect, statusElement);
+    function hydrateBankWithdrawalProfile(fullName = currentUser?.user_metadata?.full_name || displayName(currentUser)) {
+        const accountNameInput = document.querySelector('[data-bank-account-name]');
+        if (!accountNameInput) return;
+        accountNameInput.value = fullName || '';
+        accountNameInput.defaultValue = fullName || '';
     }
 
     // Setup forms across dashboard
@@ -1329,9 +1236,6 @@
                 amountInput.value = Number(brokerAccount.getData()?.balance || 0);
             }));
 
-            const bankSelect = withdrawForm.querySelector('[data-country-bank]');
-            if (formType === 'bank') setupBankAccountLookup(withdrawForm);
-
             withdrawForm.addEventListener('submit', (event) => {
                 event.preventDefault();
                 const formData = new FormData(withdrawForm);
@@ -1340,19 +1244,14 @@
                 let address = '';
 
                 if (formType === 'bank') {
-                    const country = currentUser?.user_metadata?.country?.trim() || '';
-                    const bankName = bankSelect?.selectedOptions[0]?.textContent?.trim() || '';
-                    const bankCode = bankSelect?.value || '';
-                    const accountNameInput = withdrawForm.querySelector('[data-bank-account-name]');
-                    const accountName = accountNameInput?.value.trim() || '';
-                    const accountNumber = String(formData.get('accountNumber') || '').replace(/[\s-]/g, '');
-                    const verifiedKey = `${bankCode}:${accountNumber}`;
-                    if (!country || !bankCode || !accountNumber || !accountName || accountNameInput?.dataset.verifiedKey !== verifiedKey) {
-                        showAppleToast('Enter a bank and account number and wait for account verification.', 'error');
+                    const accountName = String(formData.get('accountName') || '').trim();
+                    const accountNumber = String(formData.get('accountNumber') || '').trim();
+                    if (!accountName || !accountNumber) {
+                        showAppleToast('Your account name and account number are required.', 'error');
                         return;
                     }
-                    network = `Bank Wire - ${country} - ${bankName}`;
-                    address = `Account name: ${accountName} | Account / IBAN: ${accountNumber}`;
+                    network = 'Bank Wire';
+                    address = `Account name: ${accountName} | Account number: ${accountNumber}`;
                 } else {
                     network = String(formData.get('network') || 'USDT (TRC-20)');
                     address = String(formData.get('address') || '').trim();
@@ -1361,12 +1260,7 @@
                 if (brokerAccount.withdraw({ amount, network, address })) {
                     withdrawForm.reset();
                     if (formType === 'bank') {
-                        const country = currentUser?.user_metadata?.country || '';
-                        hydrateBankWithdrawalProfile(country);
-                        const nameInput = withdrawForm.querySelector('[data-bank-account-name]');
-                        if (nameInput) delete nameInput.dataset.verifiedKey;
-                        const statusElement = withdrawForm.querySelector('[data-bank-lookup-status]');
-                        if (statusElement) statusElement.textContent = 'Choose your bank and enter the account number to look up the registered account name.';
+                        hydrateBankWithdrawalProfile();
                     }
                     const successAlert = document.querySelector('[data-withdraw-success]');
                     if (successAlert) {

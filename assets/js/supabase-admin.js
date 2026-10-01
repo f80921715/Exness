@@ -20,11 +20,9 @@
         selectedUserTransactions: [],
         metrics: {
             totalUsers: 0,
-            totalDeposits: 0,
-            totalWithdrawals: 0,
-            totalTransactions: 0,
-            pendingDeposits: 0,
-            pendingWithdrawals: 0
+            activeUsers: 0,
+            suspendedUsers: 0,
+            topupRequiredUsers: 0
         },
         searchQuery: '',
         activeTab: 'all'
@@ -224,7 +222,8 @@
                 ];
             }
 
-            populateActionUserSelects();
+            calculateMetrics();
+            renderAdminDashboard();
 
         } catch (err) {
             console.error('[Admin] Data fetch exception:', err);
@@ -233,31 +232,11 @@
     }
 
     function calculateMetrics() {
-        const totalUsers = adminState.users.length;
-        
-        const totalDeposits = adminState.deposits
-            .filter((d) => d.status === 'confirmed' || d.status === 'Confirmed')
-            .reduce((acc, curr) => acc + (parseFloat(curr.amount) || 0), 0);
-
-        const totalWithdrawals = adminState.withdrawals
-            .filter((w) => w.status === 'processed' || w.status === 'Processed')
-            .reduce((acc, curr) => acc + (parseFloat(curr.amount) || 0), 0);
-
-        const totalTransactions = adminState.transactions.length;
-
-        const pendingDeposits = adminState.deposits
-            .filter((d) => d.status === 'pending' || d.status === 'Pending').length;
-
-        const pendingWithdrawals = adminState.withdrawals
-            .filter((w) => w.status === 'pending' || w.status === 'Pending').length;
-
         adminState.metrics = {
-            totalUsers,
-            totalDeposits,
-            totalWithdrawals,
-            totalTransactions,
-            pendingDeposits,
-            pendingWithdrawals
+            totalUsers: adminState.users.length,
+            activeUsers: adminState.users.filter((user) => String(user.status || 'active').toLowerCase() === 'active').length,
+            suspendedUsers: adminState.users.filter((user) => String(user.status || '').toLowerCase() === 'suspended').length,
+            topupRequiredUsers: adminState.users.filter((user) => String(user.status || '').toLowerCase() === 'topup_required').length
         };
     }
 
@@ -274,44 +253,23 @@
     }
 
     function renderAdminDashboard() {
-        // Hydrate Admin Header
-        const adminEmailEl = document.querySelector('[data-admin-email]');
-        if (adminEmailEl) adminEmailEl.textContent = adminState.currentUser.email || 'Admin';
-
         const adminAvatar = document.querySelector('[data-admin-avatar]');
         if (adminAvatar) {
             const displayName = adminState.currentProfile?.full_name || adminState.currentUser.email || 'Admin';
             adminAvatar.textContent = displayName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
         }
 
-        const adminNameEl = document.querySelector('[data-admin-name]');
-        if (adminNameEl) adminNameEl.textContent = adminState.currentProfile?.full_name || 'Administrator';
-
-        // Render Metric KPI Cards
-        document.querySelectorAll('[data-metric-users]').forEach((el) => {
-            el.textContent = adminState.metrics.totalUsers.toLocaleString();
-        });
-        document.querySelectorAll('[data-metric-deposits]').forEach((el) => {
-            el.textContent = formatUSD(adminState.metrics.totalDeposits);
-        });
-        document.querySelectorAll('[data-metric-withdrawals]').forEach((el) => {
-            el.textContent = formatUSD(adminState.metrics.totalWithdrawals);
-        });
-        document.querySelectorAll('[data-metric-transactions]').forEach((el) => {
-            el.textContent = adminState.metrics.totalTransactions.toLocaleString();
-        });
-        document.querySelectorAll('[data-metric-pending-deposits]').forEach((el) => {
-            el.textContent = adminState.metrics.pendingDeposits.toLocaleString();
-        });
-        document.querySelectorAll('[data-metric-pending-withdrawals]').forEach((el) => {
-            el.textContent = adminState.metrics.pendingWithdrawals.toLocaleString();
+        const metrics = {
+            'data-metric-users': adminState.metrics.totalUsers,
+            'data-metric-active-users': adminState.metrics.activeUsers,
+            'data-metric-suspended-users': adminState.metrics.suspendedUsers,
+            'data-metric-topup-users': adminState.metrics.topupRequiredUsers
+        };
+        Object.entries(metrics).forEach(([attribute, value]) => {
+            const element = document.querySelector(`[${attribute}]`);
+            if (element) element.textContent = value.toLocaleString();
         });
 
-        // Render Tables
-        renderUsersTable();
-        renderTransactionsTable();
-        renderDepositsTable();
-        renderWithdrawalsTable();
         populateActionUserSelects();
 
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
@@ -1041,7 +999,9 @@
 
     function setAdminView(view) {
         const actionView = document.querySelector('.admin-action-view');
-        if (actionView) actionView.hidden = false;
+        const dashboardView = document.querySelector('.admin-dashboard-view');
+        if (dashboardView) dashboardView.hidden = view !== 'dashboard';
+        if (actionView) actionView.hidden = view === 'dashboard';
         document.querySelector('[data-action-panel="fund"]')?.toggleAttribute('hidden', view !== 'action');
         document.querySelector('[data-admin-view="plan"]')?.toggleAttribute('hidden', view !== 'plan');
         document.querySelector('[data-admin-view="wallet"]')?.toggleAttribute('hidden', view !== 'wallet');
@@ -1216,7 +1176,13 @@
         setupAdminLogout();
         setupAdminNavigation();
         setupActionForms();
-        setAdminView('action');
+        const adminName = document.querySelector('[data-admin-name]');
+        if (adminName) {
+            adminName.textContent = adminState.currentProfile?.full_name
+                || adminState.currentUser?.email?.split('@')[0]
+                || 'Administrator';
+        }
+        setAdminView('dashboard');
         await fetchAdminData();
 
         // Attach search listener

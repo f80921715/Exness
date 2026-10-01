@@ -1339,6 +1339,26 @@ body.admin-reference .admin-action-view[hidden] {
   font-weight: 400;
 }
 
+.admin-dashboard-view {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 28px 18px 60px;
+}
+
+.admin-dashboard-view[hidden] { display: none !important; }
+.admin-dashboard-view > h1 { margin: 0 0 22px; color: #30302f; font-size: 30px; font-weight: 400; }
+.admin-dashboard-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+.admin-dashboard-metric { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 108px; padding: 17px; border: 1px solid #e4e2de; border-radius: 18px; background: #fff; box-shadow: 0 2px 14px rgb(39 35 26 / 4%); }
+.admin-dashboard-metric span { color: #777672; font-size: 12px; }
+.admin-dashboard-metric strong { margin-top: 14px; color: #30302f; font-size: 24px; font-weight: 600; }
+.admin-dashboard-metric svg { position: absolute; top: 16px; right: 16px; width: 18px; height: 18px; color: #7045bd; }
+.admin-dashboard-quick-actions { display: grid; gap: 10px; padding: 18px 24px 24px; }
+.admin-dashboard-quick-actions button { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 14px; border: 1px solid #e4e2de; border-radius: 8px; background: #fff; color: #4d4c48; font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
+.admin-dashboard-quick-actions button:hover { border-color: #d2c8e8; background: #faf9fc; }
+.admin-dashboard-quick-actions button > span { flex: 1; }
+.admin-dashboard-quick-actions button > svg:first-child { width: 18px; height: 18px; color: #7045bd; }
+.admin-dashboard-quick-actions button > svg:last-child { width: 16px; height: 16px; color: #8a8984; }
+
 .admin-form-card {
   overflow: hidden;
   border-radius: 18px;
@@ -1386,6 +1406,11 @@ body.admin-reference .admin-action-view[hidden] {
   .admin-topbar { height: 64px; padding: 0 28px; }
   .admin-action-view { padding: 36px 24px 72px; }
   .admin-action-view > h1 { margin-bottom: 26px; font-size: 32px; }
+  .admin-dashboard-view { padding: 36px 24px 72px; }
+  .admin-dashboard-view > h1 { margin-bottom: 26px; font-size: 32px; }
+  .admin-dashboard-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .admin-dashboard-metric { min-height: 124px; padding: 20px; }
+  .admin-dashboard-quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 22px 32px 32px; }
   .admin-form-heading { padding: 26px 32px 21px; }
   .admin-form-card form { padding: 26px 32px 32px; }
 }

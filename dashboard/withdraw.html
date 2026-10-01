@@ -198,43 +198,23 @@
                         <i data-lucide="landmark" class="h-5 w-5 text-primary-400"></i>
                         <div>
                             <h2 id="bank-withdraw-heading" class="text-base font-bold text-white">Bank / wire withdrawal</h2>
-                            <p class="mt-1 text-xs text-gray-400">Banks are filtered using the country saved in your profile.</p>
+                            <p class="mt-1 text-xs text-gray-400">Withdraw to a bank account in your name.</p>
                         </div>
                     </div>
                 </div>
                 <form data-withdraw-form="bank" class="space-y-4 p-5 sm:p-6">
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label for="bank-country" class="mb-2 block text-xs font-bold text-gray-400">Registered country</label>
-                            <input id="bank-country" type="text" data-withdraw-country readonly placeholder="Add your country in Account Settings" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-gray-300">
-                        </div>
-                        <div>
-                            <label for="bank-name" class="mb-2 block text-xs font-bold text-gray-400">Bank</label>
-                            <select id="bank-name" name="bank" data-country-bank required disabled class="w-full rounded-lg border border-white/10 bg-[#141a2e] px-4 py-3 text-sm text-white focus:border-primary-500 focus:outline-none">
-                                <option value="">Loading banks for your country...</option>
-                            </select>
-                        </div>
+                    <div>
+                        <label for="bank-account-name" class="mb-2 block text-xs font-bold text-gray-400">Verified account name</label>
+                        <input id="bank-account-name" name="accountName" type="text" data-bank-account-name readonly required aria-readonly="true" placeholder="Your profile name" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-gray-300 focus:outline-none">
                     </div>
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label for="bank-account-name" class="mb-2 block text-xs font-bold text-gray-400">Verified account name</label>
-                            <input id="bank-account-name" name="accountName" type="text" data-bank-account-name readonly required aria-live="polite" placeholder="Enter account number to verify" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-gray-300 focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="bank-account-number" class="mb-2 block text-xs font-bold text-gray-400">Account number</label>
-                            <input id="bank-account-number" name="accountNumber" type="text" required autocomplete="off" inputmode="numeric" placeholder="Enter account number" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm text-white focus:border-primary-500 focus:outline-none">
-                        </div>
+                    <div>
+                        <label for="bank-account-number" class="mb-2 block text-xs font-bold text-gray-400">Account number</label>
+                        <input id="bank-account-number" name="accountNumber" type="text" required autocomplete="off" placeholder="Enter account number" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-primary-500 focus:outline-none">
                     </div>
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div class="sm:col-span-2">
-                            <label for="bank-amount" class="mb-2 block text-xs font-bold text-gray-400">Amount (USD)</label>
-                            <div class="flex gap-2">
-                                <input id="bank-amount" name="amount" type="number" step="0.01" min="1" required placeholder="Amount" class="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-base font-bold text-white focus:border-primary-500 focus:outline-none">
-                                <button type="button" data-withdraw-all class="rounded-lg border border-white/10 px-3 text-xs font-bold text-primary-400 hover:bg-white/5">Max</button>
-                            </div>
-                        </div>
+                    <div>
+                        <label for="bank-amount" class="mb-2 block text-xs font-bold text-gray-400">Amount (USD)</label>
+                        <input id="bank-amount" name="amount" type="number" step="0.01" min="1" required placeholder="Amount" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-base font-bold text-white focus:border-primary-500 focus:outline-none">
                     </div>
-                    <p data-bank-lookup-status role="status" aria-live="polite" class="text-xs leading-relaxed text-gray-500">Choose your bank and enter the account number to look up the registered account name.</p>
                     <button type="submit" class="w-full rounded-lg bg-primary-500 py-3.5 font-bold text-black transition hover:bg-primary-600">Submit bank withdrawal</button>
                 </form>
             </section>

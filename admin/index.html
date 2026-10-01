@@ -58,7 +58,7 @@
     <script src="../assets/js/supabase-admin.js" defer></script>
 
     <!-- App Styles -->
-    <link rel="stylesheet" href="../assets/css/style.css?v=admin-action-ui-20261001-3">
+    <link rel="stylesheet" href="../assets/css/style.css?v=admin-dashboard-landing-20261001-2">
 
     <style>
         [x-cloak] { display: none !important; }
@@ -135,8 +135,11 @@
         <div class="admin-drawer-backdrop" data-admin-drawer-close hidden></div>
         <aside id="admin-sidebar" class="admin-sidebar" aria-hidden="true">
             <nav aria-label="Admin navigation">
+                <p class="admin-nav-caption">Overview</p>
+                <button type="button" data-admin-nav="dashboard" class="is-active"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></button>
+
                 <p class="admin-nav-caption">Account actions</p>
-                <button type="button" data-admin-nav="action" class="is-active"><i data-lucide="credit-card"></i><span>Fund Account</span></button>
+                <button type="button" data-admin-nav="action"><i data-lucide="credit-card"></i><span>Fund Account</span></button>
                 <button type="button" data-admin-nav="topup-suspension"><i data-lucide="triangle-alert"></i><span>Top-up Suspension</span></button>
                 <button type="button" data-admin-nav="suspend"><i data-lucide="user-x"></i><span>Suspend Account</span></button>
                 <button type="button" data-admin-nav="unsuspend"><i data-lucide="user-check"></i><span>Unsuspend Account</span></button>
@@ -149,6 +152,47 @@
                 <button type="button" data-logout-link><i data-lucide="log-out"></i><span>Logout</span></button>
             </nav>
         </aside>
+
+        <main data-admin-view="dashboard" class="admin-dashboard-view">
+            <h1>Dashboard</h1>
+            <section class="admin-dashboard-metrics" aria-label="Account overview">
+                <article class="admin-dashboard-metric">
+                    <span>Total accounts</span>
+                    <strong data-metric-users>0</strong>
+                    <i data-lucide="users" aria-hidden="true"></i>
+                </article>
+                <article class="admin-dashboard-metric">
+                    <span>Active accounts</span>
+                    <strong data-metric-active-users>0</strong>
+                    <i data-lucide="user-check" aria-hidden="true"></i>
+                </article>
+                <article class="admin-dashboard-metric">
+                    <span>Suspended</span>
+                    <strong data-metric-suspended-users>0</strong>
+                    <i data-lucide="user-x" aria-hidden="true"></i>
+                </article>
+                <article class="admin-dashboard-metric">
+                    <span>Top-up required</span>
+                    <strong data-metric-topup-users>0</strong>
+                    <i data-lucide="triangle-alert" aria-hidden="true"></i>
+                </article>
+            </section>
+            <section class="admin-form-card">
+                <div class="admin-form-heading">
+                    <h2>Welcome back, <span data-admin-name>Administrator</span></h2>
+                    <p>Choose an account action to continue.</p>
+                </div>
+                <div class="admin-dashboard-quick-actions">
+                    <button type="button" data-admin-nav="action"><i data-lucide="credit-card"></i><span>Fund Account</span><i data-lucide="arrow-right"></i></button>
+                    <button type="button" data-admin-nav="suspend"><i data-lucide="user-x"></i><span>Suspend Account</span><i data-lucide="arrow-right"></i></button>
+                    <button type="button" data-admin-nav="unsuspend"><i data-lucide="user-check"></i><span>Unsuspend Account</span><i data-lucide="arrow-right"></i></button>
+                    <button type="button" data-admin-nav="topup-suspension"><i data-lucide="triangle-alert"></i><span>Require Top-up</span><i data-lucide="arrow-right"></i></button>
+                    <button type="button" data-admin-nav="topup-release"><i data-lucide="circle-check"></i><span>Release Top-up</span><i data-lucide="arrow-right"></i></button>
+                    <button type="button" data-admin-nav="plan"><i data-lucide="file-text"></i><span>Update Account Type</span><i data-lucide="arrow-right"></i></button>
+                    <button type="button" data-admin-nav="wallet"><i data-lucide="wallet"></i><span>Update Wallet</span><i data-lucide="arrow-right"></i></button>
+                </div>
+            </section>
+        </main>
 
         <main data-admin-view="action" class="admin-action-view">
             <h1>Action</h1>
