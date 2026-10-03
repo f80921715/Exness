@@ -1358,6 +1358,24 @@ body.admin-reference .admin-action-view[hidden] {
 .admin-dashboard-quick-actions button > span { flex: 1; }
 .admin-dashboard-quick-actions button > svg:first-child { width: 18px; height: 18px; color: #7045bd; }
 .admin-dashboard-quick-actions button > svg:last-child { width: 16px; height: 16px; color: #8a8984; }
+.admin-pending-withdrawals { margin-top: 18px; }
+.admin-withdrawals-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.admin-pending-count { flex: 0 0 auto; padding: 6px 9px; border: 1px solid #e4e2de; border-radius: 999px; background: #f8f8f6; color: #686762; font-size: 11px; }
+.admin-withdrawal-list { padding: 0 24px; }
+.admin-withdrawal-empty { margin: 0; padding: 20px 0 24px; color: #777672; font-size: 13px; }
+.admin-withdrawal-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid #f0efec; }
+.admin-withdrawal-row:last-child { border-bottom: 0; }
+.admin-withdrawal-copy { min-width: 0; }
+.admin-withdrawal-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.admin-withdrawal-heading strong { overflow: hidden; color: #30302f; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.admin-withdrawal-heading time { flex: 0 0 auto; color: #8a8984; font-size: 11px; }
+.admin-withdrawal-copy p { display: flex; flex-wrap: wrap; gap: 0 6px; margin: 4px 0 0; color: #777672; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+.admin-withdrawal-amount { color: #30302f; font-size: 16px; font-weight: 600; white-space: nowrap; }
+.admin-withdrawal-actions { display: flex; grid-column: 1 / -1; justify-content: flex-end; gap: 6px; }
+.admin-withdrawal-actions button { min-height: 34px; padding: 0 12px; border: 1px solid #e4e2de; border-radius: 6px; background: #fff; color: #4d4c48; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.admin-withdrawal-actions button:first-child { border-color: #7045bd; background: #7045bd; color: #fff; }
+.admin-withdrawal-actions button:first-child:hover { background: #6039a7; }
+.admin-withdrawal-actions button:last-child:hover { border-color: #d96a5e; color: #a93226; }
 
 .admin-form-card {
   overflow: hidden;
@@ -1411,6 +1429,8 @@ body.admin-reference .admin-action-view[hidden] {
   .admin-dashboard-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
   .admin-dashboard-metric { min-height: 124px; padding: 20px; }
   .admin-dashboard-quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 22px 32px 32px; }
+  .admin-withdrawal-row { grid-template-columns: minmax(0, 1fr) auto auto; gap: 16px; }
+  .admin-withdrawal-actions { grid-column: auto; }
   .admin-form-heading { padding: 26px 32px 21px; }
   .admin-form-card form { padding: 26px 32px 32px; }
 }
@@ -3348,8 +3368,8 @@ body.auth-page .auth-brand-subtitle {
   }
 
   body.reference-dashboard .reference-chart-area {
-    height: min(28rem, 60svh);
-    min-height: 20rem;
+    height: min(38rem, 72svh);
+    min-height: 30rem;
   }
 
   body.reference-dashboard .reference-market-widget {

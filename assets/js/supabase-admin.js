@@ -22,7 +22,8 @@
             totalUsers: 0,
             activeUsers: 0,
             suspendedUsers: 0,
-            topupRequiredUsers: 0
+            topupRequiredUsers: 0,
+            pendingWithdrawals: 0
         },
         searchQuery: '',
         activeTab: 'all'
@@ -222,6 +223,20 @@
                 ];
             }
 
+            const { data: withdrawals, error: withdrawalsError } = await client
+                .from('withdrawals')
+                .select('id, user_id, amount, network, address, created_at, status, profiles(full_name, email, username)')
+                .eq('status', 'pending')
+                .order('created_at', { ascending: true });
+
+            if (withdrawalsError) {
+                console.error('[Admin] Pending withdrawals could not be loaded:', withdrawalsError);
+                adminState.withdrawals = [];
+                showAdminToast('Unable to load pending withdrawals: ' + withdrawalsError.message, 'error');
+            } else {
+                adminState.withdrawals = withdrawals || [];
+            }
+
             calculateMetrics();
             renderAdminDashboard();
 
@@ -236,7 +251,8 @@
             totalUsers: adminState.users.length,
             activeUsers: adminState.users.filter((user) => String(user.status || 'active').toLowerCase() === 'active').length,
             suspendedUsers: adminState.users.filter((user) => String(user.status || '').toLowerCase() === 'suspended').length,
-            topupRequiredUsers: adminState.users.filter((user) => String(user.status || '').toLowerCase() === 'topup_required').length
+            topupRequiredUsers: adminState.users.filter((user) => String(user.status || '').toLowerCase() === 'topup_required').length,
+            pendingWithdrawals: adminState.withdrawals.length
         };
     }
 
@@ -270,11 +286,50 @@
             if (element) element.textContent = value.toLocaleString();
         });
 
+        const pendingWithdrawalCount = document.querySelector('[data-metric-pending-withdrawals]');
+        if (pendingWithdrawalCount) pendingWithdrawalCount.textContent = `${adminState.metrics.pendingWithdrawals} pending`;
+        renderPendingWithdrawals();
         populateActionUserSelects();
 
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
             window.lucide.createIcons();
         }
+    }
+
+    function renderPendingWithdrawals() {
+        const container = document.querySelector('[data-admin-pending-withdrawals]');
+        if (!container) return;
+
+        if (adminState.withdrawals.length === 0) {
+            container.innerHTML = '<p class="admin-withdrawal-empty">No pending withdrawals.</p>';
+            return;
+        }
+
+        container.innerHTML = adminState.withdrawals.map((withdrawal) => {
+            const userName = withdrawal.profiles?.full_name || withdrawal.profiles?.email || 'Account holder';
+            return `
+                <article class="admin-withdrawal-row">
+                    <div class="admin-withdrawal-copy">
+                        <div class="admin-withdrawal-heading">
+                            <strong>${escapeHtml(userName)}</strong>
+                            <time datetime="${escapeHtml(withdrawal.created_at || '')}">${escapeHtml(formatDateTime(withdrawal.created_at))}</time>
+                        </div>
+                        <p><span>${escapeHtml(withdrawal.network || 'Withdrawal')}</span><span aria-hidden="true">·</span><span>${escapeHtml(withdrawal.address || 'No destination provided')}</span></p>
+                    </div>
+                    <strong class="admin-withdrawal-amount">${formatUSD(withdrawal.amount)}</strong>
+                    <div class="admin-withdrawal-actions">
+                        <button type="button" data-approve-withdrawal="${escapeHtml(withdrawal.id)}">Approve</button>
+                        <button type="button" data-reject-withdrawal="${escapeHtml(withdrawal.id)}">Reject</button>
+                    </div>
+                </article>`;
+        }).join('');
+
+        container.querySelectorAll('[data-approve-withdrawal]').forEach((button) => {
+            button.addEventListener('click', () => window.brokerAdmin.approveWithdrawal(button.dataset.approveWithdrawal));
+        });
+        container.querySelectorAll('[data-reject-withdrawal]').forEach((button) => {
+            button.addEventListener('click', () => window.brokerAdmin.rejectWithdrawal(button.dataset.rejectWithdrawal));
+        });
     }
 
     function renderUserDetailsPanel() {

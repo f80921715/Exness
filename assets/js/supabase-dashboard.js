@@ -314,7 +314,6 @@
     let saveTimeout = null;
     let accountSuspended = false;
     let accountTopUpRequired = false;
-    const MIN_WITHDRAWAL_BALANCE = 10000;
 
     function showSuspendedBanner() {
         const existing = document.querySelector('[data-suspended-banner]');
@@ -532,6 +531,22 @@
         }, 1000);
     }
 
+    async function saveAccountTransaction({ txid, type, asset, amount, fee = 0, status = 'pending', isPositive = false }) {
+        if (!currentUser?.id) throw new Error('Your session expired. Sign in again before submitting this action.');
+
+        const { error } = await client.from('transactions').insert({
+            user_id: currentUser.id,
+            txid,
+            type,
+            asset,
+            amount,
+            fee,
+            status,
+            is_positive: isPositive
+        });
+        if (error) throw error;
+    }
+
     // Account Store Public Methods
     const brokerAccount = {
         getUser() {
@@ -544,7 +559,7 @@
         showToast: showAppleToast,
 
         // 1. DEPOSIT
-        deposit({ amount, asset, network, address, txid }) {
+        async deposit({ amount, asset, network, address, txid }) {
             if (accountSuspended && !accountTopUpRequired) {
                 showAppleToast('Your account is suspended and cannot make deposits.', 'error');
                 return false;
@@ -557,14 +572,36 @@
             }
 
             const transactionId = txid || ('TX-' + Math.floor(1000000 + Math.random() * 9000000));
+            const depositAsset = asset || 'USDT';
+            const depositNetwork = network || 'TRC-20';
+            let savedDeposit;
+            try {
+                if (!currentUser?.id) throw new Error('Your session expired. Sign in again before submitting this deposit.');
+                const { data, error } = await client.from('deposits').insert({
+                    user_id: currentUser.id,
+                    txid: transactionId,
+                    asset: depositAsset,
+                    network: depositNetwork,
+                    address: address || '',
+                    amount: num,
+                    status: 'pending'
+                }).select('id, created_at').single();
+                if (error) throw error;
+                savedDeposit = data;
+            } catch (error) {
+                console.error('[Dashboard] Deposit request could not be saved:', error);
+                showAppleToast(error.message || 'Unable to submit deposit for review.', 'error');
+                return false;
+            }
+
             const depositRecord = {
-                id: 'dep_' + Date.now(),
+                id: savedDeposit.id,
                 txid: transactionId,
                 amount: num,
-                asset: asset || 'USDT',
-                network: network || 'TRC-20',
+                asset: depositAsset,
+                network: depositNetwork,
                 address: address || '',
-                date: new Date().toISOString(),
+                date: savedDeposit.created_at || new Date().toISOString(),
                 status: 'Pending'
             };
 
@@ -591,26 +628,17 @@
                 unread: true
             });
 
-            if (currentUser) {
-                client.from('deposits').insert({
-                    user_id: currentUser.id,
-                    txid: transactionId,
-                    asset: depositRecord.asset,
-                    network: depositRecord.network,
-                    address: depositRecord.address,
-                    amount: num,
-                    status: 'pending'
-                }).then(() => {}).catch(() => {});
-
-                client.from('transactions').insert({
-                    user_id: currentUser.id,
+            try {
+                await saveAccountTransaction({
                     txid: transactionId,
                     type: 'Deposit',
                     asset: `${depositRecord.asset} (${depositRecord.network})`,
                     amount: num,
                     status: 'pending',
-                    is_positive: true
-                }).then(() => {}).catch(() => {});
+                    isPositive: true
+                });
+            } catch (error) {
+                console.warn('[Dashboard] Deposit transaction audit row could not be saved:', error);
             }
 
             persistAccountData();
@@ -620,14 +648,9 @@
         },
 
         // 2. WITHDRAWAL
-        withdraw({ amount, network, address }) {
+        async withdraw({ amount, network, address }) {
             if (accountSuspended || accountTopUpRequired) {
                 showAppleToast('Top up your account to continue trading.', 'error');
-                return false;
-            }
-
-            if (Number(currentAccountData?.balance) < MIN_WITHDRAWAL_BALANCE) {
-                showAppleToast('You are ineligible to withdraw. A minimum balance of $10,000 is required.', 'error');
                 return false;
             }
 
@@ -646,8 +669,29 @@
             const net = Math.max(0, num - fee);
             const transactionId = 'TX-' + Math.floor(1000000 + Math.random() * 9000000);
 
+            let savedWithdrawal;
+            try {
+                if (!currentUser?.id) throw new Error('Sign in again before submitting a withdrawal.');
+                const { data, error } = await client.from('withdrawals').insert({
+                    user_id: currentUser.id,
+                    txid: transactionId,
+                    amount: num,
+                    fee: fee,
+                    net_amount: net,
+                    network: network || 'USDT (TRC-20)',
+                    address: address || '',
+                    status: 'pending'
+                }).select('id, created_at').single();
+                if (error) throw error;
+                savedWithdrawal = data;
+            } catch (error) {
+                console.error('[Dashboard] Withdrawal request could not be saved:', error);
+                showAppleToast(error.message || 'Unable to submit withdrawal for approval.', 'error');
+                return false;
+            }
+
             const withdrawalRecord = {
-                id: 'wd_' + Date.now(),
+                id: savedWithdrawal.id,
                 txid: transactionId,
                 amount: num,
                 fee: fee,
@@ -681,20 +725,8 @@
                 unread: true
             });
 
-            // Async sync to Supabase database tables
-            if (currentUser) {
-                client.from('withdrawals').insert({
-                    user_id: currentUser.id,
-                    txid: transactionId,
-                    amount: num,
-                    fee: fee,
-                    net_amount: net,
-                    network: withdrawalRecord.network,
-                    address: withdrawalRecord.address,
-                    status: 'pending'
-                }).then(() => {}).catch(() => {});
-
-                client.from('transactions').insert({
+            try {
+                const { error: transactionError } = await client.from('transactions').insert({
                     user_id: currentUser.id,
                     txid: transactionId,
                     type: 'Withdrawal',
@@ -703,7 +735,10 @@
                     fee: fee,
                     status: 'pending',
                     is_positive: false
-                }).then(() => {}).catch(() => {});
+                });
+                if (transactionError) console.warn('[Dashboard] Withdrawal transaction audit row could not be saved:', transactionError);
+            } catch (error) {
+                console.warn('[Dashboard] Withdrawal transaction audit row could not be saved:', error);
             }
 
             persistAccountData();
@@ -713,7 +748,7 @@
         },
 
         // 3. EXECUTE TRADE
-        trade({ symbol, side, amount, leverage, orderType }) {
+        async trade({ symbol, side, amount, leverage, orderType }) {
             if (accountSuspended || accountTopUpRequired) {
                 showAppleToast('Top up your account to continue trading.', 'error');
                 return false;
@@ -734,6 +769,20 @@
             const entryPrices = { 'EURUSD': 1.17489, 'GOLD': 2650.00, 'BTC': 59420.00, 'ETH': 2480.00 };
             const entry = entryPrices[symbol] || 248.50;
             const transactionId = 'TX-' + Math.floor(1000000 + Math.random() * 9000000);
+            try {
+                await saveAccountTransaction({
+                    txid: transactionId,
+                    type: `${side.toUpperCase()} Order`,
+                    asset: `${symbol} (${levNum}x Leverage)`,
+                    amount: num,
+                    status: 'confirmed',
+                    isPositive: side === 'buy'
+                });
+            } catch (error) {
+                console.error('[Dashboard] Trade could not be saved:', error);
+                showAppleToast(error.message || 'Unable to execute trade.', 'error');
+                return false;
+            }
 
             const tradeRecord = {
                 id: 'pos_' + Date.now(),
@@ -773,18 +822,6 @@
                 unread: true
             });
 
-            if (currentUser) {
-                client.from('transactions').insert({
-                    user_id: currentUser.id,
-                    txid: transactionId,
-                    type: `${side.toUpperCase()} Order`,
-                    asset: `${symbol} (${levNum}x Leverage)`,
-                    amount: num,
-                    status: 'confirmed',
-                    is_positive: side === 'buy'
-                }).then(() => {}).catch(() => {});
-            }
-
             persistAccountData();
             hydrateUI();
             showAppleToast(`${side.toUpperCase()} ${symbol} order executed!`);
@@ -792,20 +829,35 @@
         },
 
         // 4. CLOSE TRADE
-        closeTrade(tradeId) {
+        async closeTrade(tradeId) {
             const index = currentAccountData.trades.findIndex((t) => t.id === tradeId);
-            if (index === -1) return;
+            if (index === -1 || currentAccountData.trades[index].status === 'Closed') return false;
 
             const trade = currentAccountData.trades[index];
             // Simulate simulated reasonable gain/loss (e.g. +3.5%)
             const pnl = trade.amount * 0.035;
+            const closeTxId = 'TX-' + Math.floor(1000000 + Math.random() * 9000000);
+            try {
+                await saveAccountTransaction({
+                    txid: closeTxId,
+                    type: 'Closed Position',
+                    asset: `${trade.symbol} (${trade.side.toUpperCase()})`,
+                    amount: pnl,
+                    status: 'confirmed',
+                    isPositive: pnl >= 0
+                });
+            } catch (error) {
+                console.error('[Dashboard] Position close could not be saved:', error);
+                showAppleToast(error.message || 'Unable to close position.', 'error');
+                return false;
+            }
+
             trade.status = 'Closed';
             trade.pnl = pnl;
 
             currentAccountData.balance += pnl;
             currentAccountData.totalProfit += Math.max(0, pnl);
 
-            const closeTxId = 'TX-' + Math.floor(1000000 + Math.random() * 9000000);
             currentAccountData.transactions.unshift({
                 id: 'close_' + Date.now(),
                 txid: closeTxId,
@@ -818,25 +870,14 @@
                 isPositive: pnl >= 0
             });
 
-            if (currentUser) {
-                client.from('transactions').insert({
-                    user_id: currentUser.id,
-                    txid: closeTxId,
-                    type: 'Closed Position',
-                    asset: `${trade.symbol} (${trade.side.toUpperCase()})`,
-                    amount: pnl,
-                    status: 'confirmed',
-                    is_positive: pnl >= 0
-                }).then(() => {}).catch(() => {});
-            }
-
             persistAccountData();
             hydrateUI();
             showAppleToast(`Position closed. P&L: +${formatUSD(pnl)}`);
+            return true;
         },
 
         // 5. SUBSCRIBE TO INVESTMENT PLAN
-        invest({ planName, capital, dailyRate, durationDays }) {
+        async invest({ planName, capital, dailyRate, durationDays }) {
             if (accountSuspended) {
                 showAppleToast('Your account is suspended and investment actions are disabled.', 'error');
                 return false;
@@ -852,9 +893,6 @@
                 showAppleToast(`Insufficient balance (${formatUSD(currentAccountData.balance)}). Deposit to subscribe.`, 'error');
                 return false;
             }
-
-            currentAccountData.balance -= cap;
-            currentAccountData.activeInvest += cap;
 
             const rate = parseFloat(dailyRate) || 2.38;
             const days = parseInt(durationDays) || 21;
@@ -873,10 +911,26 @@
                 startDate: new Date().toISOString()
             };
 
+            const planTxId = 'TX-' + Math.floor(1000000 + Math.random() * 9000000);
+            try {
+                await saveAccountTransaction({
+                    txid: planTxId,
+                    type: 'Plan Subscription',
+                    asset: plan.name,
+                    amount: cap,
+                    status: 'confirmed',
+                    isPositive: false
+                });
+            } catch (error) {
+                console.error('[Dashboard] Plan subscription could not be saved:', error);
+                showAppleToast(error.message || 'Unable to subscribe to this plan.', 'error');
+                return false;
+            }
+
+            currentAccountData.balance -= cap;
+            currentAccountData.activeInvest += cap;
             currentAccountData.activePlan = plan;
             currentAccountData.investments.unshift(plan);
-
-            const planTxId = 'TX-' + Math.floor(1000000 + Math.random() * 9000000);
             currentAccountData.transactions.unshift({
                 id: plan.id,
                 txid: planTxId,
@@ -897,18 +951,6 @@
                 time: 'Just now',
                 unread: true
             });
-
-            if (currentUser) {
-                client.from('transactions').insert({
-                    user_id: currentUser.id,
-                    txid: planTxId,
-                    type: 'Plan Subscription',
-                    asset: plan.name,
-                    amount: cap,
-                    status: 'confirmed',
-                    is_positive: false
-                }).then(() => {}).catch(() => {});
-            }
 
             persistAccountData();
             hydrateUI();
@@ -1145,12 +1187,21 @@
                     <td class="font-bold">${t.leverage}</td>
                     <td class="font-bold text-green-500 font-mono">+$0.00</td>
                     <td>
-                        <button type="button" onclick="window.brokerAccount.closeTrade('${t.id}')" class="px-2 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[10px] font-bold rounded transition">
+                        <button type="button" data-close-trade="${escapeHtml(t.id)}" class="px-2 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[10px] font-bold rounded transition">
                             Close
                         </button>
                     </td>
                 </tr>`;
         }).join('');
+
+            tbody.querySelectorAll('[data-close-trade]').forEach((button) => {
+                button.addEventListener('click', async () => {
+                    if (button.disabled) return;
+                    button.disabled = true;
+                    await window.brokerAccount.closeTrade(button.dataset.closeTrade);
+                    if (button.isConnected) button.disabled = false;
+                });
+            });
     }
 
     // Dynamic Active Plan Card Hydration
@@ -1208,21 +1259,28 @@
         // 1. DEPOSIT PAGE
         const depositForm = document.querySelector('[data-deposit-form]');
         if (depositForm) {
-            depositForm.addEventListener('submit', (e) => {
+            depositForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const submitButton = depositForm.querySelector('[type="submit"]');
+                if (submitButton?.disabled) return;
                 const amountInput = depositForm.querySelector('[name="depositAmount"]') || depositForm.querySelector('input[type="number"]');
                 const asset = depositForm.dataset.selectedAsset || 'USDT';
                 const network = depositForm.dataset.selectedNetwork || 'TRC-20';
                 const address = depositForm.dataset.selectedAddress || '';
                 const amount = amountInput ? amountInput.value : 0;
 
-                if (brokerAccount.deposit({ amount, asset, network, address })) {
-                    if (amountInput) amountInput.value = '';
-                    const successBox = document.querySelector('[data-deposit-success]');
-                    if (successBox) {
-                        successBox.hidden = false;
-                        setTimeout(() => successBox.hidden = true, 5000);
+                if (submitButton) submitButton.disabled = true;
+                try {
+                    if (await brokerAccount.deposit({ amount, asset, network, address })) {
+                        if (amountInput) amountInput.value = '';
+                        const successBox = document.querySelector('[data-deposit-success]');
+                        if (successBox) {
+                            successBox.hidden = false;
+                            setTimeout(() => successBox.hidden = true, 5000);
+                        }
                     }
+                } finally {
+                    if (submitButton) submitButton.disabled = false;
                 }
             });
         }
@@ -1236,7 +1294,7 @@
                 amountInput.value = Number(brokerAccount.getData()?.balance || 0);
             }));
 
-            withdrawForm.addEventListener('submit', (event) => {
+            withdrawForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 const formData = new FormData(withdrawForm);
                 const amount = formData.get('amount');
@@ -1257,16 +1315,22 @@
                     address = String(formData.get('address') || '').trim();
                 }
 
-                if (brokerAccount.withdraw({ amount, network, address })) {
-                    withdrawForm.reset();
-                    if (formType === 'bank') {
-                        hydrateBankWithdrawalProfile();
+                const submitButton = withdrawForm.querySelector('[type="submit"]');
+                if (submitButton) submitButton.disabled = true;
+                try {
+                    if (await brokerAccount.withdraw({ amount, network, address })) {
+                        withdrawForm.reset();
+                        if (formType === 'bank') {
+                            hydrateBankWithdrawalProfile();
+                        }
+                        const successAlert = document.querySelector('[data-withdraw-success]');
+                        if (successAlert) {
+                            successAlert.hidden = false;
+                            setTimeout(() => successAlert.hidden = true, 5000);
+                        }
                     }
-                    const successAlert = document.querySelector('[data-withdraw-success]');
-                    if (successAlert) {
-                        successAlert.hidden = false;
-                        setTimeout(() => successAlert.hidden = true, 5000);
-                    }
+                } finally {
+                    if (submitButton) submitButton.disabled = false;
                 }
             });
         });
@@ -1274,26 +1338,39 @@
         // 3. TRADES PAGE
         const tradeForm = document.querySelector('form[data-trade-form]');
         if (tradeForm) {
-            tradeForm.addEventListener('submit', (e) => {
+            tradeForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const submitButton = tradeForm.querySelector('[type="submit"]');
+                if (submitButton?.disabled) return;
                 const amount = tradeForm.querySelector('input[type="number"]')?.value;
                 const side = tradeForm.dataset.side || 'buy';
                 const leverage = tradeForm.dataset.leverage || '1x';
                 const symbol = 'EURUSD';
 
-                if (brokerAccount.trade({ symbol, side, amount, leverage })) {
-                    tradeForm.reset();
+                if (submitButton) submitButton.disabled = true;
+                try {
+                    if (await brokerAccount.trade({ symbol, side, amount, leverage })) {
+                        tradeForm.reset();
+                    }
+                } finally {
+                    if (submitButton) submitButton.disabled = false;
                 }
             });
         }
 
         // 4. INVESTMENTS PAGE
         document.querySelectorAll('[data-subscribe-plan]').forEach((btn) => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => {
+                if (btn.disabled) return;
                 const planName = btn.dataset.planName || 'Gold Arbitrage';
                 const capital = parseFloat(btn.dataset.planCapital) || 5000;
                 const rate = parseFloat(btn.dataset.planRate) || 2.38;
-                brokerAccount.invest({ planName, capital, dailyRate: rate, durationDays: 21 });
+                btn.disabled = true;
+                try {
+                    await brokerAccount.invest({ planName, capital, dailyRate: rate, durationDays: 21 });
+                } finally {
+                    btn.disabled = false;
+                }
             });
         });
     }

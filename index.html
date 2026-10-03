@@ -360,7 +360,7 @@
                 <!-- Right Controls -->
                 <div class="hidden md:flex items-center space-x-5">
                     <label class="site-language-toggle" aria-label="Select site language">
-                        <span class="text-[10px] uppercase tracking-[0.18em] font-bold opacity-80">Lang</span>
+                        <span class="text-[10px] uppercase tracking-[0.18em] font-bold opacity-80" data-i18n="nav.language">Language</span>
                         <select data-site-language aria-label="Select language">
                             <option value="en">EN</option>
                             <option value="fr">FR</option>
@@ -436,7 +436,7 @@
             <a href="faqs.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" data-i18n="nav.faq">FAQ</a>
             <div class="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
                 <label class="site-language-toggle w-full justify-center" aria-label="Select site language">
-                    <span class="text-[10px] uppercase tracking-[0.18em] font-bold opacity-80">Lang</span>
+                    <span class="text-[10px] uppercase tracking-[0.18em] font-bold opacity-80" data-i18n="nav.language">Language</span>
                     <select data-site-language aria-label="Select language" class="w-full text-center">
                         <option value="en">EN</option>
                         <option value="fr">FR</option>
@@ -461,6 +461,7 @@
                 'nav.about': 'About',
                 'nav.contact': 'Contact',
                 'nav.faq': 'FAQ',
+                'nav.language': 'Language',
                 'nav.login': 'Login',
                 'nav.signup': 'Sign Up',
                 'nav.dashboard': 'Dashboard',
@@ -483,6 +484,7 @@
                 'nav.about': 'À propos',
                 'nav.contact': 'Contact',
                 'nav.faq': 'FAQ',
+                'nav.language': 'Langue',
                 'nav.login': 'Connexion',
                 'nav.signup': 'Inscription',
                 'nav.dashboard': 'Tableau de bord',
@@ -505,6 +507,7 @@
                 'nav.about': 'Nosotros',
                 'nav.contact': 'Contacto',
                 'nav.faq': 'Preguntas',
+                'nav.language': 'Idioma',
                 'nav.login': 'Iniciar sesión',
                 'nav.signup': 'Registrarse',
                 'nav.dashboard': 'Panel',
@@ -521,18 +524,20 @@
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const select = document.querySelector('[data-site-language]');
-            if (!select) return;
+        const initializeSiteLanguage = () => {
+            const selects = [...document.querySelectorAll('[data-site-language]')];
+            if (!selects.length) return;
 
             const stored = localStorage.getItem('site-language') || 'en';
             const valid = ['en', 'fr', 'es', 'pt', 'de', 'it', 'ar'];
-            select.value = valid.includes(stored) ? stored : 'en';
+            const initialLanguage = valid.includes(stored) ? stored : 'en';
 
             const applyLanguage = (language) => {
-                const dictionary = siteTranslations[language] || siteTranslations.en;
-                document.documentElement.lang = language;
-                localStorage.setItem('site-language', language);
+                const selectedLanguage = valid.includes(language) ? language : 'en';
+                const dictionary = siteTranslations[selectedLanguage] || siteTranslations.en;
+                document.documentElement.lang = selectedLanguage;
+                localStorage.setItem('site-language', selectedLanguage);
+                selects.forEach((select) => { select.value = selectedLanguage; });
 
                 document.querySelectorAll('[data-i18n]').forEach((node) => {
                     const text = dictionary[node.dataset.i18n];
@@ -540,12 +545,22 @@
                 });
             };
 
-            select.addEventListener('change', (event) => {
-                applyLanguage(event.target.value);
+            selects.forEach((select) => {
+                select.addEventListener('change', (event) => {
+                    applyLanguage(event.target.value);
+                });
             });
 
-            applyLanguage(select.value);
-        });
+            applyLanguage(initialLanguage);
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('readystatechange', () => {
+                if (document.readyState !== 'loading') initializeSiteLanguage();
+            }, { once: true });
+        } else {
+            initializeSiteLanguage();
+        }
     </script>
 
     <!-- Trading-focused landing hero -->
