@@ -141,7 +141,7 @@
                     <span data-auth-initials>DSP</span>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <div class="font-bold text-white text-xs truncate" data-auth-name>Michael</div>
+                    <div class="font-bold text-white text-xs truncate" data-auth-name></div>
                     <div class="text-[10px] text-cyan-400 font-medium flex items-center gap-1 mt-0.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> activated
                     </div>
@@ -181,10 +181,6 @@
                 <a href="trades.html" class="sidebar-nav-item">
                     <i data-lucide="bar-chart-2"></i>
                     <span data-i18n="nav.signal">Signal Purchase</span>
-                </a>
-                <a href="news.html" class="sidebar-nav-item">
-                    <i data-lucide="newspaper"></i>
-                    <span data-i18n="nav.news">News</span>
                 </a>
                 <a href="profile.html" class="sidebar-nav-item">
                     <i data-lucide="settings"></i>
@@ -248,7 +244,7 @@
 
         <!-- User label strip -->
         <div class="reference-user-bar">
-            <span><span data-i18n="nav.username">Username :</span> <strong data-auth-name>Samuel</strong></span>
+            <span><span data-i18n="nav.username">Username :</span> <strong data-auth-username-label></strong></span>
         </div>
 
                 <div class="landing-ticker reference-dashboard-ticker bg-[#0B0C10] border-b border-[#FFD100]/20 text-xs py-2 overflow-hidden" aria-label="Market prices">
@@ -281,7 +277,7 @@
                 <!-- Card 1: Investment -->
                 <article class="reference-balance-card reference-balance-card--investment">
                     <div class="reference-card-header">
-                        <div class="reference-card-amount"><span data-auth-active-invest>$0.00</span></div>
+                        <div class="reference-card-amount"><span data-auth-active-invest></span></div>
                         <div class="reference-card-icon font-black text-lg select-none">$</div>
                     </div>
                     <div class="reference-card-title">INVESTMENT</div>
@@ -292,7 +288,7 @@
                 <!-- Card 2: Total Balance -->
                 <article class="reference-balance-card reference-balance-card--balance">
                     <div class="reference-card-header">
-                        <div class="reference-card-amount"><span data-auth-balance>$0.00</span></div>
+                        <div class="reference-card-amount"><span data-auth-balance></span></div>
                         <div class="reference-card-icon">
                             <svg class="w-5 h-5 fill-none stroke-current" viewBox="0 0 24 24" stroke-width="2.5"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
                         </div>
@@ -307,7 +303,7 @@
                 <!-- Card 3: Total Bonus -->
                 <article class="reference-balance-card reference-balance-card--bonus">
                     <div class="reference-card-header">
-                        <div class="reference-card-amount"><span data-auth-bonus>$0.00</span></div>
+                        <div class="reference-card-amount"><span data-auth-bonus></span></div>
                         <div class="reference-card-icon">
                             <i data-lucide="users" class="w-5 h-5"></i>
                         </div>
@@ -324,7 +320,7 @@
                     <div class="reference-card-header">
                         <div class="reference-card-amount">
                             <svg class="w-4 h-4 mr-0.5 inline-block fill-current opacity-95" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span data-auth-total-profit>$0.00</span>
+                            <span data-auth-total-profit></span>
                         </div>
                         <div class="reference-card-icon">
                             <svg class="w-5 h-5 fill-none stroke-current" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2.5"/><path d="M6 16c0-1.5 1.5-2.5 3-2.5s3 1 3 2.5M14 9h4M14 13h4"/></svg>
@@ -478,7 +474,7 @@
                         <button type="button" data-support-chat-close aria-label="Close Exness Support">&times;</button>
                     </header>
                     <div class="support-chat-messages" data-support-chat-messages aria-live="polite" aria-relevant="additions">
-                        <div class="support-chat-message is-assistant">CUSTOMER SUPPORT<br><br>Thank you for contacting Customer Support.<br><br>For detailed information regarding your trading account, registration, transactions, verification, or other account-related inquiries, please contact our designated Support Team through the authorized company support channel.<br><br>You may also contact your Account Trading Manager directly for account-specific assistance and guidance.<br><br>Support Email:<br><a href="mailto:officialexnessbrokeragetrading@gmail.com">officialexnessbrokeragetrading@gmail.com</a><br><br>Please include your registered account details and a brief description of your inquiry to help us assist you efficiently.<br><br>Customer Support Team<br>Professional assistance. Clear communication. Secure account service</div>
+                        <div class="support-chat-message is-assistant">Hi! I can help with deposits, withdrawals, account settings, and trading. What can I help you with?</div>
                     </div>
                     <div class="support-chat-prompts" aria-label="Common questions">
                         <button type="button" data-support-chat-prompt="How do I withdraw?">Withdrawals</button>
@@ -512,21 +508,7 @@
             if (!panel || !toggle || !form || !input || !messages) return;
 
             const supportEmail = 'officialexnessbrokeragetrading@gmail.com';
-            const customerSupportReply = `CUSTOMER SUPPORT
-
-Thank you for contacting Customer Support.
-
-For detailed information regarding your trading account, registration, transactions, verification, or other account-related inquiries, please contact our designated Support Team through the authorized company support channel.
-
-You may also contact your Account Trading Manager directly for account-specific assistance and guidance.
-
-Support Email:
-${supportEmail}
-
-Please include your registered account details and a brief description of your inquiry to help us assist you efficiently.
-
-Customer Support Team
-Professional assistance. Clear communication. Secure account service`;
+            const customerSupportReply = `I can help with information on the website. For private account questions, email ${supportEmail} or contact your trade manager.`;
             const siteSources = [
                 { path: '../faqs.html', title: 'FAQ' },
                 { path: '../services.html', title: 'Services' },
@@ -614,7 +596,7 @@ Professional assistance. Clear communication. Secure account service`;
                     return `${best.join('\n\n')}\n\nFor account-specific help, email ${supportEmail} or contact your trade manager.`;
                 }
 
-                return `I couldn’t find that answer in the website content I checked.\n\n${customerSupportReply}`;
+                return `I couldn’t find that on the website. Try asking about deposits, withdrawals, plans, or trading.\n\n${customerSupportReply}`;
             };
 
             const sendMessage = (value) => {
@@ -630,6 +612,7 @@ Professional assistance. Clear communication. Secure account service`;
 
             const setOpen = (open) => {
                 panel.hidden = !open;
+                document.body.classList.toggle('support-chat-open', open);
                 toggle.setAttribute('aria-expanded', String(open));
                 toggle.setAttribute('aria-label', open ? 'Close Exness Support' : 'Open Exness Support');
                 if (badge && open) badge.hidden = true;

@@ -56,7 +56,6 @@
             'nav.transactions': 'Transactions',
             'nav.upgrade': 'Account Upgrade',
             'nav.signal': 'Signal Purchase',
-            'nav.news': 'News',
             'nav.settings': 'Account Settings',
             'nav.logout': 'Logout',
             'nav.analysis': 'Live Analysis',
@@ -80,7 +79,6 @@
             'nav.transactions': 'Transactions',
             'nav.upgrade': 'Mise à niveau du compte',
             'nav.signal': 'Achat de signal',
-            'nav.news': 'Actualités',
             'nav.settings': 'Paramètres du compte',
             'nav.logout': 'Déconnexion',
             'nav.analysis': 'Analyse en direct',
@@ -104,7 +102,6 @@
             'nav.transactions': 'Transacciones',
             'nav.upgrade': 'Actualización de cuenta',
             'nav.signal': 'Compra de señales',
-            'nav.news': 'Noticias',
             'nav.settings': 'Ajustes de la cuenta',
             'nav.logout': 'Cerrar sesión',
             'nav.analysis': 'Análisis en vivo',
@@ -138,12 +135,19 @@
     }
 
     function dashboardCurrency(user = currentUser) {
-        const language = storedDashboardLanguage(user);
-        if (language) return currencyForDashboardLanguage(language);
-        const profileLanguage = user?.user_metadata?.language;
-        if (DASHBOARD_LANGUAGE_CURRENCIES[profileLanguage]) return currencyForDashboardLanguage(profileLanguage);
+        const language = storedDashboardLanguage(user) || user?.user_metadata?.language || 'en';
+        if (DASHBOARD_LANGUAGE_CURRENCIES[language]) return currencyForUserLanguage(language, user);
         const country = user?.user_metadata?.country;
         return user?.user_metadata?.currency || (country && window.accountPreferences?.currencyForCountry(country)) || 'USD';
+    }
+
+    function countryDefaultCurrency(user) {
+        const country = user?.user_metadata?.country;
+        return (country && window.accountPreferences?.currencyForCountry(country)) || user?.user_metadata?.currency || 'USD';
+    }
+
+    function currencyForUserLanguage(language, user) {
+        return language === 'en' ? countryDefaultCurrency(user) : currencyForDashboardLanguage(language);
     }
 
     function saveDashboardLanguage(user, language) {
@@ -159,7 +163,7 @@
             user_metadata: {
                 ...user.user_metadata,
                 language,
-                currency: currencyForDashboardLanguage(language)
+                currency: currencyForUserLanguage(language, user)
             }
         };
     }
@@ -213,15 +217,24 @@
         };
     }
 
+    function normalizeRoundTripAmount(amount, currency, rate) {
+        if (currency === 'USD') return amount;
+        const wholeAmount = Math.round(amount);
+        const conversionTolerance = rate / 200 + 1e-8;
+        return Math.abs(amount - wholeAmount) <= conversionTolerance ? wholeAmount : amount;
+    }
+
     // Helper: format currency
     function formatUSD(amount) {
         const converted = convertedCurrencyAmount(amount);
+        const rate = Number(usdExchangeRates[converted.currency]) || 1;
+        const displayAmount = normalizeRoundTripAmount(converted.amount, converted.currency, rate);
         try {
             return new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: converted.currency,
                 currencyDisplay: 'narrowSymbol'
-            }).format(converted.amount);
+            }).format(displayAmount);
         } catch (error) {
             return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(amount) || 0);
         }
@@ -1003,6 +1016,7 @@
             if ('value' in el) el.value = username;
             else el.textContent = username;
         });
+        document.querySelectorAll('[data-auth-username-label]').forEach((el) => { el.textContent = username; });
         document.querySelectorAll('[data-auth-email]').forEach((el) => {
             if ('value' in el) el.value = currentUser.email || '';
             else el.textContent = currentUser.email || '';
@@ -1098,12 +1112,30 @@
         }
     }
 
+    function transactionHistoryVisible(transaction) {
+        const type = String(transaction.type || '').trim().toLowerCase();
+        const asset = String(transaction.asset || '').trim().toLowerCase();
+        if (type.includes('profit') || type.includes('bonus') || asset.includes('profit') || asset.includes('bonus')) return false;
+        if (type === 'admin credit' || type === 'admin debit') {
+            return asset === 'balance adjustment' || asset === 'total balance';
+        }
+        return true;
+    }
+
+    function historyDisplayType(type) {
+        const normalized = String(type || '').trim().toLowerCase();
+        if (normalized === 'admin credit') return 'Deposit';
+        if (normalized === 'admin debit') return 'Withdrawal';
+        return type;
+    }
+
     // Dynamic Transactions Table Hydration
     function hydrateTransactionsTable(transactions) {
         const tableBody = document.querySelector('[data-transactions-tbody]');
         if (!tableBody) return;
+        const visibleTransactions = (transactions || []).filter(transactionHistoryVisible);
 
-        if (!transactions || transactions.length === 0) {
+        if (visibleTransactions.length === 0) {
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="6" class="px-4 py-16 text-center text-sm text-gray-500">
@@ -1114,7 +1146,7 @@
             return;
         }
 
-        tableBody.innerHTML = transactions.map((t) => {
+        tableBody.innerHTML = visibleTransactions.map((t) => {
             const isPositive = t.isPositive ?? t.is_positive;
             const color = isPositive ? 'text-green-500' : 'text-primary-500';
             const storedAmount = String(t.formattedAmount || '');
@@ -1134,7 +1166,7 @@
             return `
                 <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition">
                     <td class="py-3 px-4 font-mono text-gray-500 text-xs">${escapeHtml(t.txid || 'TX-90281')}</td>
-                    <td class="py-3 px-4 font-bold text-xs">${escapeHtml(t.type)}</td>
+                    <td class="py-3 px-4 font-bold text-xs">${escapeHtml(historyDisplayType(t.type))}</td>
                     <td class="py-3 px-4 text-xs text-gray-600 dark:text-gray-300">${escapeHtml(t.asset)}</td>
                     <td class="py-3 px-4 font-bold text-xs ${color}">${escapeHtml(formattedAmount)}</td>
                     <td class="py-3 px-4 text-xs text-gray-400">${escapeHtml(t.date)}</td>
@@ -1145,15 +1177,15 @@
 
     window.filterTransactions = (filterType) => {
         if (!currentAccountData) return;
-        const all = currentAccountData.transactions || [];
+        const all = (currentAccountData.transactions || []).filter(transactionHistoryVisible);
         const normalizedFilter = String(filterType || 'all').toLowerCase();
         const filtered = normalizedFilter === 'all'
             ? all
             : all.filter((transaction) => {
                 const type = String(transaction.type || '').trim().toLowerCase();
-                if (normalizedFilter === 'deposit') return type === 'deposit';
-                if (normalizedFilter === 'withdrawal') return type === 'withdrawal';
-                if (normalizedFilter === 'roi') return type !== 'deposit' && type !== 'withdrawal';
+                if (normalizedFilter === 'deposit') return type === 'deposit' || type === 'admin credit';
+                if (normalizedFilter === 'withdrawal') return type === 'withdrawal' || type === 'admin debit';
+                if (normalizedFilter === 'roi') return /roi|trade|order|position|plan subscription/.test(type);
                 return true;
             });
         hydrateTransactionsTable(filtered);
@@ -1386,7 +1418,7 @@
             languageInput.value = user.user_metadata?.language || 'en';
         }
         languageInput?.addEventListener('change', () => {
-            if (currencyInput) currencyInput.value = currencyForDashboardLanguage(languageInput.value);
+            if (currencyInput) currencyInput.value = currencyForUserLanguage(languageInput.value, currentUser);
         });
 
         form.addEventListener('submit', async (event) => {
@@ -1400,9 +1432,10 @@
             const country = form.querySelector('[data-auth-country]')?.value.trim() || '';
             const language = form.querySelector('[data-auth-language]')?.value || 'en';
             const previousLanguage = currentUser?.user_metadata?.language || 'en';
-            const currency = language !== previousLanguage
-                ? currencyForDashboardLanguage(language)
-                : form.querySelector('[data-auth-currency]')?.value || 'USD';
+            const currency = currencyForUserLanguage(language, {
+                ...currentUser,
+                user_metadata: { ...currentUser.user_metadata, country }
+            });
             const { data, error } = await client.auth.updateUser({
                 data: {
                     username: username,
@@ -1465,7 +1498,7 @@
         select.dataset.languageHandlerAttached = 'true';
         select.addEventListener('change', () => {
             const nextLanguage = select.value;
-            const nextCurrency = currencyForDashboardLanguage(nextLanguage);
+            const nextCurrency = currencyForUserLanguage(nextLanguage, currentUser);
             const previousLanguage = dashboardLanguage();
             if (nextLanguage === previousLanguage) return;
 
@@ -1483,6 +1516,16 @@
                 window.accountPreferences?.setLanguagePreference(nextLanguage);
                 hydrateUI();
                 applyDashboardLanguage(nextLanguage);
+                client.auth.updateUser({ data: { language: nextLanguage, currency: nextCurrency } }).then(({ data, error }) => {
+                    if (error) {
+                        console.warn('Could not sync dashboard currency preference:', error.message);
+                        return;
+                    }
+                    if (data.user) {
+                        currentUser = data.user;
+                        window.currentSupabaseUser = currentUser;
+                    }
+                }).catch((error) => console.warn('Could not sync dashboard currency preference:', error));
             } catch (error) {
                 select.value = previousLanguage;
                 console.warn('Could not save dashboard language preference:', error);
@@ -1506,7 +1549,6 @@
                 'Transactions': 'nav.transactions',
                 'Account Upgrade': 'nav.upgrade',
                 'Signal Purchase': 'nav.signal',
-                'News': 'nav.news',
                 'Account Settings': 'nav.settings',
                 'Logout': 'nav.logout'
             };

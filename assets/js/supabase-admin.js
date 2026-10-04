@@ -28,10 +28,83 @@
         searchQuery: '',
         activeTab: 'all'
     };
+    const EXCHANGE_RATE_CACHE_KEY = 'dashboard-usd-exchange-rates-v1';
+    let usdExchangeRates = { USD: 1 };
 
-    function formatUSD(amount) {
+    function getUserCurrency(user) {
+        const currency = String(user?.currency || 'USD').trim().toUpperCase();
+        return /^[A-Z]{3}$/.test(currency) ? currency : 'USD';
+    }
+
+    async function loadAdminExchangeRates() {
+        let cachedRates = null;
+        try {
+            const cached = JSON.parse(localStorage.getItem(EXCHANGE_RATE_CACHE_KEY) || 'null');
+            if (cached?.rates && Number(cached.rates.USD) === 1) {
+                usdExchangeRates = cached.rates;
+                cachedRates = cached.rates;
+                if (Number(cached.expiresAt) > Date.now()) return;
+            }
+        } catch (error) {
+            cachedRates = null;
+        }
+
+        try {
+            const response = await fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' });
+            if (!response.ok) throw new Error(`Exchange rates returned HTTP ${response.status}`);
+            const payload = await response.json();
+            if (payload.result !== 'success' || !payload.rates || Number(payload.rates.USD) !== 1) {
+                throw new Error('Exchange rate response was invalid.');
+            }
+            usdExchangeRates = payload.rates;
+            const expiresAt = (Number(payload.time_next_update_unix) || Date.now() / 1000 + 86400) * 1000;
+            localStorage.setItem(EXCHANGE_RATE_CACHE_KEY, JSON.stringify({ rates: payload.rates, expiresAt }));
+        } catch (error) {
+            if (!cachedRates) console.warn('[Admin] Currency conversion rates are unavailable:', error);
+        }
+    }
+
+    async function amountToUsd(amount, currency) {
+        const code = getUserCurrency({ currency });
+        const numericAmount = Number(amount);
+        if (code === 'USD') return Math.round((numericAmount + Number.EPSILON) * 100) / 100;
+
+        let rate = Number(usdExchangeRates[code]);
+        if (!Number.isFinite(rate) || rate <= 0) {
+            await loadAdminExchangeRates();
+            rate = Number(usdExchangeRates[code]);
+        }
+        if (!Number.isFinite(rate) || rate <= 0) {
+            throw new Error(`Cannot fund this account in ${code}: its exchange rate is unavailable.`);
+        }
+        return Math.round((numericAmount / rate + Number.EPSILON) * 100) / 100;
+    }
+
+    function normalizeRoundTripAmount(amount, currency, rate) {
+        if (currency === 'USD') return amount;
+        const wholeAmount = Math.round(amount);
+        const conversionTolerance = rate / 200 + 1e-8;
+        return Math.abs(amount - wholeAmount) <= conversionTolerance ? wholeAmount : amount;
+    }
+
+    function formatCurrency(amount, currency = 'USD') {
         const num = Number(amount) || 0;
-        return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const requestedCurrency = getUserCurrency({ currency });
+        const rate = Number(usdExchangeRates[requestedCurrency]);
+        const hasRate = requestedCurrency === 'USD' || (Number.isFinite(rate) && rate > 0);
+        const code = hasRate ? requestedCurrency : 'USD';
+        const convertedAmount = normalizeRoundTripAmount(code === 'USD' ? num : num * rate, code, code === 'USD' ? 1 : rate);
+        try {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: code,
+                currencyDisplay: 'code',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(convertedAmount);
+        } catch (error) {
+            return `${code} ${convertedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
     }
 
     function formatDate(d) {
@@ -113,8 +186,8 @@
         const normalized = String(type || '').trim().toLowerCase();
         if (normalized === 'deposit') return 'Deposit';
         if (normalized === 'withdrawal') return 'Withdrawal';
-        if (normalized === 'admin credit') return 'Admin Credit';
-        if (normalized === 'admin debit') return 'Admin Debit';
+        if (normalized === 'admin credit') return 'Deposit';
+        if (normalized === 'admin debit') return 'Withdrawal';
         return String(type || 'Transaction').trim() || 'Transaction';
     }
 
@@ -316,7 +389,7 @@
                         </div>
                         <p><span>${escapeHtml(withdrawal.network || 'Withdrawal')}</span><span aria-hidden="true">·</span><span>${escapeHtml(withdrawal.address || 'No destination provided')}</span></p>
                     </div>
-                    <strong class="admin-withdrawal-amount">${formatUSD(withdrawal.amount)}</strong>
+                    <strong class="admin-withdrawal-amount">${formatCurrency(withdrawal.amount, getUserCurrency(adminState.users.find((user) => user.id === withdrawal.user_id) || withdrawal.profiles))}</strong>
                     <div class="admin-withdrawal-actions">
                         <button type="button" data-approve-withdrawal="${escapeHtml(withdrawal.id)}">Approve</button>
                         <button type="button" data-reject-withdrawal="${escapeHtml(withdrawal.id)}">Reject</button>
@@ -351,12 +424,12 @@
             ? adminState.selectedUserTransactions.slice(0, 6).map((tx) => `
                 <div class="flex items-center justify-between gap-3 border-b border-gray-100 py-2 last:border-b-0 dark:border-gray-800">
                     <div>
-                        <p class="text-[11px] font-bold uppercase tracking-wider text-gray-500">${escapeHtml(tx.type || 'transaction')}</p>
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-gray-500">${escapeHtml(normalizeTransactionType(tx.type || 'transaction'))}</p>
                         <p class="text-[10px] text-gray-400">${formatDateTime(tx.created_at)}</p>
                     </div>
                     <div class="text-right">
                         <p class="text-xs font-bold ${tx.is_positive || tx.type === 'deposit' || tx.type === 'Deposit' ? 'text-green-500' : 'text-primary-500'}">
-                            ${tx.is_positive || tx.type === 'deposit' || tx.type === 'Deposit' ? '+' : '-'}${formatUSD(tx.amount || 0)}
+                            ${tx.is_positive || tx.type === 'deposit' || tx.type === 'Deposit' ? '+' : '-'}${formatCurrency(tx.amount || 0, getUserCurrency(user))}
                         </p>
                         <p class="text-[10px] text-gray-500">${escapeHtml(tx.status || 'confirmed')}</p>
                     </div>
@@ -391,19 +464,19 @@
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
                             <p class="text-gray-400">Total Balance</p>
-                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatUSD(user.balance)}</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.balance, getUserCurrency(user))}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
                             <p class="text-gray-400">Investment</p>
-                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatUSD(user.active_invest)}</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.active_invest, getUserCurrency(user))}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
                             <p class="text-gray-400">Total Bonus</p>
-                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatUSD(user.bonus_balance)}</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.bonus_balance, getUserCurrency(user))}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
                             <p class="text-gray-400">Profit Earned</p>
-                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatUSD(user.total_profit)}</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.total_profit, getUserCurrency(user))}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
                             <p class="text-gray-400">Registered</p>
@@ -436,9 +509,9 @@
                     </div>
 
                     <div class="rounded-2xl border border-gray-200 p-4 dark:border-gray-700">
-                        <p class="mb-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Balance Adjustment</p>
+                        <p class="mb-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Balance Adjustment (${escapeHtml(getUserCurrency(user))})</p>
                         <div class="space-y-3">
-                            <input type="number" min="0.01" step="0.01" data-admin-balance-amount placeholder="Enter amount" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <input type="number" min="0.01" step="0.01" data-admin-balance-amount placeholder="Enter amount in ${escapeHtml(getUserCurrency(user))}" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                             <div class="grid grid-cols-2 gap-2">
                                 <button type="button" data-admin-balance-increase class="rounded-xl bg-green-500 px-3 py-2 text-[10px] font-bold text-white hover:bg-green-600">Increase Balance</button>
                                 <button type="button" data-admin-balance-decrease class="rounded-xl bg-red-500 px-3 py-2 text-[10px] font-bold text-white hover:bg-red-600">Decrease Balance</button>
@@ -707,7 +780,7 @@
                     </td>
                     <td class="py-3 px-4">${getRoleBadgeHTML(u.role)}</td>
                     <td class="py-3 px-4">${getStatusBadgeHTML(u.status)}</td>
-                    <td class="py-3 px-4 font-bold text-xs text-gray-900 dark:text-white font-mono">${formatUSD(u.balance)}</td>
+                    <td class="py-3 px-4 font-bold text-xs text-gray-900 dark:text-white font-mono">${formatCurrency(u.balance, getUserCurrency(u))}</td>
                     <td class="py-3 px-4 text-xs text-gray-400">${formatDate(u.created_at)}</td>
                     <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
@@ -770,7 +843,7 @@
                     <td class="w-[18%] whitespace-nowrap py-3 px-4 font-mono text-gray-500 text-xs">${escapeHtml(t.txid || 'TX-90281')}</td>
                     <td class="w-[22%] py-3 px-4 text-xs font-semibold text-gray-800 dark:text-gray-200">${escapeHtml(userName)}</td>
                     <td class="w-[16%] whitespace-nowrap py-3 px-4 font-bold text-xs uppercase">${escapeHtml(normalizedType)}</td>
-                    <td class="w-[14%] whitespace-nowrap py-3 px-4 font-bold text-xs ${color}">${isPos ? '+' : '-'}${formatUSD(t.amount)}</td>
+                    <td class="w-[14%] whitespace-nowrap py-3 px-4 font-bold text-xs ${color}">${isPos ? '+' : '-'}${formatCurrency(t.amount, getUserCurrency(adminState.users.find((user) => user.id === t.user_id)))}</td>
                     <td class="w-[14%] whitespace-nowrap py-3 px-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeBg}">${normalizedStatus}</span></td>
                     <td class="w-[16%] whitespace-nowrap py-3 px-4 text-xs text-gray-400">${escapeHtml(formatDateTime(t.created_at))}</td>
                 </tr>`;
@@ -819,7 +892,7 @@
                         <div class="text-xs font-bold text-gray-900 dark:text-white">${escapeHtml(userName)}</div>
                         <div class="text-[10px] font-mono text-gray-400 truncate max-w-[140px]">${escapeHtml(d.txid || 'TX-000000')}</div>
                     </td>
-                    <td class="py-3 px-4 font-bold text-xs text-green-500 font-mono">${formatUSD(d.amount)}</td>
+                    <td class="py-3 px-4 font-bold text-xs text-green-500 font-mono">${formatCurrency(d.amount, getUserCurrency(adminState.users.find((user) => user.id === d.user_id) || d.profiles))}</td>
                     <td class="py-3 px-4 text-xs text-gray-500 font-semibold">${escapeHtml(d.asset || 'USDT')} · ${escapeHtml(d.network || 'TRC-20')}</td>
                     <td class="py-3 px-4">${statusBadge}</td>
                     <td class="py-3 px-4 text-xs text-gray-400">${formatDateTime(d.created_at)}</td>
@@ -870,7 +943,7 @@
                         <div class="text-xs font-bold text-gray-900 dark:text-white">${escapeHtml(userName)}</div>
                         <div class="text-[10px] font-mono text-gray-400 truncate max-w-[140px]">${escapeHtml(w.address)}</div>
                     </td>
-                    <td class="py-3 px-4 font-bold text-xs text-primary-500 font-mono">${formatUSD(w.amount)}</td>
+                    <td class="py-3 px-4 font-bold text-xs text-primary-500 font-mono">${formatCurrency(w.amount, getUserCurrency(adminState.users.find((user) => user.id === w.user_id) || w.profiles))}</td>
                     <td class="py-3 px-4 text-xs text-gray-500 font-semibold">${escapeHtml(w.network || 'TRC-20')}</td>
                     <td class="py-3 px-4">${statusBadge}</td>
                     <td class="py-3 px-4 text-xs text-gray-400">${formatDateTime(w.created_at)}</td>
@@ -945,10 +1018,13 @@
                 if (!userId || !numericAmount || numericAmount <= 0) {
                     throw new Error('Invalid adjustment amount.');
                 }
+                const user = adminState.users.find((item) => item.id === userId);
+                const currency = getUserCurrency(user);
+                const usdAmount = await amountToUsd(numericAmount, currency);
 
                 const { error } = await client.rpc('adjust_user_balance', {
                     p_user_id: userId,
-                    p_amount: numericAmount,
+                    p_amount: usdAmount,
                     p_direction: direction
                 });
                 if (error) throw error;
@@ -962,7 +1038,7 @@
                     );
                 }
 
-                showAdminToast(direction === 'increase' ? 'Balance increased successfully.' : 'Balance decreased successfully.');
+                showAdminToast(`${currency} balance ${direction === 'increase' ? 'increased' : 'decreased'} successfully.`);
                 await fetchAdminData();
                 refreshSelectedUserView();
                 return true;
@@ -979,17 +1055,20 @@
                 if (!userId || !balanceType || !action || !Number.isFinite(numericAmount) || numericAmount < 0 || (action !== 'static' && numericAmount === 0)) {
                     throw new Error('Enter a valid amount for this balance action.');
                 }
+                const user = adminState.users.find((item) => item.id === userId);
+                const currency = getUserCurrency(user);
+                const usdAmount = await amountToUsd(numericAmount, currency);
 
                 const { error } = await client.rpc('admin_apply_balance_action', {
                     p_user_id: userId,
                     p_balance_type: balanceType,
                     p_action: action,
-                    p_amount: numericAmount,
+                    p_amount: usdAmount,
                     p_description: description
                 });
                 if (error) throw error;
 
-                showAdminToast('Balance updated successfully.');
+                showAdminToast(`${currency} balance updated successfully.`);
                 await fetchAdminData();
                 refreshSelectedUserView();
                 return true;
@@ -1128,15 +1207,26 @@
             const currentValue = select.value;
             select.replaceChildren(new Option('Select User', ''));
             adminState.users.forEach((user) => {
-                const label = getUserDisplayName(user) + (user.email ? ` (${user.email})` : '');
+                const label = `${getUserDisplayName(user)}${user.email ? ` (${user.email})` : ''} · ${getUserCurrency(user)}`;
                 select.add(new Option(label, user.id));
             });
             select.value = currentValue;
         });
+        updateFundCurrencyLabel();
+    }
+
+    function updateFundCurrencyLabel() {
+        const form = document.querySelector('[data-admin-fund-form]');
+        const select = form?.querySelector('[data-action-user]');
+        const currencyLabel = form?.querySelector('[data-fund-currency]');
+        if (!currencyLabel) return;
+        const user = adminState.users.find((item) => item.id === select?.value);
+        currencyLabel.textContent = user ? getUserCurrency(user) : 'Select user';
     }
 
     function setupActionForms() {
         const fundForm = document.querySelector('[data-admin-fund-form]');
+        fundForm?.querySelector('[data-action-user]')?.addEventListener('change', updateFundCurrencyLabel);
         fundForm?.addEventListener('submit', async (event) => {
             event.preventDefault();
             const formData = new FormData(fundForm);
@@ -1260,6 +1350,7 @@
         }
         setAdminView('dashboard');
         await fetchAdminData();
+        loadAdminExchangeRates().then(() => renderAdminDashboard());
 
         // Attach search listener
         const searchInput = document.querySelector('[data-admin-user-search]');

@@ -1135,7 +1135,25 @@ body.reference-dashboard .dashboard-header-actions > button {
 .support-chat-disclaimer { margin: 0; padding: 0 12px 10px; background: #fff; color: #81899a; font-size: 10px; text-align: center; }
 
 @media (max-width: 480px) {
-  .support-chat-panel { right: 0.75rem; bottom: 4.75rem; width: calc(100vw - 1.5rem); height: min(31rem, calc(100dvh - 6.5rem)); }
+  .support-chat-panel {
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+    background: #efeae2;
+  }
+  .support-chat-header { padding-top: calc(14px + env(safe-area-inset-top)); }
+  .support-chat-messages { background: #efeae2; }
+  .support-chat-message { max-width: 86%; border-radius: 12px; }
+  .support-chat-message.is-assistant { background: #fff; border-color: #e5e7eb; color: #202124; }
+  .support-chat-message.is-user { background: #d9fdd3; color: #18221b; }
+  .support-chat-open .reference-chat-floating .chat-bubble,
+  .support-chat-open .reference-chat-floating .chat-btn { visibility: hidden; }
+  .support-chat-disclaimer { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
 }
 
 /* ─── Sidebar Styling ─── */

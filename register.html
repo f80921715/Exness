@@ -818,6 +818,15 @@ EXPERTISE.???">
         // Form submission enhancement
         document.addEventListener('DOMContentLoaded', function() {
             const country = document.getElementById('country');
+            const currency = document.getElementById('currency');
+
+            const updateCountryCurrency = () => {
+                if (country?.value && currency && window.accountPreferences?.currencyForCountry) {
+                    currency.value = window.accountPreferences.currencyForCountry(country.value);
+                }
+            };
+            country?.addEventListener('change', updateCountryCurrency);
+            updateCountryCurrency();
 
             const form = document.getElementById('register');
             if (form) {
