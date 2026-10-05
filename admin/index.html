@@ -137,6 +137,7 @@
             <nav aria-label="Admin navigation">
                 <p class="admin-nav-caption">Overview</p>
                 <button type="button" data-admin-nav="dashboard" class="is-active"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></button>
+                <button type="button" data-admin-nav="users"><i data-lucide="users"></i><span>User Information</span></button>
 
                 <p class="admin-nav-caption">Account actions</p>
                 <button type="button" data-admin-nav="action"><i data-lucide="credit-card"></i><span>Fund Account</span></button>
@@ -180,9 +181,10 @@
             <section class="admin-form-card">
                 <div class="admin-form-heading">
                     <h2>Welcome back, <span data-admin-name>Administrator</span></h2>
-                    <p>Choose an account action to continue.</p>
+                    <p>Choose an account action or inspect user records.</p>
                 </div>
                 <div class="admin-dashboard-quick-actions">
+                    <button type="button" data-admin-nav="users"><i data-lucide="users"></i><span>User Information & Directory</span><i data-lucide="arrow-right"></i></button>
                     <button type="button" data-admin-nav="action"><i data-lucide="credit-card"></i><span>Fund Account</span><i data-lucide="arrow-right"></i></button>
                     <button type="button" data-admin-nav="suspend"><i data-lucide="user-x"></i><span>Suspend Account</span><i data-lucide="arrow-right"></i></button>
                     <button type="button" data-admin-nav="unsuspend"><i data-lucide="user-check"></i><span>Unsuspend Account</span><i data-lucide="arrow-right"></i></button>
@@ -204,6 +206,95 @@
                 </div>
             </section>
         </main>
+
+        <!-- ========================================================================= -->
+        <!-- USER INFORMATION & SUPABASE DIRECTORY VIEW                                -->
+        <!-- ========================================================================= -->
+        <main data-admin-view="users" class="admin-users-view" hidden>
+            <div class="admin-users-header">
+                <div>
+                    <h1>User Information</h1>
+                    <p class="admin-users-subtitle">Live registered client records, contact details (Name, Email, Phone Number), country, balances, and Supabase profiles.</p>
+                </div>
+                <div class="admin-user-search-wrapper">
+                    <i data-lucide="search" class="admin-search-icon"></i>
+                    <input type="text" data-admin-user-search placeholder="Search by name, email, phone number, country..." class="admin-search-input">
+                </div>
+            </div>
+
+            <!-- KPI Metric Summary -->
+            <section class="admin-dashboard-metrics" aria-label="User metrics">
+                <article class="admin-dashboard-metric">
+                    <span>Total accounts</span>
+                    <strong data-metric-users>0</strong>
+                    <i data-lucide="users" aria-hidden="true"></i>
+                </article>
+                <article class="admin-dashboard-metric">
+                    <span>Active accounts</span>
+                    <strong data-metric-active-users>0</strong>
+                    <i data-lucide="user-check" aria-hidden="true"></i>
+                </article>
+                <article class="admin-dashboard-metric">
+                    <span>Suspended</span>
+                    <strong data-metric-suspended-users>0</strong>
+                    <i data-lucide="user-x" aria-hidden="true"></i>
+                </article>
+                <article class="admin-dashboard-metric">
+                    <span>Top-up required</span>
+                    <strong data-metric-topup-users>0</strong>
+                    <i data-lucide="triangle-alert" aria-hidden="true"></i>
+                </article>
+            </section>
+
+            <!-- Selected User Details Card -->
+            <section class="admin-form-card admin-selected-user-card" data-admin-selected-user-card>
+                <div class="admin-form-heading flex items-center justify-between">
+                    <div>
+                        <h2>Selected Account Profile</h2>
+                        <p>Detailed Supabase credentials, contact channels, and portfolio balances</p>
+                    </div>
+                    <button type="button" data-user-detail-reset class="admin-reset-pill hidden">Clear selection</button>
+                </div>
+                <div data-user-details-panel class="admin-user-detail-body">
+                    <p class="admin-withdrawal-empty">Select any user below to inspect their full Supabase profile (Name, Email, Phone Number, Balances, etc.).</p>
+                </div>
+            </section>
+
+            <!-- All Users Directory Table / Cards -->
+            <section class="admin-form-card admin-users-directory-card">
+                <div class="admin-form-heading flex items-center justify-between">
+                    <div>
+                        <h2>User Directory</h2>
+                        <p>Comprehensive list of all registered clients synced from Supabase</p>
+                    </div>
+                    <span class="admin-pending-count" data-users-count-badge>0 users</span>
+                </div>
+                <div class="admin-users-list" data-admin-users-directory aria-live="polite">
+                    <p class="admin-withdrawal-empty">Loading registered users from Supabase...</p>
+                </div>
+            </section>
+        </main>
+
+        <div data-user-status-confirmation hidden class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+            <div class="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-700 dark:bg-[#141414]">
+                <div class="mb-4 flex items-center gap-3">
+                    <div data-user-status-icon class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500">
+                        <i data-lucide="alert-triangle" class="h-5 w-5"></i>
+                    </div>
+                    <div>
+                        <h3 data-user-status-title class="text-base font-black text-gray-900 dark:text-white">Suspend this user?</h3>
+                        <p class="text-[11px] text-gray-500">This confirms the database action.</p>
+                    </div>
+                </div>
+                <p data-user-status-message class="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                    This will change the user's account status in the database.
+                </p>
+                <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                    <button type="button" data-user-status-cancel class="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800">Cancel</button>
+                    <button type="button" data-user-status-confirm class="rounded-xl bg-red-500 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-red-600">Confirm</button>
+                </div>
+            </div>
+        </div>
 
         <main data-admin-view="action" class="admin-action-view">
             <h1>Action</h1>

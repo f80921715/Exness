@@ -195,27 +195,123 @@
             <section class="reference-card overflow-hidden" aria-labelledby="bank-withdraw-heading">
                 <div class="border-b border-white/10 px-5 py-4 sm:px-6">
                     <div class="flex items-center gap-3">
-                        <i data-lucide="landmark" class="h-5 w-5 text-primary-400"></i>
+                        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-500/10 text-primary-400 border border-primary-500/20">
+                            <i data-lucide="landmark" class="h-5 w-5"></i>
+                        </div>
                         <div>
-                            <h2 id="bank-withdraw-heading" class="text-base font-bold text-white">Bank / wire withdrawal</h2>
-                            <p class="mt-1 text-xs text-gray-400">Withdraw to a bank account in your name.</p>
+                            <h2 id="bank-withdraw-heading" class="text-base font-bold text-white">Bank / Wire Withdrawal</h2>
+                            <p class="mt-0.5 text-xs text-gray-400">Withdraw funds directly to your bank account.</p>
                         </div>
                     </div>
                 </div>
-                <form data-withdraw-form="bank" class="space-y-4 p-5 sm:p-6">
+
+                <form data-withdraw-form="bank" class="space-y-4 p-5 sm:p-6" novalidate>
+                    <!-- Country runs silently in the background based on registered profile -->
+                    <input type="hidden" id="bank-country" name="country" data-bank-country value="">
+
+                    <!-- Bank Selection -->
                     <div>
-                        <label for="bank-account-name" class="mb-2 block text-xs font-bold text-gray-400">Verified account name</label>
-                        <input id="bank-account-name" name="accountName" type="text" data-bank-account-name readonly required aria-readonly="true" placeholder="Your profile name" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-gray-300 focus:outline-none">
+                        <label for="bank-name-select" class="mb-2 block text-xs font-bold text-gray-300">Bank / Financial Institution</label>
+                        <select id="bank-name-select" name="bankCode" data-bank-code required class="w-full rounded-lg border border-white/10 bg-[#141a2e] px-4 py-3 text-sm text-white focus:border-primary-500 focus:outline-none transition">
+                            <option value="">Select your bank...</option>
+                        </select>
                     </div>
+
+                    <!-- Dynamic Scheme Fields (Runs silently based on country) -->
+                    <!-- 1. US Specific: Routing Number & Account Type -->
+                    <div data-scheme-group="us_ach" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label for="bank-routing-number" class="mb-2 block text-xs font-bold text-gray-300">Routing Number (ABA 9-digit)</label>
+                            <input id="bank-routing-number" name="routingNumber" type="text" maxlength="9" placeholder="9-digit routing number" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm text-white focus:border-primary-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="bank-account-type" class="mb-2 block text-xs font-bold text-gray-300">Account Type</label>
+                            <select id="bank-account-type" name="accountType" class="w-full rounded-lg border border-white/10 bg-[#141a2e] px-4 py-3 text-sm text-white focus:border-primary-500 focus:outline-none">
+                                <option value="Checking">Checking Account</option>
+                                <option value="Savings">Savings Account</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 2. UK Specific: Sort Code -->
+                    <div data-scheme-group="gb_sort" class="hidden">
+                        <label for="bank-sort-code" class="mb-2 block text-xs font-bold text-gray-300">Sort Code (6-digit)</label>
+                        <input id="bank-sort-code" name="sortCode" type="text" maxlength="8" placeholder="e.g. 20-00-00" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm text-white focus:border-primary-500 focus:outline-none">
+                    </div>
+
+                    <!-- 3. Canada Specific: Transit & Institution Number -->
+                    <div data-scheme-group="ca_transit" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label for="bank-transit-number" class="mb-2 block text-xs font-bold text-gray-300">Transit Number (5 digits)</label>
+                            <input id="bank-transit-number" name="transitNumber" type="text" maxlength="5" placeholder="e.g. 12345" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm text-white focus:border-primary-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="bank-inst-number" class="mb-2 block text-xs font-bold text-gray-300">Institution No. (3 digits)</label>
+                            <input id="bank-inst-number" name="institutionNumber" type="text" maxlength="3" placeholder="e.g. 003" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm text-white focus:border-primary-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- 4. Australia Specific: BSB -->
+                    <div data-scheme-group="au_bsb" class="hidden">
+                        <label for="bank-bsb" class="mb-2 block text-xs font-bold text-gray-300">BSB Code (6-digit)</label>
+                        <input id="bank-bsb" name="bsb" type="text" maxlength="7" placeholder="e.g. 062-000" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm text-white focus:border-primary-500 focus:outline-none">
+                    </div>
+
+                    <!-- 5. India Specific: IFSC Code -->
+                    <div data-scheme-group="in_ifsc" class="hidden">
+                        <label for="bank-ifsc" class="mb-2 block text-xs font-bold text-gray-300">IFSC Code (11 characters)</label>
+                        <input id="bank-ifsc" name="ifsc" type="text" maxlength="11" placeholder="e.g. SBIN0001234" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm uppercase text-white focus:border-primary-500 focus:outline-none">
+                    </div>
+
+                    <!-- 6. SEPA / SWIFT: IBAN & BIC -->
+                    <div data-scheme-group="sepa_iban" class="hidden space-y-3">
+                        <div>
+                            <label for="bank-iban" class="mb-2 block text-xs font-bold text-gray-300">IBAN (International Bank Account Number)</label>
+                            <input id="bank-iban" name="iban" type="text" maxlength="34" placeholder="e.g. DE89 3704 0044 0532 0130 00" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm uppercase text-white focus:border-primary-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="bank-bic" class="mb-2 block text-xs font-bold text-gray-300">BIC / SWIFT Code (Optional)</label>
+                            <input id="bank-bic" name="swiftBic" type="text" maxlength="11" placeholder="e.g. DEUTDEDD" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm uppercase text-white focus:border-primary-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- 7. Global Wire: SWIFT & Account/IBAN -->
+                    <div data-scheme-group="swift_iban" class="hidden space-y-3">
+                        <div>
+                            <label for="bank-global-swift" class="mb-2 block text-xs font-bold text-gray-300">SWIFT / BIC Code</label>
+                            <input id="bank-global-swift" name="globalSwift" type="text" maxlength="11" placeholder="e.g. CHASUS33" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm uppercase text-white focus:border-primary-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="bank-global-account" class="mb-2 block text-xs font-bold text-gray-300">IBAN or Account Number</label>
+                            <input id="bank-global-account" name="globalAccount" type="text" placeholder="Enter international account identifier" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm text-white focus:border-primary-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Standard Account Number Field -->
+                    <div data-standard-account-group>
+                        <label for="bank-account-number" class="mb-2 block text-xs font-bold text-gray-300" data-account-number-label>Account Number</label>
+                        <input id="bank-account-number" name="accountNumber" type="text" autocomplete="off" placeholder="Enter account number" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm text-white focus:border-primary-500 focus:outline-none transition">
+                    </div>
+
+                    <!-- Account Holder Name (Silently populates in uppercase when bank and account number are selected) -->
                     <div>
-                        <label for="bank-account-number" class="mb-2 block text-xs font-bold text-gray-400">Account number</label>
-                        <input id="bank-account-number" name="accountNumber" type="text" required autocomplete="off" placeholder="Enter account number" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-primary-500 focus:outline-none">
+                        <label for="bank-account-name" class="mb-2 block text-xs font-bold text-gray-300">Account Holder Name</label>
+                        <input id="bank-account-name" name="accountName" type="text" data-bank-account-name required readonly placeholder="Will appear automatically..." class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold uppercase tracking-wider text-white placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-gray-500 focus:border-primary-500 focus:outline-none transition cursor-default">
                     </div>
+
+                    <!-- Amount -->
                     <div>
-                        <label for="bank-amount" class="mb-2 block text-xs font-bold text-gray-400">Amount (USD)</label>
-                        <input id="bank-amount" name="amount" type="number" step="0.01" required placeholder="Amount" class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-base font-bold text-white focus:border-primary-500 focus:outline-none">
+                        <label for="bank-amount" class="mb-2 block text-xs font-bold text-gray-300">Amount to Withdraw (USD)</label>
+                        <div class="flex gap-2">
+                            <input id="bank-amount" name="amount" type="number" step="0.01" required placeholder="0.00" class="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-base font-bold text-white focus:border-primary-500 focus:outline-none">
+                            <button type="button" data-withdraw-all class="rounded-lg border border-white/10 px-4 text-xs font-bold text-primary-400 hover:bg-white/5 transition">Max</button>
+                        </div>
                     </div>
-                    <button type="submit" class="w-full rounded-lg bg-primary-500 py-3.5 font-bold text-black transition hover:bg-primary-600">Submit bank withdrawal</button>
+
+                    <!-- Submit Button -->
+                    <button type="submit" data-bank-submit class="w-full rounded-lg bg-primary-500 py-3.5 font-bold text-black transition hover:bg-primary-400 shadow-lg shadow-primary-500/10 flex items-center justify-center gap-2">
+                        <span>Submit bank withdrawal</span>
+                    </button>
                 </form>
             </section>
         </main>

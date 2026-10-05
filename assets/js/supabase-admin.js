@@ -355,13 +355,17 @@
             'data-metric-topup-users': adminState.metrics.topupRequiredUsers
         };
         Object.entries(metrics).forEach(([attribute, value]) => {
-            const element = document.querySelector(`[${attribute}]`);
-            if (element) element.textContent = value.toLocaleString();
+            const elements = document.querySelectorAll(`[${attribute}]`);
+            elements.forEach((el) => {
+                el.textContent = value.toLocaleString();
+            });
         });
 
         const pendingWithdrawalCount = document.querySelector('[data-metric-pending-withdrawals]');
         if (pendingWithdrawalCount) pendingWithdrawalCount.textContent = `${adminState.metrics.pendingWithdrawals} pending`;
         renderPendingWithdrawals();
+        renderUsersDirectory();
+        renderUsersTable();
         populateActionUserSelects();
 
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
@@ -405,21 +409,158 @@
         });
     }
 
+    function renderUsersDirectory() {
+        const container = document.querySelector('[data-admin-users-directory]');
+        const countBadge = document.querySelector('[data-users-count-badge]');
+        if (!container) return;
+
+        let filtered = adminState.users;
+        if (adminState.searchQuery) {
+            const q = adminState.searchQuery.toLowerCase();
+            filtered = filtered.filter((u) => 
+                (u.email && u.email.toLowerCase().includes(q)) ||
+                (u.full_name && u.full_name.toLowerCase().includes(q)) ||
+                (u.username && u.username.toLowerCase().includes(q)) ||
+                (u.phone && String(u.phone).toLowerCase().includes(q)) ||
+                (u.country && String(u.country).toLowerCase().includes(q))
+            );
+        }
+
+        if (countBadge) {
+            countBadge.textContent = `${filtered.length} account${filtered.length === 1 ? '' : 's'}`;
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<p class="admin-withdrawal-empty">No users found matching your search query.</p>';
+            return;
+        }
+
+        container.innerHTML = filtered.map((u) => {
+            const initial = (u.full_name || u.email || 'U').trim().charAt(0).toUpperCase() || 'U';
+            const isSuspended = String(u.status || 'active').toLowerCase() === 'suspended';
+            const isSelected = adminState.selectedUserId === u.id;
+            const currency = getUserCurrency(u);
+            const country = u.country || 'Global / Unset';
+            const phone = u.phone ? escapeHtml(u.phone) : '<span class="text-gray-400 italic">No phone registered</span>';
+            const email = u.email ? escapeHtml(u.email) : 'No email on file';
+            const fullName = escapeHtml(u.full_name || u.username || 'Account Holder');
+
+            return `
+                <article class="admin-user-row-item ${isSelected ? 'is-selected' : ''}">
+                    <div class="admin-user-main-col">
+                        <div class="admin-user-avatar">
+                            ${initial}
+                        </div>
+                        <div class="admin-user-meta-group">
+                            <strong>${fullName}</strong>
+                            <div class="admin-user-contact-lines">
+                                <div class="admin-user-contact-line">
+                                    <i data-lucide="mail"></i>
+                                    <span>${email}</span>
+                                </div>
+                                <div class="admin-user-contact-line">
+                                    <i data-lucide="phone"></i>
+                                    <span>${phone}</span>
+                                </div>
+                            </div>
+                            <div class="admin-user-badges">
+                                <span class="admin-user-badge-pill"><i data-lucide="globe"></i> ${escapeHtml(country)} · ${escapeHtml(currency)}</span>
+                                ${getRoleBadgeHTML(u.role)}
+                                ${getStatusBadgeHTML(u.status)}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="admin-user-side-col">
+                        <div class="admin-user-balances-summary">
+                            <span class="main-balance">${formatCurrency(u.balance || 0, currency)}</span>
+                            <span class="sub-balance">Invest: ${formatCurrency(u.active_invest || 0, currency)} · Profit: ${formatCurrency(u.total_profit || 0, currency)}</span>
+                        </div>
+                        <div class="admin-user-action-buttons">
+                            <button type="button" data-user-view-info="${escapeHtml(u.id)}" class="is-primary ${isSelected ? 'is-active' : ''}">
+                                <i data-lucide="${isSelected ? 'eye-off' : 'user'}"></i> ${isSelected ? 'Close Profile' : 'View Profile'}
+                            </button>
+                            <button type="button" data-user-quick-fund="${escapeHtml(u.id)}"><i data-lucide="credit-card"></i> Fund</button>
+                            <button type="button" data-user-quick-status="${escapeHtml(u.id)}">${isSuspended ? 'Activate' : 'Suspend'}</button>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }).join('');
+
+        container.querySelectorAll('[data-user-view-info]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const userId = btn.dataset.userViewInfo;
+                if (adminState.selectedUserId === userId) {
+                    // Tap on same user toggles/dismisses profile
+                    adminState.selectedUserId = null;
+                    adminState.selectedUser = null;
+                    adminState.selectedUserTransactions = [];
+                    renderUserDetailsPanel();
+                    renderUsersDirectory();
+                } else {
+                    // Tap on another user dismisses previous and displays present user
+                    adminState.selectedUserId = userId;
+                    adminState.selectedUserTransactions = [];
+                    loadUserDetails(userId);
+                    renderUsersDirectory();
+                    const card = document.querySelector('[data-admin-selected-user-card]');
+                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        container.querySelectorAll('[data-user-quick-fund]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const userId = btn.dataset.userQuickFund;
+                setAdminView('action');
+                const fundSelect = document.querySelector('#fund-user');
+                if (fundSelect) {
+                    fundSelect.value = userId;
+                    updateFundCurrencyLabel();
+                }
+            });
+        });
+
+        container.querySelectorAll('[data-user-quick-status]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const userId = btn.dataset.userQuickStatus;
+                const user = adminState.users.find((u) => u.id === userId);
+                if (!user) return;
+                const isSuspended = String(user.status || 'active').toLowerCase() === 'suspended';
+                openUserStatusConfirm(user, isSuspended ? 'activate' : 'suspend');
+            });
+        });
+
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
+    }
+
     function renderUserDetailsPanel() {
         const panel = document.querySelector('[data-user-details-panel]');
         const resetButton = document.querySelector('[data-user-detail-reset]');
         if (!panel) return;
 
         if (!adminState.selectedUser) {
-            panel.innerHTML = '<p class="text-xs text-gray-500">Select a user from the directory to view their profile, account status, and recent transaction activity.</p>';
+            panel.innerHTML = '<p class="admin-withdrawal-empty">Select any user from the directory to view their complete Supabase profile (Name, Email, Phone Number, Country, Balances, etc.).</p>';
             if (resetButton) resetButton.classList.add('hidden');
             return;
         }
 
-        if (resetButton) resetButton.classList.remove('hidden');
+        if (resetButton) {
+            resetButton.classList.remove('hidden');
+            resetButton.onclick = () => {
+                adminState.selectedUserId = null;
+                adminState.selectedUser = null;
+                adminState.selectedUserTransactions = [];
+                renderUserDetailsPanel();
+                renderUsersDirectory();
+            };
+        }
 
         const user = adminState.selectedUser;
         const isSuspended = String(user.status || 'active').toLowerCase() === 'suspended';
+        const userCurrency = getUserCurrency(user);
         const recentTransactions = adminState.selectedUserTransactions.length
             ? adminState.selectedUserTransactions.slice(0, 6).map((tx) => `
                 <div class="flex items-center justify-between gap-3 border-b border-gray-100 py-2 last:border-b-0 dark:border-gray-800">
@@ -429,13 +570,13 @@
                     </div>
                     <div class="text-right">
                         <p class="text-xs font-bold ${tx.is_positive || tx.type === 'deposit' || tx.type === 'Deposit' ? 'text-green-500' : 'text-primary-500'}">
-                            ${tx.is_positive || tx.type === 'deposit' || tx.type === 'Deposit' ? '+' : '-'}${formatCurrency(tx.amount || 0, getUserCurrency(user))}
+                            ${tx.is_positive || tx.type === 'deposit' || tx.type === 'Deposit' ? '+' : '-'}${formatCurrency(tx.amount || 0, userCurrency)}
                         </p>
                         <p class="text-[10px] text-gray-500">${escapeHtml(tx.status || 'confirmed')}</p>
                     </div>
                 </div>
             `).join('')
-            : '<p class="text-xs text-gray-500">No recent transactions available for this user.</p>';
+            : '<p class="text-xs text-gray-500 py-2">No recent transactions recorded for this account.</p>';
 
         const actionText = isSuspended ? 'Activate user' : 'Suspend user';
         const actionClass = isSuspended ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600';
@@ -444,12 +585,12 @@
             <div class="grid gap-6 lg:grid-cols-[1.1fr_1.4fr]">
                 <div class="space-y-4">
                     <div class="flex items-center gap-3">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-500/10 text-sm font-black text-primary-500 border border-primary-500/20">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-500/10 text-base font-black text-primary-500 border border-primary-500/20">
                             ${escapeHtml((getUserDisplayName(user).trim().charAt(0) || 'U').toUpperCase())}
                         </div>
                         <div>
                             <h3 class="text-base font-black text-gray-900 dark:text-white">${escapeHtml(getUserDisplayName(user))}</h3>
-                            <p class="text-[11px] text-gray-500">${escapeHtml(user.email || 'No email on file')}</p>
+                            <p class="text-xs text-gray-500">${escapeHtml(user.email || 'No email on file')}</p>
                         </div>
                     </div>
 
@@ -459,47 +600,50 @@
                             <p class="mt-1 font-bold text-gray-900 dark:text-white">${getStatusBadgeHTML(user.status)}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
-                            <p class="text-gray-400">Role</p>
+                            <p class="text-gray-400">Role clearance</p>
                             <p class="mt-1 font-bold text-gray-900 dark:text-white">${getRoleBadgeHTML(user.role)}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
                             <p class="text-gray-400">Total Balance</p>
-                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.balance, getUserCurrency(user))}</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.balance, userCurrency)}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
-                            <p class="text-gray-400">Investment</p>
-                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.active_invest, getUserCurrency(user))}</p>
+                            <p class="text-gray-400">Active Investment</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.active_invest, userCurrency)}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
                             <p class="text-gray-400">Total Bonus</p>
-                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.bonus_balance, getUserCurrency(user))}</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.bonus_balance, userCurrency)}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
                             <p class="text-gray-400">Profit Earned</p>
-                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.total_profit, getUserCurrency(user))}</p>
-                        </div>
-                        <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
-                            <p class="text-gray-400">Registered</p>
-                            <p class="mt-1 font-bold text-gray-900 dark:text-white">${formatDate(user.created_at)}</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.total_profit, userCurrency)}</p>
                         </div>
                     </div>
 
-                    <div class="space-y-2 rounded-2xl border border-gray-200 p-3 dark:border-gray-700">
-                        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Profile information</p>
+                    <div class="space-y-2 rounded-2xl border border-gray-200 p-3.5 dark:border-gray-700">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Supabase User Profile</p>
                         <div class="space-y-2 text-xs text-gray-600 dark:text-gray-300">
-                            <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Name</span><span class="font-semibold text-gray-900 dark:text-white">${escapeHtml(user.full_name || 'Not provided')}</span></div>
-                            <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Email</span><span class="font-semibold text-gray-900 dark:text-white break-all">${escapeHtml(user.email || 'Not provided')}</span></div>
-                            <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Phone</span><span class="font-semibold text-gray-900 dark:text-white">${escapeHtml(user.phone || 'Not stored')}</span></div>
-                            <div class="flex justify-between gap-3"><span>Account status</span><span class="font-semibold text-gray-900 dark:text-white">${escapeHtml(getUserStatusLabel(user.status))}</span></div>
+                            <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Full Name</span><span class="font-semibold text-gray-900 dark:text-white">${escapeHtml(user.full_name || 'Not provided')}</span></div>
+                            <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Email Address</span><span class="font-semibold text-gray-900 dark:text-white break-all">${escapeHtml(user.email || 'Not provided')}</span></div>
+                            <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Phone Number</span><span class="font-semibold text-gray-900 dark:text-white font-mono">${escapeHtml(user.phone || 'Not stored')}</span></div>
+                            <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Country & Currency</span><span class="font-semibold text-gray-900 dark:text-white">${escapeHtml(user.country || 'Global')} (${escapeHtml(userCurrency)})</span></div>
+                            <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>User UUID</span><span class="font-mono text-[10px] text-gray-500 break-all">${escapeHtml(user.id)}</span></div>
+                            <div class="flex justify-between gap-3"><span>Registered Date</span><span class="font-semibold text-gray-900 dark:text-white">${formatDate(user.created_at)}</span></div>
                         </div>
                     </div>
 
-                    <button type="button" data-user-status-toggle class="w-full rounded-xl ${actionClass} px-4 py-2.5 text-xs font-bold text-white transition">
-                        ${actionText}
-                    </button>
-                    <button type="button" data-user-topup-toggle class="w-full rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-amber-600">
-                        Require Top-up
-                    </button>
+                    <div class="flex flex-col gap-2">
+                        <button type="button" data-user-quick-fund-btn class="w-full rounded-xl bg-primary-500 hover:bg-primary-600 text-black px-4 py-2.5 text-xs font-bold transition">
+                            Fund This Account
+                        </button>
+                        <button type="button" data-user-status-toggle class="w-full rounded-xl ${actionClass} px-4 py-2.5 text-xs font-bold text-white transition">
+                            ${actionText}
+                        </button>
+                        <button type="button" data-user-topup-toggle class="w-full rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-amber-600">
+                            Require Top-up
+                        </button>
+                    </div>
                 </div>
 
                 <div class="space-y-4">
@@ -509,9 +653,9 @@
                     </div>
 
                     <div class="rounded-2xl border border-gray-200 p-4 dark:border-gray-700">
-                        <p class="mb-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Balance Adjustment (${escapeHtml(getUserCurrency(user))})</p>
+                        <p class="mb-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Quick Balance Adjustment (${escapeHtml(userCurrency)})</p>
                         <div class="space-y-3">
-                            <input type="number" min="0.01" step="0.01" data-admin-balance-amount placeholder="Enter amount in ${escapeHtml(getUserCurrency(user))}" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <input type="number" min="0.01" step="0.01" data-admin-balance-amount placeholder="Enter amount in ${escapeHtml(userCurrency)}" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                             <div class="grid grid-cols-2 gap-2">
                                 <button type="button" data-admin-balance-increase class="rounded-xl bg-green-500 px-3 py-2 text-[10px] font-bold text-white hover:bg-green-600">Increase Balance</button>
                                 <button type="button" data-admin-balance-decrease class="rounded-xl bg-red-500 px-3 py-2 text-[10px] font-bold text-white hover:bg-red-600">Decrease Balance</button>
@@ -521,6 +665,18 @@
                 </div>
             </div>
         `;
+
+        const fundBtn = panel.querySelector('[data-user-quick-fund-btn]');
+        if (fundBtn) {
+            fundBtn.addEventListener('click', () => {
+                setAdminView('action');
+                const fundSelect = document.querySelector('#fund-user');
+                if (fundSelect) {
+                    fundSelect.value = user.id;
+                    updateFundCurrencyLabel();
+                }
+            });
+        }
 
         const balanceAmountInput = panel.querySelector('[data-admin-balance-amount]');
         const increaseButton = panel.querySelector('[data-admin-balance-increase]');
@@ -567,22 +723,31 @@
                 if (topUpUserSelect) topUpUserSelect.value = user.id;
             });
         }
+
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
     }
 
     async function loadUserDetails(userId) {
         if (!userId) {
+            adminState.selectedUserId = null;
             adminState.selectedUser = null;
             adminState.selectedUserTransactions = [];
             renderUserDetailsPanel();
+            renderUsersDirectory();
             return;
         }
 
         const selectedUser = adminState.users.find((user) => user.id === userId) || null;
+        adminState.selectedUserId = userId;
         adminState.selectedUser = selectedUser;
+        adminState.selectedUserTransactions = [];
+
+        // Immediately dismiss previous profile and render present profile
+        renderUserDetailsPanel();
 
         if (!selectedUser) {
-            adminState.selectedUserTransactions = [];
-            renderUserDetailsPanel();
             return;
         }
 
@@ -593,13 +758,15 @@
             .order('created_at', { ascending: false })
             .limit(10);
 
-        if (!error && data) {
-            adminState.selectedUserTransactions = data;
-        } else {
-            adminState.selectedUserTransactions = [];
+        // Verify the user hasn't switched to another account while fetching
+        if (adminState.selectedUserId === userId) {
+            if (!error && data) {
+                adminState.selectedUserTransactions = data;
+            } else {
+                adminState.selectedUserTransactions = [];
+            }
+            renderUserDetailsPanel();
         }
-
-        renderUserDetailsPanel();
     }
 
     function openUserStatusConfirm(user, action) {
@@ -724,6 +891,7 @@
             );
             calculateMetrics();
             renderAdminDashboard();
+            renderUsersDirectory();
             renderUsersTable();
             renderUserDetailsPanel();
             return true;
@@ -1097,8 +1265,11 @@
 
         filterUsers(query) {
             adminState.searchQuery = query;
+            renderUsersDirectory();
             renderUsersTable();
-            if (window.lucide) window.lucide.createIcons();
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+            }
         }
     };
 
@@ -1155,8 +1326,10 @@
     function setAdminView(view) {
         const actionView = document.querySelector('.admin-action-view');
         const dashboardView = document.querySelector('.admin-dashboard-view');
+        const usersView = document.querySelector('.admin-users-view');
         if (dashboardView) dashboardView.hidden = view !== 'dashboard';
-        if (actionView) actionView.hidden = view === 'dashboard';
+        if (usersView) usersView.hidden = view !== 'users';
+        if (actionView) actionView.hidden = view === 'dashboard' || view === 'users';
         document.querySelector('[data-action-panel="fund"]')?.toggleAttribute('hidden', view !== 'action');
         document.querySelector('[data-admin-view="plan"]')?.toggleAttribute('hidden', view !== 'plan');
         document.querySelector('[data-admin-view="wallet"]')?.toggleAttribute('hidden', view !== 'wallet');
@@ -1167,6 +1340,9 @@
         document.querySelectorAll('[data-admin-nav]').forEach((button) => {
             button.classList.toggle('is-active', button.dataset.adminNav === view);
         });
+        if (view === 'users') {
+            renderUsersDirectory();
+        }
         closeAdminDrawer();
     }
 
@@ -1352,13 +1528,12 @@
         await fetchAdminData();
         loadAdminExchangeRates().then(() => renderAdminDashboard());
 
-        // Attach search listener
-        const searchInput = document.querySelector('[data-admin-user-search]');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
+        // Attach search listeners
+        document.querySelectorAll('[data-admin-user-search]').forEach((input) => {
+            input.addEventListener('input', (e) => {
                 window.brokerAdmin.filterUsers(e.target.value);
             });
-        }
+        });
     }
 
     document.addEventListener('DOMContentLoaded', initAdmin);
