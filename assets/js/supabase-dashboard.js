@@ -1022,6 +1022,10 @@
         document.querySelectorAll('[data-auth-phone]').forEach((el) => { el.value = phone; });
         document.querySelectorAll('[data-auth-country]').forEach((el) => { el.value = country; });
         document.querySelectorAll('[data-auth-currency]').forEach((el) => { el.value = currency; });
+        document.querySelectorAll('[data-user-currency]').forEach((el) => {
+            if ('value' in el && el.tagName === 'INPUT') el.value = currency;
+            else el.textContent = currency;
+        });
         document.querySelectorAll('[data-auth-language]').forEach((el) => { el.value = language; });
         document.querySelectorAll('[data-dashboard-language]').forEach((el) => { el.value = language; });
         document.querySelectorAll('[data-auth-initials]').forEach((el) => { el.textContent = initials(fullName); });

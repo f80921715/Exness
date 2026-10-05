@@ -178,7 +178,7 @@
                         </select>
                     </div>
                     <div>
-                        <label for="crypto-amount" class="mb-2 block text-xs font-bold text-gray-400">Amount (USD)</label>
+                        <label for="crypto-amount" class="mb-2 block text-xs font-bold text-gray-400">Amount (<span data-user-currency>USD</span>)</label>
                         <div class="flex gap-2">
                             <input id="crypto-amount" name="amount" type="number" step="0.01" required placeholder="Amount" class="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-base font-bold text-white focus:border-primary-500 focus:outline-none">
                             <button type="button" data-withdraw-all class="rounded-lg border border-white/10 px-3 text-xs font-bold text-primary-400 hover:bg-white/5">Max</button>
@@ -301,7 +301,7 @@
 
                     <!-- Amount -->
                     <div>
-                        <label for="bank-amount" class="mb-2 block text-xs font-bold text-gray-300">Amount to Withdraw (USD)</label>
+                        <label for="bank-amount" class="mb-2 block text-xs font-bold text-gray-300">Amount to Withdraw (<span data-user-currency>USD</span>)</label>
                         <div class="flex gap-2">
                             <input id="bank-amount" name="amount" type="number" step="0.01" required placeholder="0.00" class="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-base font-bold text-white focus:border-primary-500 focus:outline-none">
                             <button type="button" data-withdraw-all class="rounded-lg border border-white/10 px-4 text-xs font-bold text-primary-400 hover:bg-white/5 transition">Max</button>
@@ -331,7 +331,7 @@
     <script>document.addEventListener('DOMContentLoaded', () => { if(window.lucide) lucide.createIcons(); });</script>
 
     <!-- OTP Verification Modal -->
-    <div id="otp-modal" class="fixed inset-0 z-[200] flex items-center justify-center p-4" style="display:none!important">
+    <div id="otp-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
         <!-- Backdrop -->
         <div id="otp-backdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
         <!-- Card -->
@@ -378,7 +378,6 @@
             80%{transform:translateX(4px)}
         }
         .otp-shake { animation: otp-shake 0.4s ease; }
-        #otp-modal.otp-visible { display:flex!important; }
     </style>
 
     <script>
@@ -387,7 +386,7 @@
         var pendingFormEl = null;
         var pendingFormType = null;
         var countdownTimer = null;
-        var correctOtp = ''; // generated per session
+        var correctOtp = '';
 
         // --- Helpers ---
         function maskEmail(email) {
@@ -414,6 +413,7 @@
         function setError(show) {
             var err = document.getElementById('otp-error');
             var boxes = document.getElementById('otp-boxes');
+            if (!err || !boxes) return;
             err.classList.toggle('hidden', !show);
             if (show) {
                 getInputs().forEach(function(i){
@@ -432,17 +432,20 @@
 
         function startCountdown() {
             var secs = 60;
-            document.getElementById('otp-countdown').textContent = secs;
-            document.getElementById('otp-resend-timer').classList.remove('hidden');
-            document.getElementById('otp-resend-btn').classList.add('hidden');
+            var cd = document.getElementById('otp-countdown');
+            var timerEl = document.getElementById('otp-resend-timer');
+            var resendBtn = document.getElementById('otp-resend-btn');
+            if (cd) cd.textContent = secs;
+            if (timerEl) timerEl.classList.remove('hidden');
+            if (resendBtn) resendBtn.classList.add('hidden');
             clearInterval(countdownTimer);
             countdownTimer = setInterval(function(){
                 secs--;
-                document.getElementById('otp-countdown').textContent = secs;
+                if (cd) cd.textContent = secs;
                 if (secs <= 0) {
                     clearInterval(countdownTimer);
-                    document.getElementById('otp-resend-timer').classList.add('hidden');
-                    document.getElementById('otp-resend-btn').classList.remove('hidden');
+                    if (timerEl) timerEl.classList.add('hidden');
+                    if (resendBtn) resendBtn.classList.remove('hidden');
                 }
             }, 1000);
         }
@@ -450,51 +453,96 @@
         function openOtpModal(formEl, formType) {
             pendingFormEl = formEl;
             pendingFormType = formType;
-            // Generate a new OTP (display-only — real security is server-side)
             correctOtp = generateOtp();
-            console.log('[OTP] Code for this session:', correctOtp); // Dev only
-            // Show masked email
+            console.log('[OTP] Verification code for this session:', correctOtp);
+
+            // Extract email
             var email = '';
-            if (window.supabaseUser && window.supabaseUser.email) {
+            if (window.currentSupabaseUser && window.currentSupabaseUser.email) {
+                email = window.currentSupabaseUser.email;
+            } else if (window.supabaseUser && window.supabaseUser.email) {
                 email = window.supabaseUser.email;
             } else {
-                var authMeta = document.querySelector('[data-auth-name]');
-                // Fallback: try supabase state
-                try { email = window._supabaseSession && window._supabaseSession.user && window._supabaseSession.user.email || ''; } catch(e){}
+                try {
+                    for (var i = 0; i < localStorage.length; i++) {
+                        var k = localStorage.key(i);
+                        if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) {
+                            var parsed = JSON.parse(localStorage.getItem(k));
+                            if (parsed && parsed.user && parsed.user.email) {
+                                email = parsed.user.email;
+                                break;
+                            }
+                        }
+                    }
+                } catch(e){}
             }
-            document.getElementById('otp-email-display').textContent = maskEmail(email);
+
+            var emailDisplay = document.getElementById('otp-email-display');
+            if (emailDisplay) emailDisplay.textContent = maskEmail(email);
+
             // Reset inputs
-            getInputs().forEach(function(i){ i.value = ''; i.classList.remove('border-red-500'); i.classList.add('border-white/15'); });
-            document.getElementById('otp-error').classList.add('hidden');
-            document.getElementById('otp-verify-btn').disabled = true;
-            // Show modal
-            document.getElementById('otp-modal').classList.add('otp-visible');
-            setTimeout(function(){ getInputs()[0].focus(); }, 100);
+            getInputs().forEach(function(i){
+                i.value = '';
+                i.classList.remove('border-red-500');
+                i.classList.add('border-white/15');
+            });
+            setError(false);
+            var vBtn = document.getElementById('otp-verify-btn');
+            if (vBtn) vBtn.disabled = true;
+
+            // Show modal cleanly
+            var modal = document.getElementById('otp-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            setTimeout(function(){
+                var inputs = getInputs();
+                if (inputs[0]) inputs[0].focus();
+            }, 100);
             startCountdown();
         }
 
         function closeOtpModal() {
-            document.getElementById('otp-modal').classList.remove('otp-visible');
+            var modal = document.getElementById('otp-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
             clearInterval(countdownTimer);
             pendingFormEl = null;
             pendingFormType = null;
         }
 
-        // Wire OTP inputs and buttons after all scripts are ready
+        function updateWithdrawCurrencyLabels() {
+            var curr = 'USD';
+            if (window.currentSupabaseUser) {
+                var u = window.currentSupabaseUser;
+                curr = u.user_metadata?.currency || (window.accountPreferences && u.user_metadata?.country && window.accountPreferences.currencyForCountry(u.user_metadata.country)) || 'USD';
+            }
+            document.querySelectorAll('[data-user-currency]').forEach(function(el) {
+                el.textContent = curr;
+            });
+        }
+
+        // Wire inputs and buttons
         window.addEventListener('load', function() {
+            updateWithdrawCurrencyLabels();
             var inputs = getInputs();
             inputs.forEach(function(input, idx) {
                 input.addEventListener('input', function() {
                     this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
                     setError(false);
                     if (this.value && idx < inputs.length - 1) inputs[idx + 1].focus();
-                    document.getElementById('otp-verify-btn').disabled = getOtpValue().length < 6;
+                    var btn = document.getElementById('otp-verify-btn');
+                    if (btn) btn.disabled = getOtpValue().length < 6;
                 });
                 input.addEventListener('keydown', function(e) {
                     if (e.key === 'Backspace' && !this.value && idx > 0) {
                         inputs[idx - 1].value = '';
                         inputs[idx - 1].focus();
-                        document.getElementById('otp-verify-btn').disabled = true;
+                        var btn = document.getElementById('otp-verify-btn');
+                        if (btn) btn.disabled = true;
                     }
                 });
                 input.addEventListener('paste', function(e) {
@@ -503,46 +551,101 @@
                     paste.split('').forEach(function(ch, i) { if (inputs[i]) inputs[i].value = ch; });
                     var next = inputs.findIndex(function(i) { return !i.value; });
                     (next === -1 ? inputs[5] : inputs[next]).focus();
-                    document.getElementById('otp-verify-btn').disabled = getOtpValue().length < 6;
+                    var btn = document.getElementById('otp-verify-btn');
+                    if (btn) btn.disabled = getOtpValue().length < 6;
                 });
             });
 
-            document.getElementById('otp-verify-btn').addEventListener('click', function() {
-                if (getOtpValue().length === 6) {
-                    var savedForm = pendingFormEl;
-                    closeOtpModal();
-                    if (savedForm) {
-                        savedForm._otpVerified = true;
-                        savedForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+            var verifyBtn = document.getElementById('otp-verify-btn');
+            if (verifyBtn) {
+                verifyBtn.addEventListener('click', function() {
+                    if (getOtpValue().length === 6) {
+                        var savedForm = pendingFormEl;
+                        closeOtpModal();
+                        if (savedForm) {
+                            savedForm._otpVerified = true;
+                            if (typeof savedForm.requestSubmit === 'function') {
+                                savedForm.requestSubmit();
+                            } else {
+                                savedForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                            }
+                        }
+                    } else {
+                        setError(true);
                     }
-                } else {
-                    setError(true);
-                }
-            });
+                });
+            }
 
-            document.getElementById('otp-resend-btn').addEventListener('click', function() {
-                getInputs().forEach(function(i) { i.value = ''; });
-                document.getElementById('otp-verify-btn').disabled = true;
-                setError(false);
-                startCountdown();
-                getInputs()[0].focus();
-            });
+            var resendBtn = document.getElementById('otp-resend-btn');
+            if (resendBtn) {
+                resendBtn.addEventListener('click', function() {
+                    getInputs().forEach(function(i) { i.value = ''; });
+                    var btn = document.getElementById('otp-verify-btn');
+                    if (btn) btn.disabled = true;
+                    setError(false);
+                    startCountdown();
+                    var inputs = getInputs();
+                    if (inputs[0]) inputs[0].focus();
+                });
+            }
 
-            document.getElementById('otp-cancel-btn').addEventListener('click', closeOtpModal);
-            document.getElementById('otp-backdrop').addEventListener('click', closeOtpModal);
+            var cancelBtn = document.getElementById('otp-cancel-btn');
+            if (cancelBtn) cancelBtn.addEventListener('click', closeOtpModal);
+            var backdrop = document.getElementById('otp-backdrop');
+            if (backdrop) backdrop.addEventListener('click', closeOtpModal);
         });
 
-        // Capture-phase intercept — fires before any other submit handler
+        // Capture-phase intercept — validates form first, then shows OTP modal
         document.addEventListener('submit', function(e) {
             var form = e.target;
             if (!form || !form.dataset || !form.dataset.withdrawForm) return;
-            if (form._otpVerified) { form._otpVerified = false; return; } // let through after OTP
+            if (form._otpVerified) {
+                form._otpVerified = false;
+                return; // Let through to real submission in supabase-dashboard.js
+            }
+
+            var formType = form.dataset.withdrawForm;
+            if (formType === 'crypto') {
+                var amtInput = form.querySelector('[name="amount"]');
+                var addrInput = form.querySelector('[name="address"]');
+                if (!amtInput || !amtInput.value || parseFloat(amtInput.value) <= 0) {
+                    if (window.showAppleToast) window.showAppleToast('Please enter a valid withdrawal amount.', 'error');
+                    else alert('Please enter a valid withdrawal amount.');
+                    return;
+                }
+                if (!addrInput || !addrInput.value.trim()) {
+                    if (window.showAppleToast) window.showAppleToast('Please enter destination wallet address.', 'error');
+                    else alert('Please enter destination wallet address.');
+                    return;
+                }
+            } else if (formType === 'bank') {
+                var bankSelect = form.querySelector('[data-bank-code]');
+                var acctNameInput = form.querySelector('[data-bank-account-name]');
+                var bankAmtInput = form.querySelector('[name="amount"]');
+                if (!bankSelect || !bankSelect.value) {
+                    if (window.showAppleToast) window.showAppleToast('Please select your bank institution.', 'error');
+                    else alert('Please select your bank institution.');
+                    return;
+                }
+                if (!acctNameInput || !acctNameInput.value.trim()) {
+                    if (window.showAppleToast) window.showAppleToast('Please enter the account holder name.', 'error');
+                    else alert('Please enter the account holder name.');
+                    return;
+                }
+                if (!bankAmtInput || !bankAmtInput.value || parseFloat(bankAmtInput.value) <= 0) {
+                    if (window.showAppleToast) window.showAppleToast('Please enter a valid withdrawal amount.', 'error');
+                    else alert('Please enter a valid withdrawal amount.');
+                    return;
+                }
+            }
+
             e.preventDefault();
             e.stopImmediatePropagation();
-            openOtpModal(form, form.dataset.withdrawForm);
+            openOtpModal(form, formType);
         }, true);
 
     })();
+    </script>
     </script>
 </body>
 </html>
