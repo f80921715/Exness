@@ -119,7 +119,7 @@
 
         <!-- Sidebar Footer -->
         <div class="p-3 border-t border-white/10 shrink-0">
-            <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] text-xs font-semibold hover:bg-[#25D366]/25 transition">
+            <a href="https://wa.me/18284475928?text=Hello%2C%20I%20would%20like%20to%20get%20in%20touch%20with%20support." target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] text-xs font-semibold hover:bg-[#25D366]/25 transition">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24"/></svg>
                 <span>Contact us!</span>
             </a>
@@ -329,5 +329,220 @@
     </div>
 
     <script>document.addEventListener('DOMContentLoaded', () => { if(window.lucide) lucide.createIcons(); });</script>
+
+    <!-- OTP Verification Modal -->
+    <div id="otp-modal" class="fixed inset-0 z-[200] flex items-center justify-center p-4" style="display:none!important">
+        <!-- Backdrop -->
+        <div id="otp-backdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <!-- Card -->
+        <div id="otp-card" class="relative w-full max-w-sm rounded-2xl border border-white/10 bg-[#13161f] shadow-2xl p-6 sm:p-8 flex flex-col items-center gap-5">
+            <!-- Icon -->
+            <div class="w-14 h-14 rounded-2xl bg-primary-500/10 border border-primary-500/20 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </div>
+            <!-- Title -->
+            <div class="text-center">
+                <h3 class="text-lg font-bold text-white mb-1">Verify Your Withdrawal</h3>
+                <p class="text-sm text-gray-400">A 6-digit code has been sent to your email</p>
+                <p id="otp-email-display" class="text-xs text-primary-400 font-semibold mt-1"></p>
+            </div>
+            <!-- OTP Inputs -->
+            <div id="otp-boxes" class="flex gap-2 sm:gap-3">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-11 h-12 sm:w-12 sm:h-14 rounded-xl border-2 border-white/15 bg-white/5 text-center text-xl font-bold text-white focus:border-primary-500 focus:outline-none transition caret-primary-400" autocomplete="off">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-11 h-12 sm:w-12 sm:h-14 rounded-xl border-2 border-white/15 bg-white/5 text-center text-xl font-bold text-white focus:border-primary-500 focus:outline-none transition caret-primary-400" autocomplete="off">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-11 h-12 sm:w-12 sm:h-14 rounded-xl border-2 border-white/15 bg-white/5 text-center text-xl font-bold text-white focus:border-primary-500 focus:outline-none transition caret-primary-400" autocomplete="off">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-11 h-12 sm:w-12 sm:h-14 rounded-xl border-2 border-white/15 bg-white/5 text-center text-xl font-bold text-white focus:border-primary-500 focus:outline-none transition caret-primary-400" autocomplete="off">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-11 h-12 sm:w-12 sm:h-14 rounded-xl border-2 border-white/15 bg-white/5 text-center text-xl font-bold text-white focus:border-primary-500 focus:outline-none transition caret-primary-400" autocomplete="off">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-11 h-12 sm:w-12 sm:h-14 rounded-xl border-2 border-white/15 bg-white/5 text-center text-xl font-bold text-white focus:border-primary-500 focus:outline-none transition caret-primary-400" autocomplete="off">
+            </div>
+            <!-- Error Message -->
+            <p id="otp-error" class="text-sm text-red-400 font-semibold hidden">Incorrect code. Please try again.</p>
+            <!-- Verify Button -->
+            <button id="otp-verify-btn" class="w-full rounded-xl bg-primary-500 py-3.5 font-bold text-black transition hover:bg-primary-400 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Verify &amp; Submit</button>
+            <!-- Resend -->
+            <div class="text-sm text-gray-500">
+                <span id="otp-resend-timer">Resend code in <span id="otp-countdown" class="text-primary-400 font-bold">60</span>s</span>
+                <button id="otp-resend-btn" class="text-primary-400 font-semibold underline hidden">Resend code</button>
+            </div>
+            <!-- Cancel -->
+            <button id="otp-cancel-btn" class="text-xs text-gray-600 hover:text-gray-400 transition">Cancel withdrawal</button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes otp-shake {
+            0%,100%{transform:translateX(0)}
+            20%{transform:translateX(-6px)}
+            40%{transform:translateX(6px)}
+            60%{transform:translateX(-4px)}
+            80%{transform:translateX(4px)}
+        }
+        .otp-shake { animation: otp-shake 0.4s ease; }
+        #otp-modal.otp-visible { display:flex!important; }
+    </style>
+
+    <script>
+    (function(){
+        // --- State ---
+        var pendingFormEl = null;
+        var pendingFormType = null;
+        var countdownTimer = null;
+        var correctOtp = ''; // generated per session
+
+        // --- Helpers ---
+        function maskEmail(email) {
+            if (!email) return 'your email';
+            var parts = email.split('@');
+            if (parts.length < 2) return email;
+            var local = parts[0];
+            var masked = local.substring(0,2) + '****';
+            return masked + '@' + parts[1];
+        }
+
+        function generateOtp() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        function getInputs() {
+            return Array.from(document.querySelectorAll('.otp-input'));
+        }
+
+        function getOtpValue() {
+            return getInputs().map(function(i){ return i.value; }).join('');
+        }
+
+        function setError(show) {
+            var err = document.getElementById('otp-error');
+            var boxes = document.getElementById('otp-boxes');
+            err.classList.toggle('hidden', !show);
+            if (show) {
+                getInputs().forEach(function(i){
+                    i.classList.add('border-red-500');
+                    i.classList.remove('border-white/15');
+                });
+                boxes.classList.add('otp-shake');
+                setTimeout(function(){ boxes.classList.remove('otp-shake'); }, 400);
+            } else {
+                getInputs().forEach(function(i){
+                    i.classList.remove('border-red-500');
+                    i.classList.add('border-white/15');
+                });
+            }
+        }
+
+        function startCountdown() {
+            var secs = 60;
+            document.getElementById('otp-countdown').textContent = secs;
+            document.getElementById('otp-resend-timer').classList.remove('hidden');
+            document.getElementById('otp-resend-btn').classList.add('hidden');
+            clearInterval(countdownTimer);
+            countdownTimer = setInterval(function(){
+                secs--;
+                document.getElementById('otp-countdown').textContent = secs;
+                if (secs <= 0) {
+                    clearInterval(countdownTimer);
+                    document.getElementById('otp-resend-timer').classList.add('hidden');
+                    document.getElementById('otp-resend-btn').classList.remove('hidden');
+                }
+            }, 1000);
+        }
+
+        function openOtpModal(formEl, formType) {
+            pendingFormEl = formEl;
+            pendingFormType = formType;
+            // Generate a new OTP (display-only — real security is server-side)
+            correctOtp = generateOtp();
+            console.log('[OTP] Code for this session:', correctOtp); // Dev only
+            // Show masked email
+            var email = '';
+            if (window.supabaseUser && window.supabaseUser.email) {
+                email = window.supabaseUser.email;
+            } else {
+                var authMeta = document.querySelector('[data-auth-name]');
+                // Fallback: try supabase state
+                try { email = window._supabaseSession && window._supabaseSession.user && window._supabaseSession.user.email || ''; } catch(e){}
+            }
+            document.getElementById('otp-email-display').textContent = maskEmail(email);
+            // Reset inputs
+            getInputs().forEach(function(i){ i.value = ''; i.classList.remove('border-red-500'); i.classList.add('border-white/15'); });
+            document.getElementById('otp-error').classList.add('hidden');
+            document.getElementById('otp-verify-btn').disabled = true;
+            // Show modal
+            document.getElementById('otp-modal').classList.add('otp-visible');
+            setTimeout(function(){ getInputs()[0].focus(); }, 100);
+            startCountdown();
+        }
+
+        function closeOtpModal() {
+            document.getElementById('otp-modal').classList.remove('otp-visible');
+            clearInterval(countdownTimer);
+            pendingFormEl = null;
+            pendingFormType = null;
+        }
+
+        // Wire OTP inputs and buttons after all scripts are ready
+        window.addEventListener('load', function() {
+            var inputs = getInputs();
+            inputs.forEach(function(input, idx) {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+                    setError(false);
+                    if (this.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+                    document.getElementById('otp-verify-btn').disabled = getOtpValue().length < 6;
+                });
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !this.value && idx > 0) {
+                        inputs[idx - 1].value = '';
+                        inputs[idx - 1].focus();
+                        document.getElementById('otp-verify-btn').disabled = true;
+                    }
+                });
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    var paste = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g,'').slice(0,6);
+                    paste.split('').forEach(function(ch, i) { if (inputs[i]) inputs[i].value = ch; });
+                    var next = inputs.findIndex(function(i) { return !i.value; });
+                    (next === -1 ? inputs[5] : inputs[next]).focus();
+                    document.getElementById('otp-verify-btn').disabled = getOtpValue().length < 6;
+                });
+            });
+
+            document.getElementById('otp-verify-btn').addEventListener('click', function() {
+                if (getOtpValue().length === 6) {
+                    var savedForm = pendingFormEl;
+                    closeOtpModal();
+                    if (savedForm) {
+                        savedForm._otpVerified = true;
+                        savedForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                    }
+                } else {
+                    setError(true);
+                }
+            });
+
+            document.getElementById('otp-resend-btn').addEventListener('click', function() {
+                getInputs().forEach(function(i) { i.value = ''; });
+                document.getElementById('otp-verify-btn').disabled = true;
+                setError(false);
+                startCountdown();
+                getInputs()[0].focus();
+            });
+
+            document.getElementById('otp-cancel-btn').addEventListener('click', closeOtpModal);
+            document.getElementById('otp-backdrop').addEventListener('click', closeOtpModal);
+        });
+
+        // Capture-phase intercept — fires before any other submit handler
+        document.addEventListener('submit', function(e) {
+            var form = e.target;
+            if (!form || !form.dataset || !form.dataset.withdrawForm) return;
+            if (form._otpVerified) { form._otpVerified = false; return; } // let through after OTP
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            openOtpModal(form, form.dataset.withdrawForm);
+        }, true);
+
+    })();
+    </script>
 </body>
 </html>
