@@ -673,13 +673,22 @@
                 return false;
             }
 
-            if (num > currentAccountData.balance) {
+            const currency = dashboardCurrency();
+            const rate = Number(usdExchangeRates[currency]) || 1;
+            const convertedBal = convertedCurrencyAmount(currentAccountData.balance);
+            const userCurrencyMax = normalizeRoundTripAmount(convertedBal.amount, convertedBal.currency, rate);
+
+            if (num > userCurrencyMax + 0.05) {
                 showAppleToast(`Insufficient balance. Available: ${formatUSD(currentAccountData.balance)}`, 'error');
                 return false;
             }
 
+            // Convert amount from user's currency to USD for storage
+            const usdAmount = currency === 'USD' || !Number.isFinite(rate) || rate <= 0
+                ? num
+                : Math.round((num / rate + Number.EPSILON) * 100) / 100;
             const fee = 1.00;
-            const net = Math.max(0, num - fee);
+            const net = Math.max(0, usdAmount - fee);
             const transactionId = 'TX-' + Math.floor(1000000 + Math.random() * 9000000);
 
             let savedWithdrawal;
@@ -688,7 +697,7 @@
                 const { data, error } = await client.from('withdrawals').insert({
                     user_id: currentUser.id,
                     txid: transactionId,
-                    amount: num,
+                    amount: usdAmount,
                     fee: fee,
                     net_amount: net,
                     network: network || 'USDT (TRC-20)',
@@ -706,7 +715,7 @@
             const withdrawalRecord = {
                 id: savedWithdrawal.id,
                 txid: transactionId,
-                amount: num,
+                amount: usdAmount,
                 fee: fee,
                 netAmount: net,
                 network: network || 'USDT (TRC-20)',
@@ -722,8 +731,8 @@
                 txid: transactionId,
                 type: 'Withdrawal',
                 asset: withdrawalRecord.network,
-                amount: num,
-                formattedAmount: `-${formatUSD(num)}`,
+                amount: usdAmount,
+                formattedAmount: `-${formatUSD(usdAmount)}`,
                 date: `${formatDate()} · ${formatTime()}`,
                 status: 'Pending',
                 isPositive: false
@@ -744,7 +753,7 @@
                     txid: transactionId,
                     type: 'Withdrawal',
                     asset: withdrawalRecord.network,
-                    amount: num,
+                    amount: usdAmount,
                     fee: fee,
                     status: 'pending',
                     is_positive: false
@@ -756,7 +765,7 @@
 
             persistAccountData();
             hydrateUI();
-            showAppleToast(`Withdrawal request of ${formatUSD(num)} submitted for approval.`);
+            showAppleToast(`Withdrawal request of ${formatUSD(usdAmount)} submitted for approval.`);
             return true;
         },
 
@@ -2097,7 +2106,11 @@
             const amountInput = withdrawForm.querySelector('[name="amount"]');
             const maxButtons = withdrawForm.querySelectorAll('[data-withdraw-all]');
             maxButtons.forEach((button) => button.addEventListener('click', () => {
-                amountInput.value = Number(brokerAccount.getData()?.balance || 0);
+                const rawBal = Number(brokerAccount.getData()?.balance || 0);
+                const conv = convertedCurrencyAmount(rawBal);
+                const rate = Number(usdExchangeRates[conv.currency]) || 1;
+                const convertedMax = normalizeRoundTripAmount(conv.amount, conv.currency, rate);
+                amountInput.value = Math.round((convertedMax + Number.EPSILON) * 100) / 100;
             }));
 
             withdrawForm.addEventListener('submit', async (event) => {

