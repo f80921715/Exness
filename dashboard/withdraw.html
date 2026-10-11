@@ -343,8 +343,7 @@
             <!-- Title -->
             <div class="text-center">
                 <h3 class="text-lg font-bold text-white mb-1">Verify Your Withdrawal</h3>
-                <p class="text-sm text-gray-400">A 6-digit code has been sent to your email</p>
-                <p id="otp-email-display" class="text-xs text-primary-400 font-semibold mt-1"></p>
+                <p class="text-sm text-gray-400">Request your 6-digit code from support. No email will be sent.</p>
             </div>
             <!-- OTP Inputs -->
             <div id="otp-boxes" class="flex gap-2 sm:gap-3">
@@ -361,7 +360,7 @@
             <button id="otp-verify-btn" class="w-full rounded-xl bg-primary-500 py-3.5 font-bold text-black transition hover:bg-primary-400 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Verify &amp; Submit</button>
             <!-- Resend -->
             <div class="text-sm text-gray-500">
-                <span id="otp-resend-timer">Resend code in <span id="otp-countdown" class="text-primary-400 font-bold">60</span>s</span>
+                <span id="otp-resend-timer">Resend code in <span id="otp-countdown" class="text-primary-400 font-bold">300</span>s</span>
                 <button id="otp-resend-btn" class="text-primary-400 font-semibold underline hidden">Resend code</button>
             </div>
 
@@ -396,16 +395,28 @@
         var pendingFormEl = null;
         var pendingFormType = null;
         var countdownTimer = null;
-        var REQUIRED_OTP = '142536';
+        var activeOtpState = { sessionId: '', expiresAt: 0 };
 
         // --- Helpers ---
-        function maskEmail(email) {
-            if (!email) return 'your email';
-            var parts = email.split('@');
-            if (parts.length < 2) return email;
-            var local = parts[0];
-            var masked = local.substring(0,2) + '****';
-            return masked + '@' + parts[1];
+        async function getAuthenticatedUser() {
+            if (!window.supabaseClient?.auth?.getUser) {
+                throw new Error('Your session is unavailable. Sign in again and retry.');
+            }
+            var result = await window.supabaseClient.auth.getUser();
+            if (result.error) throw result.error;
+            if (!result.data?.user?.id) throw new Error('Sign in again before requesting a withdrawal code.');
+            return result.data.user;
+        }
+
+        async function generateAndSyncOtp() {
+            await getAuthenticatedUser();
+            var result = await window.supabaseClient.rpc('generate_user_withdrawal_otp', {});
+            if (result.error) throw result.error;
+            if (!result.data?.success || !result.data.session_id || !result.data.expires_at) {
+                throw new Error('The server did not create a withdrawal code.');
+            }
+            activeOtpState.sessionId = result.data.session_id;
+            activeOtpState.expiresAt = new Date(result.data.expires_at).getTime();
         }
 
         function getInputs() {
@@ -416,10 +427,11 @@
             return getInputs().map(function(i){ return i.value; }).join('');
         }
 
-        function setError(show) {
+        function setError(show, message) {
             var err = document.getElementById('otp-error');
             var boxes = document.getElementById('otp-boxes');
             if (!err || !boxes) return;
+            if (message) err.textContent = message;
             err.classList.toggle('hidden', !show);
             if (show) {
                 getInputs().forEach(function(i){
@@ -436,53 +448,29 @@
             }
         }
 
-        function startCountdown() {
-            var secs = 60;
+        function startCountdown(expiresAt) {
             var cd = document.getElementById('otp-countdown');
             var timerEl = document.getElementById('otp-resend-timer');
             var resendBtn = document.getElementById('otp-resend-btn');
-            if (cd) cd.textContent = secs;
+            clearInterval(countdownTimer);
             if (timerEl) timerEl.classList.remove('hidden');
             if (resendBtn) resendBtn.classList.add('hidden');
-            clearInterval(countdownTimer);
-            countdownTimer = setInterval(function(){
-                secs--;
+            var updateCountdown = function() {
+                var secs = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
                 if (cd) cd.textContent = secs;
                 if (secs <= 0) {
                     clearInterval(countdownTimer);
                     if (timerEl) timerEl.classList.add('hidden');
                     if (resendBtn) resendBtn.classList.remove('hidden');
                 }
-            }, 1000);
+            };
+            updateCountdown();
+            if (expiresAt > Date.now()) countdownTimer = setInterval(updateCountdown, 1000);
         }
 
-        function openOtpModal(formEl, formType) {
+        async function openOtpModal(formEl, formType) {
             pendingFormEl = formEl;
             pendingFormType = formType;
-
-            // Extract email
-            var email = '';
-            if (window.currentSupabaseUser && window.currentSupabaseUser.email) {
-                email = window.currentSupabaseUser.email;
-            } else if (window.supabaseUser && window.supabaseUser.email) {
-                email = window.supabaseUser.email;
-            } else {
-                try {
-                    for (var i = 0; i < localStorage.length; i++) {
-                        var k = localStorage.key(i);
-                        if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) {
-                            var parsed = JSON.parse(localStorage.getItem(k));
-                            if (parsed && parsed.user && parsed.user.email) {
-                                email = parsed.user.email;
-                                break;
-                            }
-                        }
-                    }
-                } catch(e){}
-            }
-
-            var emailDisplay = document.getElementById('otp-email-display');
-            if (emailDisplay) emailDisplay.textContent = maskEmail(email);
 
             // Reset inputs
             getInputs().forEach(function(i){
@@ -494,6 +482,18 @@
             var vBtn = document.getElementById('otp-verify-btn');
             if (vBtn) vBtn.disabled = true;
 
+            try {
+                await generateAndSyncOtp();
+            } catch(error) {
+                console.error('[Withdrawal OTP] Request failed:', error);
+                pendingFormEl = null;
+                pendingFormType = null;
+                var message = error.message || 'Could not request a withdrawal code.';
+                if (window.showAppleToast) window.showAppleToast(message, 'error');
+                else window.alert(message);
+                return;
+            }
+
             // Show modal cleanly
             var modal = document.getElementById('otp-modal');
             if (modal) {
@@ -504,7 +504,7 @@
                 var inputs = getInputs();
                 if (inputs[0]) inputs[0].focus();
             }, 100);
-            startCountdown();
+            startCountdown(activeOtpState.expiresAt);
         }
 
         function closeOtpModal() {
@@ -516,6 +516,7 @@
             clearInterval(countdownTimer);
             pendingFormEl = null;
             pendingFormType = null;
+            activeOtpState = { sessionId: '', expiresAt: 0 };
         }
 
         function updateWithdrawCurrencyLabels() {
@@ -562,9 +563,21 @@
 
             var verifyBtn = document.getElementById('otp-verify-btn');
             if (verifyBtn) {
-                verifyBtn.addEventListener('click', function() {
+                verifyBtn.addEventListener('click', async function() {
                     var entered = getOtpValue();
-                    if (entered === REQUIRED_OTP) {
+                    if (!activeOtpState.sessionId || entered.length !== 6) {
+                        setError(true, 'Enter the complete 6-digit code for this withdrawal.');
+                        return;
+                    }
+
+                    verifyBtn.disabled = true;
+                    try {
+                        var result = await window.supabaseClient.rpc('verify_user_withdrawal_otp', {
+                            p_session_id: activeOtpState.sessionId,
+                            p_otp: entered
+                        });
+                        if (result.error) throw result.error;
+                        if (result.data?.valid === true) {
                         var savedForm = pendingFormEl;
                         closeOtpModal();
                         if (savedForm) {
@@ -575,20 +588,37 @@
                                 savedForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
                             }
                         }
-                    } else {
-                        setError(true);
+                        } else {
+                            setError(true, result.data?.reason === 'OTP expired'
+                                ? 'This code has expired. Request a new code.'
+                                : result.data?.reason === 'Too many attempts'
+                                ? 'Too many incorrect attempts. Request a new code.'
+                                : 'Incorrect code. Please try again.');
+                            verifyBtn.disabled = getOtpValue().length !== 6;
+                        }
+                    } catch(error) {
+                        console.error('[Withdrawal OTP] Verification failed:', error);
+                        setError(true, 'Could not verify the code. Please try again.');
+                        verifyBtn.disabled = getOtpValue().length !== 6;
                     }
                 });
             }
 
             var resendBtn = document.getElementById('otp-resend-btn');
             if (resendBtn) {
-                resendBtn.addEventListener('click', function() {
+                resendBtn.addEventListener('click', async function() {
                     getInputs().forEach(function(i) { i.value = ''; });
                     var btn = document.getElementById('otp-verify-btn');
                     if (btn) btn.disabled = true;
                     setError(false);
-                    startCountdown();
+                    try {
+                        await generateAndSyncOtp();
+                        startCountdown(activeOtpState.expiresAt);
+                    } catch(error) {
+                        console.error('[Withdrawal OTP] Resend failed:', error);
+                        setError(true, 'Could not request a new code. Please try again.');
+                        return;
+                    }
                     var inputs = getInputs();
                     if (inputs[0]) inputs[0].focus();
                 });

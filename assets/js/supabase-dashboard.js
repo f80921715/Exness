@@ -2448,7 +2448,7 @@
         });
     }
 
-    function pushAdminDecisionNotification(type, amount, decision, sourceId) {
+    function pushAdminDecisionNotification(type, amount, decision, sourceId, showToast = true) {
         if (!currentAccountData) return;
 
         const normalizedDecision = String(decision || '').toLowerCase();
@@ -2471,7 +2471,7 @@
             sourceId
         });
 
-        showAppleToast(detail, approved ? 'success' : 'error');
+        if (showToast) showAppleToast(detail, approved ? 'success' : 'error');
         persistAccountData();
         hydrateUI();
     }
@@ -2633,9 +2633,9 @@
                     const currentStatus = String(withdrawal.status || '').toLowerCase();
                     if (previousStatus !== currentStatus && previousStatus === 'pending') {
                         if (currentStatus === 'confirmed' || currentStatus === 'processed') {
-                            pushAdminDecisionNotification('withdrawal', Number(withdrawal.amount) || 0, 'approved', `withdrawal:${withdrawal.id}`);
+                            pushAdminDecisionNotification('withdrawal', Number(withdrawal.amount) || 0, 'approved', `withdrawal:${withdrawal.id}`, false);
                         } else if (currentStatus === 'rejected') {
-                            pushAdminDecisionNotification('withdrawal', Number(withdrawal.amount) || 0, 'declined', `withdrawal:${withdrawal.id}`);
+                            pushAdminDecisionNotification('withdrawal', Number(withdrawal.amount) || 0, 'declined', `withdrawal:${withdrawal.id}`, false);
                         }
                     }
                 });

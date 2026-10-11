@@ -29,6 +29,7 @@
         activeTab: 'all'
     };
     const EXCHANGE_RATE_CACHE_KEY = 'dashboard-usd-exchange-rates-v1';
+    let pendingOtpExpiryTimer = null;
     let usdExchangeRates = { USD: 1 };
 
     function getUserCurrency(user) {
@@ -280,20 +281,36 @@
                 .order('created_at', { ascending: false });
 
             if (!pErr && profiles) {
-                adminState.users = profiles;
+                adminState.users = profiles.filter((profile) =>
+                    profile.id !== adminState.currentUser?.id
+                    && String(profile.role || '').toLowerCase() !== 'admin'
+                );
             } else {
-                // If table is empty or just initialized, include current admin
-                adminState.users = [
-                    {
-                        id: adminState.currentUser.id,
-                        email: adminState.currentUser.email,
-                        full_name: adminState.currentUser.user_metadata?.full_name || 'System Admin',
-                        role: 'admin',
-                        status: 'active',
-                        balance: 0.00,
-                        created_at: adminState.currentUser.created_at || new Date().toISOString()
-                    }
-                ];
+                adminState.users = [];
+            }
+
+            const { data: otpRecords, error: otpError } = await client
+                .from('user_withdrawal_otps')
+                .select('id, user_id, otp, expires_at, consumed_at, created_at')
+                .is('consumed_at', null)
+                .gt('expires_at', new Date().toISOString())
+                .order('created_at', { ascending: false });
+
+            if (otpError) {
+                console.error('[Admin] Active withdrawal OTPs could not be loaded:', otpError);
+                showAdminToast('Withdrawal OTP storage is unavailable. Apply the Phase 10 database script.', 'error');
+            }
+
+            const otpByUserId = new Map();
+            (otpRecords || []).forEach((record) => {
+                if (!otpByUserId.has(record.user_id)) otpByUserId.set(record.user_id, record);
+            });
+            adminState.users = adminState.users.map((user) => ({
+                ...user,
+                activeWithdrawalOtp: otpByUserId.get(user.id) || null
+            }));
+            if (adminState.selectedUserId) {
+                adminState.selectedUser = adminState.users.find((user) => user.id === adminState.selectedUserId) || null;
             }
 
             const { data: withdrawals, error: withdrawalsError } = await client
@@ -377,12 +394,50 @@
         const container = document.querySelector('[data-admin-pending-withdrawals]');
         if (!container) return;
 
-        if (adminState.withdrawals.length === 0) {
+        if (pendingOtpExpiryTimer) clearTimeout(pendingOtpExpiryTimer);
+        const activeOtpUsers = adminState.users.filter((user) => {
+            const otp = user.activeWithdrawalOtp;
+            return Boolean(otp?.otp && !otp.consumed_at && new Date(otp.expires_at).getTime() > Date.now());
+        });
+        const nextOtpExpiry = Math.min(...activeOtpUsers.map((user) => new Date(user.activeWithdrawalOtp.expires_at).getTime()));
+        if (Number.isFinite(nextOtpExpiry)) {
+            pendingOtpExpiryTimer = window.setTimeout(() => {
+                const now = Date.now();
+                adminState.users.forEach((user) => {
+                    if (user.activeWithdrawalOtp && new Date(user.activeWithdrawalOtp.expires_at).getTime() <= now) {
+                        user.activeWithdrawalOtp = null;
+                    }
+                });
+                renderPendingWithdrawals();
+            }, Math.max(0, nextOtpExpiry - Date.now() + 25));
+        }
+
+        if (adminState.withdrawals.length === 0 && activeOtpUsers.length === 0) {
             container.innerHTML = '<p class="admin-withdrawal-empty">No pending withdrawals.</p>';
             return;
         }
 
-        container.innerHTML = adminState.withdrawals.map((withdrawal) => {
+        const otpRows = activeOtpUsers.map((user) => {
+            const otp = user.activeWithdrawalOtp;
+            const userName = getUserDisplayName(user);
+            return `
+                <article class="admin-withdrawal-row">
+                    <div class="admin-withdrawal-copy">
+                        <div class="admin-withdrawal-heading">
+                            <strong>${escapeHtml(userName)}</strong>
+                            <time datetime="${escapeHtml(otp.created_at || '')}">${escapeHtml(formatDateTime(otp.created_at))}</time>
+                        </div>
+                        <p><span>Withdrawal OTP request</span><span aria-hidden="true">·</span><span>Expires ${escapeHtml(formatDateTime(otp.expires_at))}</span></p>
+                        <strong class="mt-2 inline-block font-mono text-lg tracking-widest text-primary-500">${escapeHtml(otp.otp)}</strong>
+                    </div>
+                    <strong class="admin-withdrawal-amount">OTP</strong>
+                    <div class="admin-withdrawal-actions">
+                        <button type="button" data-copy-withdrawal-otp="${escapeHtml(user.id)}">Copy OTP</button>
+                    </div>
+                </article>`;
+        }).join('');
+
+        const withdrawalRows = adminState.withdrawals.map((withdrawal) => {
             const userName = withdrawal.profiles?.full_name || withdrawal.profiles?.email || 'Account holder';
             return `
                 <article class="admin-withdrawal-row">
@@ -400,6 +455,36 @@
                     </div>
                 </article>`;
         }).join('');
+        container.innerHTML = `${otpRows}${withdrawalRows}`;
+
+        container.querySelectorAll('[data-copy-withdrawal-otp]').forEach((button) => {
+            button.addEventListener('click', async () => {
+                const user = adminState.users.find((profile) => profile.id === button.dataset.copyWithdrawalOtp);
+                const otp = user?.activeWithdrawalOtp;
+                if (!otp?.otp || otp.consumed_at || new Date(otp.expires_at).getTime() <= Date.now()) {
+                    showAdminToast('This withdrawal OTP has expired or was already used.', 'error');
+                    return;
+                }
+
+                try {
+                    if (navigator.clipboard?.writeText) {
+                        await navigator.clipboard.writeText(otp.otp);
+                    } else {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = otp.otp;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        textarea.remove();
+                    }
+                    showAdminToast('Withdrawal OTP copied.', 'success');
+                } catch (error) {
+                    showAdminToast('Could not copy withdrawal OTP.', 'error');
+                }
+            });
+        });
 
         container.querySelectorAll('[data-approve-withdrawal]').forEach((button) => {
             button.addEventListener('click', () => window.brokerAdmin.approveWithdrawal(button.dataset.approveWithdrawal));
@@ -580,6 +665,22 @@
 
         const actionText = isSuspended ? 'Activate user' : 'Suspend user';
         const actionClass = isSuspended ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600';
+        const activeOtp = user.activeWithdrawalOtp;
+        const activeOtpExpiresAt = activeOtp ? new Date(activeOtp.expires_at).getTime() : 0;
+        const hasActiveOtp = Boolean(activeOtp?.otp && activeOtpExpiresAt > Date.now() && !activeOtp.consumed_at);
+
+        if (hasActiveOtp) {
+            window.setTimeout(() => {
+                const currentUser = adminState.users.find((profile) => profile.id === user.id);
+                if (currentUser?.activeWithdrawalOtp?.id === activeOtp.id && activeOtpExpiresAt <= Date.now()) {
+                    currentUser.activeWithdrawalOtp = null;
+                    if (adminState.selectedUserId === user.id) {
+                        adminState.selectedUser = currentUser;
+                        renderUserDetailsPanel();
+                    }
+                }
+            }, activeOtpExpiresAt - Date.now() + 25);
+        }
 
         panel.innerHTML = `
             <div class="grid gap-6 lg:grid-cols-[1.1fr_1.4fr]">
@@ -648,6 +749,17 @@
 
                 <div class="space-y-4">
                     <div class="rounded-2xl border border-gray-200 p-4 dark:border-gray-700">
+                        <p class="mb-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Withdrawal OTP</p>
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p class="font-mono text-xl font-black tracking-widest text-primary-500">${hasActiveOtp ? escapeHtml(activeOtp.otp) : 'No active code'}</p>
+                                <p class="text-[10px] text-gray-500">${hasActiveOtp ? `Expires ${formatDateTime(activeOtp.expires_at)}` : 'A code appears here when this client requests a withdrawal.'}</p>
+                            </div>
+                            ${hasActiveOtp ? '<button type="button" data-copy-profile-otp class="rounded-xl bg-primary-500 px-3 py-2 text-xs font-bold text-black hover:bg-primary-600">Copy OTP</button>' : ''}
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-200 p-4 dark:border-gray-700">
                         <p class="mb-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Recent Transactions</p>
                         <div class="space-y-1">${recentTransactions}</div>
                     </div>
@@ -674,6 +786,29 @@
                 if (fundSelect) {
                     fundSelect.value = user.id;
                     updateFundCurrencyLabel();
+                }
+            });
+        }
+
+        const copyOtpButton = panel.querySelector('[data-copy-profile-otp]');
+        if (copyOtpButton) {
+            copyOtpButton.addEventListener('click', async () => {
+                try {
+                    if (navigator.clipboard?.writeText) {
+                        await navigator.clipboard.writeText(activeOtp.otp);
+                    } else {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = activeOtp.otp;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        textarea.remove();
+                    }
+                    showAdminToast('Withdrawal OTP copied.', 'success');
+                } catch (error) {
+                    showAdminToast('Could not copy withdrawal OTP.', 'error');
                 }
             });
         }
@@ -1527,6 +1662,27 @@
         setAdminView('dashboard');
         await fetchAdminData();
         loadAdminExchangeRates().then(() => renderAdminDashboard());
+
+        if (client.channel) {
+            client
+                .channel('admin-withdrawal-otp-sync')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'user_withdrawal_otps' }, (payload) => {
+                    const record = payload.new || payload.old;
+                    const user = adminState.users.find((profile) => profile.id === record?.user_id);
+                    if (!user) return;
+
+                    const recordIsActive = payload.eventType !== 'DELETE'
+                        && !record.consumed_at
+                        && new Date(record.expires_at).getTime() > Date.now();
+                    user.activeWithdrawalOtp = recordIsActive ? record : null;
+                    if (adminState.selectedUserId === user.id) {
+                        adminState.selectedUser = user;
+                        renderUserDetailsPanel();
+                    }
+                    renderPendingWithdrawals();
+                })
+                .subscribe();
+        }
 
         // Attach search listeners
         document.querySelectorAll('[data-admin-user-search]').forEach((input) => {
