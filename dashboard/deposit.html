@@ -26,10 +26,10 @@
     <link rel="stylesheet" href="../assets/css/style.css?v=dashboard-drawer-labels-20260929">
     <script src="../assets/js/lucide.min.js"></script>
     <script src="../assets/js/icons.js"></script>
-    <script defer src="../assets/js/alpine.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="../assets/js/supabase-client.js" defer></script>
     <script src="../assets/js/supabase-dashboard.js" defer></script>
+    <script defer src="../assets/js/alpine.min.js"></script>
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('theme', {
@@ -127,7 +127,7 @@
     </aside>
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col min-w-0" x-data="{ asset: 'btc', amount: '', copied: false,
+    <div class="flex-1 flex flex-col min-w-0" x-data="{ asset: 'btc', amount: '', copied: false, bankAccountCopied: false, paymentMethod: 'crypto', bankTransferOpen: false, bankTransferLoading: true, bankTransferError: '', bankTransferRealtimeVersion: 0, bankTransfer: { bank_name: '', account_name: '', account_number: '' },
         addresses: {
             'usdt-trc20': 'TX8mK5uQvQx2R9P9vL1Xy9Z5YwW6V5U4T3',
             'btc': 'bc1q2fykn5c9prp4t7a3xly3ulrj8paspvzmgzlt5u',
@@ -138,8 +138,82 @@
             navigator.clipboard.writeText(this.addresses[this.asset]);
             this.copied = true;
             setTimeout(() => this.copied = false, 2000);
+        },
+        async copyBankAccount() {
+            try {
+                await navigator.clipboard.writeText(this.bankTransfer.account_number);
+                this.bankAccountCopied = true;
+                setTimeout(() => this.bankAccountCopied = false, 2000);
+            } catch (error) {
+                console.error('Could not copy bank account number:', error);
+                if (window.brokerAccount?.showToast) {
+                    window.brokerAccount.showToast('Could not copy the account number. Please copy it manually.', 'error');
+                } else {
+                    alert('Could not copy the account number. Please copy it manually.');
+                }
+            }
+        },
+        subscribeToBankTransferUpdates() {
+            const client = window.supabaseClient;
+            if (!client || !client.channel) return;
+            client
+                .channel('bank-transfer-settings-live')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'bank_transfer_settings',
+                    filter: 'id=eq.default'
+                }, (payload) => {
+                    this.bankTransferRealtimeVersion += 1;
+                    if (payload.eventType === 'DELETE') {
+                        this.bankTransferError = 'Bank transfer details are unavailable right now. Please try again later.';
+                        return;
+                    }
+                    const settings = payload.new;
+                    if (!settings?.bank_name || !settings?.account_name || !settings?.account_number) return;
+                    this.bankTransfer = {
+                        bank_name: settings.bank_name,
+                        account_name: settings.account_name,
+                        account_number: settings.account_number
+                    };
+                    this.bankTransferError = '';
+                    this.bankTransferLoading = false;
+                    this.bankAccountCopied = false;
+                })
+                .subscribe((status, error) => {
+                    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                        console.warn('Live bank transfer updates are unavailable:', error || status);
+                    }
+                });
+        },
+        async initializeBankTransfer() {
+            this.subscribeToBankTransferUpdates();
+            await this.loadBankTransferDetails();
+        },
+        async loadBankTransferDetails() {
+            const realtimeVersion = this.bankTransferRealtimeVersion;
+            try {
+                const client = window.supabaseClient;
+                if (!client) throw new Error('The database connection is unavailable.');
+                const { data, error } = await client
+                    .from('bank_transfer_settings')
+                    .select('bank_name, account_name, account_number')
+                    .eq('id', 'default')
+                    .maybeSingle();
+                if (error) throw error;
+                if (!data) throw new Error('No bank transfer details are configured.');
+                if (realtimeVersion === this.bankTransferRealtimeVersion) {
+                    this.bankTransfer = data;
+                    this.bankTransferError = '';
+                }
+            } catch (error) {
+                console.error('Could not load bank transfer details:', error);
+                this.bankTransferError = 'Bank transfer details are unavailable right now. Please try again later.';
+            } finally {
+                this.bankTransferLoading = false;
+            }
         }
-    }">
+    }" x-init="initializeBankTransfer()">
         <!-- Top Navigation Bar -->
         <header class="reference-topbar flex h-12 items-center justify-between sticky top-0 z-30 px-3 sm:px-6">
             <div class="flex items-center space-x-3">
@@ -162,7 +236,21 @@
         <main class="p-6 sm:p-10 max-w-4xl mx-auto w-full space-y-6 pb-10">
             <div class="reference-card p-6 sm:p-8">
                 <h2 class="text-base font-bold mb-6">Fund Your Portfolio</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div class="mb-6">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Select Payment Method</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" @click="paymentMethod = 'crypto'" :class="paymentMethod === 'crypto' ? 'border-primary-500 bg-primary-500/10' : 'border-white/10'" class="p-3 border rounded-xl text-left transition flex items-center gap-2 hover:border-primary-500/50">
+                            <i data-lucide="bitcoin" class="w-5 h-5 text-primary-400"></i>
+                            <span class="text-sm font-bold text-white">Cryptocurrency</span>
+                        </button>
+                        <button type="button" @click="paymentMethod = 'bank'; bankTransferOpen = true" :class="paymentMethod === 'bank' ? 'border-primary-500 bg-primary-500/10' : 'border-white/10'" class="p-3 border rounded-xl text-left transition flex items-center gap-2 hover:border-primary-500/50">
+                            <i data-lucide="landmark" class="w-5 h-5 text-primary-400"></i>
+                            <span class="text-sm font-bold text-white">Bank transfer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div x-show="paymentMethod === 'crypto'" class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                     <!-- Left: Asset selection & Amount -->
                     <div class="space-y-5">
                         <div>
@@ -221,8 +309,57 @@
                         </div>
                     </div>
                 </div>
+
+                <div x-show="paymentMethod === 'bank'" x-cloak class="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+                    <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-500/10 text-primary-400">
+                        <i data-lucide="landmark" class="h-6 w-6"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white">Bank transfer selected</h3>
+                    <p class="mt-2 text-sm text-gray-400">View the account details to make your deposit by bank transfer.</p>
+                    <button type="button" @click="bankTransferOpen = true" class="mt-5 rounded-xl bg-primary-500 px-5 py-3 text-sm font-bold text-black transition hover:bg-primary-600">
+                        View bank details
+                    </button>
+                </div>
             </div>
         </main>
+
+        <div x-show="bankTransferOpen" x-cloak @keydown.escape.window="bankTransferOpen = false" @click.self="bankTransferOpen = false" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="bank-transfer-title">
+            <div class="w-full max-w-md rounded-2xl border border-white/10 bg-[#141a2e] p-6 shadow-2xl">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h2 id="bank-transfer-title" class="text-lg font-bold text-white">Bank transfer details</h2>
+                        <p class="mt-1 text-sm text-gray-400">Use these details to make your deposit.</p>
+                    </div>
+                    <button type="button" @click="bankTransferOpen = false" aria-label="Close bank details" class="rounded-lg p-2 text-gray-400 transition hover:bg-white/10 hover:text-white">
+                        <i data-lucide="x" class="h-5 w-5"></i>
+                    </button>
+                </div>
+                <p x-show="bankTransferLoading" class="mt-6 text-sm text-gray-400" role="status">Loading bank details...</p>
+                <p x-show="bankTransferError" x-text="bankTransferError" class="mt-6 text-sm text-red-300" role="alert"></p>
+                <dl x-show="!bankTransferLoading && !bankTransferError" class="mt-6 space-y-3">
+                    <div class="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-4">
+                        <dt class="text-sm text-gray-400">Account name</dt>
+                        <dd class="text-right text-sm font-semibold text-white" x-text="bankTransfer.account_name"></dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-4">
+                        <dt class="text-sm text-gray-400">Account number</dt>
+                        <dd>
+                            <button type="button" @click="copyBankAccount()" class="inline-flex items-center gap-2 rounded-lg px-2 py-1 font-mono text-sm font-semibold text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-primary-500" :aria-label="'Copy account number ' + bankTransfer.account_number">
+                                <span x-text="bankTransfer.account_number"></span>
+                                <i :data-lucide="bankAccountCopied ? 'check' : 'copy'" class="h-4 w-4 text-primary-400"></i>
+                            </button>
+                            <span x-show="bankAccountCopied" x-cloak role="status" class="sr-only">Copied</span>
+                        </dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-4">
+                        <dt class="text-sm text-gray-400">Bank</dt>
+                        <dd class="text-right text-sm font-semibold text-white" x-text="bankTransfer.bank_name"></dd>
+                    </div>
+                </dl>
+                <p x-show="!bankTransferLoading && !bankTransferError" class="mt-4 text-xs leading-relaxed text-gray-500">Deposits are credited after the transfer is verified.</p>
+                <button type="button" @click="bankTransferOpen = false" class="mt-5 w-full rounded-xl bg-primary-500 py-3 font-bold text-black transition hover:bg-primary-600">Done</button>
+            </div>
+        </div>
 
         <!-- Mobile Bottom Nav -->
         <nav class="lg:hidden fixed bottom-4 left-4 right-4 z-40 rounded-3xl border border-white/10 bg-[#181a24]/95 px-4 py-3 shadow-2xl backdrop-blur-xl" aria-label="Mobile navigation">

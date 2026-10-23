@@ -744,6 +744,9 @@
                         <button type="button" data-user-topup-toggle class="w-full rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-amber-600">
                             Require Top-up
                         </button>
+                        <button type="button" data-user-delete class="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-xs font-bold text-red-500 transition hover:bg-red-500/20">
+                            Delete User
+                        </button>
                     </div>
                 </div>
 
@@ -789,6 +792,10 @@
                 }
             });
         }
+
+        panel.querySelector('[data-user-delete]')?.addEventListener('click', () => {
+            openUserDeleteConfirm(user);
+        });
 
         const copyOtpButton = panel.querySelector('[data-copy-profile-otp]');
         if (copyOtpButton) {
@@ -951,6 +958,60 @@
 
         cancelButton.onclick = () => {
             overlay.hidden = true;
+        };
+    }
+
+    function openUserDeleteConfirm(user) {
+        const overlay = document.querySelector('[data-user-delete-confirmation]');
+        if (!overlay || !user) return;
+
+        const message = overlay.querySelector('[data-user-delete-message]');
+        const errorMessage = overlay.querySelector('[data-user-delete-error]');
+        const confirmButton = overlay.querySelector('[data-user-delete-confirm]');
+        const cancelButton = overlay.querySelector('[data-user-delete-cancel]');
+        if (!message || !errorMessage || !confirmButton || !cancelButton) return;
+
+        message.textContent = `Delete ${getUserDisplayName(user)} (${user.email || 'no email'}) and their account data permanently?`;
+        errorMessage.hidden = true;
+        errorMessage.textContent = '';
+        confirmButton.disabled = false;
+        confirmButton.textContent = 'Delete user';
+        overlay.hidden = false;
+
+        cancelButton.onclick = () => {
+            overlay.hidden = true;
+        };
+        confirmButton.onclick = async () => {
+            confirmButton.disabled = true;
+            confirmButton.textContent = 'Deleting...';
+            errorMessage.hidden = true;
+            try {
+                const { error } = await client.rpc('admin_delete_user', {
+                    target_user_id: user.id
+                });
+                if (error) throw error;
+
+                adminState.users = adminState.users.filter((item) => item.id !== user.id);
+                if (adminState.selectedUserId === user.id) {
+                    adminState.selectedUserId = null;
+                    adminState.selectedUser = null;
+                    adminState.selectedUserTransactions = [];
+                }
+                overlay.hidden = true;
+                calculateMetrics();
+                renderAdminDashboard();
+                renderUsersDirectory();
+                renderUsersTable();
+                renderUserDetailsPanel();
+                showAdminToast('User permanently deleted.');
+            } catch (error) {
+                console.error('[Admin] User deletion failed:', error);
+                errorMessage.textContent = error.message || 'Unable to delete this user. Please try again.';
+                errorMessage.hidden = false;
+            } finally {
+                confirmButton.disabled = false;
+                confirmButton.textContent = 'Delete user';
+            }
         };
     }
 
@@ -1472,6 +1533,7 @@
         document.querySelector('[data-admin-view="unsuspend"]')?.toggleAttribute('hidden', view !== 'unsuspend');
         document.querySelector('[data-admin-view="topup-suspension"]')?.toggleAttribute('hidden', view !== 'topup-suspension');
         document.querySelector('[data-admin-view="topup-release"]')?.toggleAttribute('hidden', view !== 'topup-release');
+        document.querySelector('[data-admin-view="bank-transfer"]')?.toggleAttribute('hidden', view !== 'bank-transfer');
         document.querySelectorAll('[data-admin-nav]').forEach((button) => {
             button.classList.toggle('is-active', button.dataset.adminNav === view);
         });
@@ -1629,6 +1691,77 @@
         );
     }
 
+    async function setupBankTransferSettings() {
+        const form = document.querySelector('[data-admin-bank-transfer-form]');
+        if (!form) return;
+
+        const status = form.querySelector('[data-bank-transfer-settings-status]');
+        const fields = {
+            bank_name: form.elements.namedItem('bankName'),
+            account_name: form.elements.namedItem('accountName'),
+            account_number: form.elements.namedItem('accountNumber')
+        };
+        const setStatus = (message, isError = false) => {
+            if (!status) return;
+            status.textContent = message;
+            status.hidden = !message;
+            status.classList.toggle('is-error', isError);
+        };
+
+        const { data, error } = await client
+            .from('bank_transfer_settings')
+            .select('bank_name, account_name, account_number')
+            .eq('id', 'default')
+            .maybeSingle();
+
+        if (error) {
+            console.error('[Admin] Could not load bank transfer settings:', error);
+            setStatus('Could not load saved bank details. Apply the bank transfer settings database migration, then try again.', true);
+        } else if (data) {
+            fields.bank_name.value = data.bank_name;
+            fields.account_name.value = data.account_name;
+            fields.account_number.value = data.account_number;
+        } else {
+            setStatus('No bank details are saved yet. Enter the details and save to publish them.');
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const bankName = String(formData.get('bankName') || '').trim();
+            const accountName = String(formData.get('accountName') || '').trim();
+            const accountNumber = String(formData.get('accountNumber') || '').trim();
+            if (!bankName || !accountName || !accountNumber) {
+                showAdminToast('Enter the bank name, account name, and account number.', 'error');
+                return;
+            }
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) submitButton.disabled = true;
+            try {
+                const { error: saveError } = await client
+                    .from('bank_transfer_settings')
+                    .upsert({
+                        id: 'default',
+                        bank_name: bankName,
+                        account_name: accountName,
+                        account_number: accountNumber,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'id' });
+                if (saveError) throw saveError;
+
+                setStatus('Bank transfer details saved.');
+                showAdminToast('Bank transfer details saved successfully.');
+            } catch (saveError) {
+                console.error('[Admin] Could not save bank transfer settings:', saveError);
+                setStatus('Could not save bank details. Check the database migration and your admin access, then try again.', true);
+                showAdminToast('Could not save bank transfer details.', 'error');
+            } finally {
+                if (submitButton) submitButton.disabled = false;
+            }
+        });
+    }
+
     // Initialize Admin Module
     async function initAdmin() {
         const authorized = await verifyAdminRole();
@@ -1653,6 +1786,7 @@
         setupAdminLogout();
         setupAdminNavigation();
         setupActionForms();
+        await setupBankTransferSettings();
         const adminName = document.querySelector('[data-admin-name]');
         if (adminName) {
             adminName.textContent = adminState.currentProfile?.full_name
