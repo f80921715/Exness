@@ -252,7 +252,7 @@
 
                 <div x-show="paymentMethod === 'crypto'" class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                     <!-- Left: Asset selection & Amount -->
-                    <div class="space-y-5">
+                    <form data-deposit-form :data-selected-asset="asset.toUpperCase()" :data-selected-network="asset" :data-selected-address="addresses[asset]" class="space-y-5">
                         <div>
                             <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Select Deposit Currency</label>
                             <div class="grid grid-cols-2 gap-3">
@@ -277,18 +277,24 @@
 
                         <div>
                             <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Deposit Amount ($ USD)</label>
-                            <input type="number" x-model="amount" placeholder="e.g. 5000" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-base font-bold text-white focus:outline-none focus:border-primary-500 placeholder-gray-600">
+                            <input type="number" name="depositAmount" min="0.01" step="0.01" required x-model="amount" placeholder="e.g. 5000" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-base font-bold text-white focus:outline-none focus:border-primary-500 placeholder-gray-600">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Transaction Hash / Proof (Optional)</label>
-                            <input type="text" placeholder="Paste TXID hash (optional)" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-primary-500 placeholder-gray-600">
+                            <label for="crypto-deposit-txid" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Transaction Hash (Optional)</label>
+                            <input id="crypto-deposit-txid" name="txid" type="text" placeholder="Paste TXID hash (optional)" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-primary-500 placeholder-gray-600">
                         </div>
 
-                        <button type="button" @click="if (window.brokerAccount?.deposit({ amount, asset: asset.toUpperCase(), network: asset, address: addresses[asset] })) { amount = ''; }" class="w-full py-3.5 bg-primary-500 hover:bg-primary-600 text-black font-bold rounded-xl shadow-md transition">
-                            Confirm Deposit
+                        <div>
+                            <label for="crypto-deposit-proof" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Proof of Payment <span class="text-red-400">*</span></label>
+                            <input id="crypto-deposit-proof" name="proof" type="file" accept="image/jpeg,image/png,image/webp" required class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-xs text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-primary-500 file:px-3 file:py-2 file:text-xs file:font-bold file:text-black">
+                            <p class="mt-2 text-[10px] text-gray-500">Upload a JPEG, PNG, or WebP image, up to 5 MB.</p>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 bg-primary-500 hover:bg-primary-600 text-black font-bold rounded-xl shadow-md transition">
+                            Submit Deposit for Review
                         </button>
-                    </div>
+                    </form>
 
                     <!-- Right: Wallet Address & QR -->
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center space-y-4">
@@ -319,7 +325,20 @@
                     <button type="button" @click="bankTransferOpen = true" class="mt-5 rounded-xl bg-primary-500 px-5 py-3 text-sm font-bold text-black transition hover:bg-primary-600">
                         View bank details
                     </button>
+                    <form data-deposit-form data-selected-asset="Bank Transfer" data-selected-network="Bank Transfer" class="mt-6 space-y-4 text-left">
+                        <div>
+                            <label for="bank-deposit-amount" class="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-400">Deposit Amount ($ USD)</label>
+                            <input id="bank-deposit-amount" name="depositAmount" type="number" min="0.01" step="0.01" required placeholder="e.g. 5000" class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-base font-bold text-white placeholder-gray-600 focus:border-primary-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="bank-deposit-proof" class="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-400">Proof of Payment <span class="text-red-400">*</span></label>
+                            <input id="bank-deposit-proof" name="proof" type="file" accept="image/jpeg,image/png,image/webp" required class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-xs text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-primary-500 file:px-3 file:py-2 file:text-xs file:font-bold file:text-black">
+                            <p class="mt-2 text-[10px] text-gray-500">Upload a JPEG, PNG, or WebP image, up to 5 MB.</p>
+                        </div>
+                        <button type="submit" class="w-full rounded-xl bg-primary-500 py-3.5 font-bold text-black shadow-md transition hover:bg-primary-600">Submit Deposit for Review</button>
+                    </form>
                 </div>
+                <p data-deposit-success hidden role="status" class="mt-5 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm font-semibold text-green-400">Deposit request submitted. Your proof of payment is available to the admin team for review.</p>
             </div>
         </main>
 

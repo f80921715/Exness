@@ -572,7 +572,7 @@
         showToast: showAppleToast,
 
         // 1. DEPOSIT
-        async deposit({ amount, asset, network, address, txid }) {
+        async deposit({ amount, asset, network, address, txid, proofFile }) {
             if (accountSuspended && !accountTopUpRequired) {
                 showAppleToast('Your account is suspended and cannot make deposits.', 'error');
                 return false;
@@ -584,12 +584,42 @@
                 return false;
             }
 
+            const allowedProofTypes = {
+                'image/jpeg': 'jpg',
+                'image/png': 'png',
+                'image/webp': 'webp'
+            };
+            if (!proofFile || !allowedProofTypes[proofFile.type]) {
+                showAppleToast('Choose a JPEG, PNG, or WebP image as proof of payment.', 'error');
+                return false;
+            }
+            if (proofFile.size > 5 * 1024 * 1024) {
+                showAppleToast('The proof image must be 5 MB or smaller.', 'error');
+                return false;
+            }
+            if (!currentUser?.id) {
+                showAppleToast('Your session expired. Sign in again before submitting this deposit.', 'error');
+                return false;
+            }
+
             const transactionId = txid || ('TX-' + Math.floor(1000000 + Math.random() * 9000000));
             const depositAsset = asset || 'USDT';
             const depositNetwork = network || 'TRC-20';
             let savedDeposit;
+            let proofPath;
+            let proofUploaded = false;
             try {
-                if (!currentUser?.id) throw new Error('Your session expired. Sign in again before submitting this deposit.');
+                proofPath = `${currentUser.id}/${crypto.randomUUID()}.${allowedProofTypes[proofFile.type]}`;
+                const { error: uploadError } = await client.storage
+                    .from('deposit-proofs')
+                    .upload(proofPath, proofFile, {
+                        contentType: proofFile.type,
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+                if (uploadError) throw uploadError;
+                proofUploaded = true;
+
                 const { data, error } = await client.from('deposits').insert({
                     user_id: currentUser.id,
                     txid: transactionId,
@@ -597,11 +627,24 @@
                     network: depositNetwork,
                     address: address || '',
                     amount: num,
+                    proof_path: proofPath,
                     status: 'pending'
                 }).select('id, created_at').single();
                 if (error) throw error;
                 savedDeposit = data;
             } catch (error) {
+                if (proofUploaded) {
+                    try {
+                        const { error: cleanupError } = await client.storage
+                            .from('deposit-proofs')
+                            .remove([proofPath]);
+                        if (cleanupError) {
+                            console.error('[Dashboard] An unlinked deposit proof could not be removed:', cleanupError);
+                        }
+                    } catch (cleanupError) {
+                        console.error('[Dashboard] An unlinked deposit proof could not be removed:', cleanupError);
+                    }
+                }
                 console.error('[Dashboard] Deposit request could not be saved:', error);
                 showAppleToast(error.message || 'Unable to submit deposit for review.', 'error');
                 return false;
@@ -2071,8 +2114,7 @@
     // Setup forms across dashboard
     function setupPageForms() {
         // 1. DEPOSIT PAGE
-        const depositForm = document.querySelector('[data-deposit-form]');
-        if (depositForm) {
+        document.querySelectorAll('[data-deposit-form]').forEach((depositForm) => {
             depositForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const submitButton = depositForm.querySelector('[type="submit"]');
@@ -2082,11 +2124,20 @@
                 const network = depositForm.dataset.selectedNetwork || 'TRC-20';
                 const address = depositForm.dataset.selectedAddress || '';
                 const amount = amountInput ? amountInput.value : 0;
+                const proofFile = depositForm.querySelector('[name="proof"]')?.files?.[0];
+                const txid = String(depositForm.querySelector('[name="txid"]')?.value || '').trim();
 
                 if (submitButton) submitButton.disabled = true;
                 try {
-                    if (await brokerAccount.deposit({ amount, asset, network, address })) {
-                        if (amountInput) amountInput.value = '';
+                    if (await brokerAccount.deposit({ amount, asset, network, address, txid, proofFile })) {
+                        if (amountInput) {
+                            amountInput.value = '';
+                            amountInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                        const txidInput = depositForm.querySelector('[name="txid"]');
+                        if (txidInput) txidInput.value = '';
+                        const proofInput = depositForm.querySelector('[name="proof"]');
+                        if (proofInput) proofInput.value = '';
                         const successBox = document.querySelector('[data-deposit-success]');
                         if (successBox) {
                             successBox.hidden = false;
@@ -2097,7 +2148,7 @@
                     if (submitButton) submitButton.disabled = false;
                 }
             });
-        }
+        });
 
         // 2. WITHDRAW PAGE
         document.querySelectorAll('form[data-withdraw-form]').forEach((withdrawForm) => {

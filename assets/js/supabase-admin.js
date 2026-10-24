@@ -18,6 +18,7 @@
         selectedUserId: null,
         selectedUser: null,
         selectedUserTransactions: [],
+        selectedUserDeposits: [],
         metrics: {
             totalUsers: 0,
             activeUsers: 0,
@@ -354,6 +355,7 @@
             loadUserDetails(refreshedUser.id);
         } else {
             adminState.selectedUserTransactions = [];
+            adminState.selectedUserDeposits = [];
             renderUserDetailsPanel();
         }
     }
@@ -580,12 +582,14 @@
                     adminState.selectedUserId = null;
                     adminState.selectedUser = null;
                     adminState.selectedUserTransactions = [];
+                    adminState.selectedUserDeposits = [];
                     renderUserDetailsPanel();
                     renderUsersDirectory();
                 } else {
                     // Tap on another user dismisses previous and displays present user
                     adminState.selectedUserId = userId;
                     adminState.selectedUserTransactions = [];
+                    adminState.selectedUserDeposits = [];
                     loadUserDetails(userId);
                     renderUsersDirectory();
                     const card = document.querySelector('[data-admin-selected-user-card]');
@@ -622,26 +626,30 @@
     }
 
     function renderUserDetailsPanel() {
-        const panel = document.querySelector('[data-user-details-panel]');
-        const resetButton = document.querySelector('[data-user-detail-reset]');
+        const panels = Array.from(document.querySelectorAll('[data-user-details-panel]'));
+        const panel = panels[0];
+        const resetButtons = document.querySelectorAll('[data-user-detail-reset]');
         if (!panel) return;
 
         if (!adminState.selectedUser) {
-            panel.innerHTML = '<p class="admin-withdrawal-empty">Select any user from the directory to view their complete Supabase profile (Name, Email, Phone Number, Country, Balances, etc.).</p>';
-            if (resetButton) resetButton.classList.add('hidden');
+            panels.forEach((detailsPanel) => {
+                detailsPanel.innerHTML = '<p class="admin-withdrawal-empty">Select any user from the directory to view their complete Supabase profile (Name, Email, Phone Number, Country, Balances, etc.).</p>';
+            });
+            resetButtons.forEach((button) => button.classList.add('hidden'));
             return;
         }
 
-        if (resetButton) {
-            resetButton.classList.remove('hidden');
-            resetButton.onclick = () => {
+        resetButtons.forEach((button) => {
+            button.classList.remove('hidden');
+            button.onclick = () => {
                 adminState.selectedUserId = null;
                 adminState.selectedUser = null;
                 adminState.selectedUserTransactions = [];
+                adminState.selectedUserDeposits = [];
                 renderUserDetailsPanel();
                 renderUsersDirectory();
             };
-        }
+        });
 
         const user = adminState.selectedUser;
         const isSuspended = String(user.status || 'active').toLowerCase() === 'suspended';
@@ -662,6 +670,24 @@
                 </div>
             `).join('')
             : '<p class="text-xs text-gray-500 py-2">No recent transactions recorded for this account.</p>';
+        const depositProofs = adminState.selectedUserDeposits.length
+            ? adminState.selectedUserDeposits.map((deposit) => `
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 py-3 last:border-b-0 dark:border-gray-800">
+                    <div>
+                        <p class="text-xs font-bold text-gray-900 dark:text-white">${formatCurrency(deposit.amount, userCurrency)} · ${escapeHtml(deposit.asset || 'Deposit')}</p>
+                        <p class="mt-1 text-[10px] text-gray-500">${escapeHtml(deposit.network || 'Network')} · ${escapeHtml(deposit.status || 'pending')} · ${formatDateTime(deposit.created_at)}</p>
+                    </div>
+                    ${deposit.proof_path
+                        ? `<div class="flex items-center gap-2">
+                            <button type="button" data-download-deposit-proof="${escapeHtml(deposit.id)}" class="rounded-lg bg-primary-500 px-3 py-2 text-[10px] font-bold text-black transition hover:bg-primary-600">Download proof</button>
+                            ${deposit.proof_preview_url
+                                ? `<a href="${escapeHtml(deposit.proof_preview_url)}" target="_blank" rel="noopener noreferrer" aria-label="View full deposit proof image" title="View full image" class="block overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"><img src="${escapeHtml(deposit.proof_preview_url)}" alt="Deposit payment proof" loading="lazy" class="h-12 w-12 object-cover"></a>`
+                                : '<span class="text-[10px] text-gray-400">Preview unavailable</span>'}
+                        </div>`
+                        : '<span class="text-[10px] text-gray-400">No proof attached</span>'}
+                </div>
+            `).join('')
+            : '<p class="py-2 text-xs text-gray-500">No deposit requests recorded for this account.</p>';
 
         const actionText = isSuspended ? 'Activate user' : 'Suspend user';
         const actionClass = isSuspended ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600';
@@ -768,6 +794,11 @@
                     </div>
 
                     <div class="rounded-2xl border border-gray-200 p-4 dark:border-gray-700">
+                        <p class="mb-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Deposit Proofs</p>
+                        <div>${depositProofs}</div>
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-200 p-4 dark:border-gray-700">
                         <p class="mb-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Quick Balance Adjustment (${escapeHtml(userCurrency)})</p>
                         <div class="space-y-3">
                             <input type="number" min="0.01" step="0.01" data-admin-balance-amount placeholder="Enter amount in ${escapeHtml(userCurrency)}" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white">
@@ -780,6 +811,9 @@
                 </div>
             </div>
         `;
+        panels.slice(1).forEach((detailsPanel) => {
+            detailsPanel.innerHTML = panel.innerHTML;
+        });
 
         const fundBtn = panel.querySelector('[data-user-quick-fund-btn]');
         if (fundBtn) {
@@ -819,6 +853,12 @@
                 }
             });
         }
+
+        panels.forEach((detailsPanel) => {
+            detailsPanel.querySelectorAll('[data-download-deposit-proof]').forEach((button) => {
+                button.addEventListener('click', () => downloadSelectedDepositProof(button.dataset.downloadDepositProof));
+            });
+        });
 
         const balanceAmountInput = panel.querySelector('[data-admin-balance-amount]');
         const increaseButton = panel.querySelector('[data-admin-balance-increase]');
@@ -876,6 +916,7 @@
             adminState.selectedUserId = null;
             adminState.selectedUser = null;
             adminState.selectedUserTransactions = [];
+            adminState.selectedUserDeposits = [];
             renderUserDetailsPanel();
             renderUsersDirectory();
             return;
@@ -885,6 +926,7 @@
         adminState.selectedUserId = userId;
         adminState.selectedUser = selectedUser;
         adminState.selectedUserTransactions = [];
+        adminState.selectedUserDeposits = [];
 
         // Immediately dismiss previous profile and render present profile
         renderUserDetailsPanel();
@@ -893,21 +935,76 @@
             return;
         }
 
-        const { data, error } = await client
-            .from('transactions')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false })
-            .limit(10);
+        const [transactionsResult, depositsResult] = await Promise.all([
+            client
+                .from('transactions')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(10),
+            client
+                .from('deposits')
+                .select('id, user_id, amount, asset, network, status, created_at, proof_path')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(20)
+        ]);
 
         // Verify the user hasn't switched to another account while fetching
         if (adminState.selectedUserId === userId) {
-            if (!error && data) {
-                adminState.selectedUserTransactions = data;
+            if (!transactionsResult.error && transactionsResult.data) {
+                adminState.selectedUserTransactions = transactionsResult.data;
             } else {
                 adminState.selectedUserTransactions = [];
             }
+            if (!depositsResult.error && depositsResult.data) {
+                const depositsWithPreviews = await Promise.all(depositsResult.data.map(async (deposit) => {
+                    if (!deposit.proof_path) return deposit;
+                    const { data, error } = await client.storage
+                        .from('deposit-proofs')
+                        .createSignedUrl(deposit.proof_path, 300);
+                    if (error) {
+                        console.error(`[Admin] Deposit proof preview could not be loaded (${deposit.id}):`, error);
+                        return deposit;
+                    }
+                    return { ...deposit, proof_preview_url: data?.signedUrl || null };
+                }));
+                if (adminState.selectedUserId !== userId) return;
+                adminState.selectedUserDeposits = depositsWithPreviews;
+            } else {
+                adminState.selectedUserDeposits = [];
+                console.error('[Admin] User deposit proofs could not be loaded:', depositsResult.error);
+                showAdminToast('Could not load this user’s deposit proofs. Check the Phase 13 deposit proof migration.', 'error');
+            }
             renderUserDetailsPanel();
+        }
+    }
+
+    async function downloadSelectedDepositProof(depositId) {
+        const deposit = adminState.selectedUserDeposits.find((item) => item.id === depositId);
+        if (!deposit?.proof_path || !adminState.selectedUserId || deposit.user_id !== adminState.selectedUserId) {
+            showAdminToast('This deposit proof is not available for the selected user.', 'error');
+            return;
+        }
+
+        try {
+            const { data, error } = await client.storage
+                .from('deposit-proofs')
+                .createSignedUrl(deposit.proof_path, 60, { download: true });
+            if (error) throw error;
+            if (!data?.signedUrl) throw new Error('The storage service did not return a download link.');
+
+            const link = document.createElement('a');
+            link.href = data.signedUrl;
+            const extension = /\.(jpg|png|webp)$/i.exec(deposit.proof_path)?.[1] || 'image';
+            link.download = `deposit-proof-${deposit.id}.${extension}`;
+            link.rel = 'noopener';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('[Admin] Deposit proof download failed:', error);
+            showAdminToast('Could not download the deposit proof. Check the storage bucket and admin access.', 'error');
         }
     }
 
@@ -996,6 +1093,7 @@
                     adminState.selectedUserId = null;
                     adminState.selectedUser = null;
                     adminState.selectedUserTransactions = [];
+                    adminState.selectedUserDeposits = [];
                 }
                 overlay.hidden = true;
                 calculateMetrics();
