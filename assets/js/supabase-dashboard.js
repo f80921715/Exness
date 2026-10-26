@@ -694,7 +694,7 @@
                 title: normalizedUpgradeTier ? `${ACCOUNT_UPGRADE_PLANS[normalizedUpgradeTier].name} Upgrade Processing` : 'Deposit Processing',
                 detail: normalizedUpgradeTier
                     ? `Your ${ACCOUNT_UPGRADE_PLANS[normalizedUpgradeTier].name} account upgrade payment is being verified. Your tier updates when verification is complete.`
-                    : `Your deposit request of ${formatUSD(num)} via ${depositRecord.asset} is being processed and will be credited when verification is complete.`,
+                    : `Your deposit request of ${formatUSD(num)} via ${depositRecord.asset} is being processed. When verified, it will be added to Investment and will not be available for withdrawals.`,
                 icon: 'download',
                 time: 'Just now',
                 unread: true
@@ -1142,6 +1142,10 @@
         // 2. Balances across all pages
         document.querySelectorAll('[data-auth-balance]').forEach((el) => {
             el.textContent = formatUSD(data.balance);
+        });
+        document.querySelectorAll('[data-auth-total-balance]').forEach((el) => {
+            const totalBonusAndProfit = (Number(data.bonusBalance ?? data.bonus) || 0) + (Number(data.totalProfit) || 0);
+            el.textContent = formatUSD(totalBonusAndProfit);
         });
         document.querySelectorAll('[data-auth-active-invest]').forEach((el) => {
             el.textContent = formatUSD(data.activeInvest);
@@ -2236,7 +2240,7 @@
                             if (message) {
                                 message.textContent = upgradeTier
                                     ? `Your ${amountLabel} ${ACCOUNT_UPGRADE_PLANS[upgradeTier].name} upgrade payment request was submitted successfully. Your account type updates when payment verification is complete.`
-                                    : `Your ${amountLabel} deposit request was submitted successfully. It will be added to your available balance when payment verification is complete.`;
+                                    : `Your ${amountLabel} deposit request was submitted successfully. When verified, it will be added to Investment and will not be available for withdrawals.`;
                             }
                             successBox.hidden = false;
                             setTimeout(() => successBox.hidden = true, 5000);

@@ -55,7 +55,7 @@
     <!-- Supabase Client & Admin Logic -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="../assets/js/supabase-client.js" defer></script>
-    <script src="../assets/js/supabase-admin.js?v=pending-deposits-20261026" defer></script>
+    <script src="../assets/js/supabase-admin.js?v=balance-breakdown-20261026" defer></script>
 
     <!-- App Styles -->
     <link rel="stylesheet" href="../assets/css/style.css?v=admin-withdrawal-queue-20261003-2">
@@ -334,10 +334,10 @@
                             <option value="investment-static">Investment (Static)</option>
                             <option value="investment-deduct">Investment (Deduction)</option>
                         </optgroup>
-                        <optgroup label="Total Balance">
-                            <option value="total-balance-add">Total Balance (Addition)</option>
-                            <option value="total-balance-static">Total Balance (Static)</option>
-                            <option value="total-balance-deduct">Total Balance (Deduction)</option>
+                        <optgroup label="Available Balance">
+                            <option value="available-balance-add">Available Balance (Addition)</option>
+                            <option value="available-balance-static">Available Balance (Static)</option>
+                            <option value="available-balance-deduct">Available Balance (Deduction)</option>
                         </optgroup>
                         <optgroup label="Total Bonus">
                             <option value="total-bonus-add">Total Bonus (Addition)</option>
@@ -618,7 +618,7 @@
                             <th class="py-3 px-4">User</th>
                             <th class="py-3 px-4">Role</th>
                             <th class="py-3 px-4">Status</th>
-                            <th class="py-3 px-4">Balance</th>
+                            <th class="py-3 px-4">Total Balance</th>
                             <th class="py-3 px-4">Joined Date</th>
                             <th class="py-3 px-4">Actions</th>
                         </tr>

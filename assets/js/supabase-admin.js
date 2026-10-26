@@ -618,8 +618,8 @@
                     </div>
                     <div class="admin-user-side-col">
                         <div class="admin-user-balances-summary">
-                            <span class="main-balance">${formatCurrency(u.balance || 0, currency)}</span>
-                            <span class="sub-balance">Invest: ${formatCurrency(u.active_invest || 0, currency)} · Profit: ${formatCurrency(u.total_profit || 0, currency)}</span>
+                            <span class="main-balance">Total: ${formatCurrency((Number(u.bonus_balance) || 0) + (Number(u.total_profit) || 0), currency)}</span>
+                            <span class="sub-balance">Available: ${formatCurrency(u.balance || 0, currency)} · Bonus: ${formatCurrency(u.bonus_balance || 0, currency)} · Profit: ${formatCurrency(u.total_profit || 0, currency)}</span>
                         </div>
                         <div class="admin-user-action-buttons">
                             <button type="button" data-user-view-info="${escapeHtml(u.id)}" class="is-primary ${isSelected ? 'is-active' : ''}">
@@ -792,6 +792,10 @@
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
                             <p class="text-gray-400">Total Balance</p>
+                            <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency((Number(user.bonus_balance) || 0) + (Number(user.total_profit) || 0), userCurrency)}</p>
+                        </div>
+                        <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
+                            <p class="text-gray-400">Available Balance</p>
                             <p class="mt-1 font-bold text-gray-900 dark:text-white font-mono">${formatCurrency(user.balance, userCurrency)}</p>
                         </div>
                         <div class="rounded-xl bg-gray-50 p-3 dark:bg-gray-900/50">
@@ -1304,7 +1308,7 @@
                     </td>
                     <td class="py-3 px-4">${getRoleBadgeHTML(u.role)}</td>
                     <td class="py-3 px-4">${getStatusBadgeHTML(u.status)}</td>
-                    <td class="py-3 px-4 font-bold text-xs text-gray-900 dark:text-white font-mono">${formatCurrency(u.balance, getUserCurrency(u))}</td>
+                    <td class="py-3 px-4 font-bold text-xs text-gray-900 dark:text-white font-mono">${formatCurrency((Number(u.bonus_balance) || 0) + (Number(u.total_profit) || 0), getUserCurrency(u))}</td>
                     <td class="py-3 px-4 text-xs text-gray-400">${formatDate(u.created_at)}</td>
                     <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
@@ -1770,9 +1774,9 @@
                 'investment-add': ['investment', 'addition'],
                 'investment-static': ['investment', 'static'],
                 'investment-deduct': ['investment', 'deduction'],
-                'total-balance-add': ['total_balance', 'addition'],
-                'total-balance-static': ['total_balance', 'static'],
-                'total-balance-deduct': ['total_balance', 'deduction'],
+                'available-balance-add': ['total_balance', 'addition'],
+                'available-balance-static': ['total_balance', 'static'],
+                'available-balance-deduct': ['total_balance', 'deduction'],
                 'total-bonus-add': ['total_bonus', 'addition'],
                 'total-bonus-static': ['total_bonus', 'static'],
                 'total-bonus-deduct': ['total_bonus', 'deduction'],
