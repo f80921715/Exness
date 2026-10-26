@@ -29,7 +29,7 @@
     <script defer src="../assets/js/alpine.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="../assets/js/supabase-client.js" defer></script>
-    <script src="../assets/js/supabase-dashboard.js" defer></script>
+    <script src="../assets/js/supabase-dashboard.js?v=customer-copy-tier-layout-20261026" defer></script>
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('theme', {
@@ -168,6 +168,17 @@
                 </div>
                 <span data-user-status-pill class="inline-flex items-center rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-300">Active</span>
             </div>
+
+            <section aria-labelledby="account-type-heading" class="relative rounded-2xl border border-primary-500/20 bg-white p-6 shadow-sm dark:bg-[#141414]">
+                <div class="pr-32">
+                    <div>
+                        <h2 id="account-type-heading" class="text-base font-bold text-gray-900 dark:text-white">Account Type</h2>
+                        <p class="mt-1 text-xs text-gray-500">Your current account upgrade level.</p>
+                    </div>
+                    <p data-auth-account-tier-empty class="mt-3 text-xs font-semibold text-gray-500">Loading account type...</p>
+                </div>
+                <span data-auth-account-tier hidden class="absolute right-6 top-6"></span>
+            </section>
 
             <!-- Profile Info Form -->
             <div class="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">

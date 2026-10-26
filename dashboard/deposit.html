@@ -28,7 +28,7 @@
     <script src="../assets/js/icons.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="../assets/js/supabase-client.js" defer></script>
-    <script src="../assets/js/supabase-dashboard.js" defer></script>
+    <script src="../assets/js/supabase-dashboard.js?v=private-payment-choice-copy-20261026" defer></script>
     <script defer src="../assets/js/alpine.min.js"></script>
     <script>
         document.addEventListener('alpine:init', () => {
@@ -127,7 +127,7 @@
     </aside>
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col min-w-0" x-data="{ asset: 'btc', amount: '', copied: false, bankAccountCopied: false, paymentMethod: 'crypto', bankTransferOpen: false, bankTransferLoading: true, bankTransferError: '', bankTransferRealtimeVersion: 0, bankTransfer: { bank_name: '', account_name: '', account_number: '' },
+    <div class="flex-1 flex flex-col min-w-0" x-data="{ asset: 'btc', amount: '', copied: false, bankAccountCopied: false, paymentMethod: ['silver', 'gold', 'diamond', 'vip'].includes(new URLSearchParams(window.location.search).get('upgrade')) ? 'bank' : 'crypto', bankTransferOpen: false, bankTransferLoading: true, bankTransferError: '', bankTransferRealtimeVersion: 0, bankTransfer: { bank_name: '', account_name: '', account_number: '' },
         addresses: {
             'usdt-trc20': 'TX8mK5uQvQx2R9P9vL1Xy9Z5YwW6V5U4T3',
             'btc': 'bc1q2fykn5c9prp4t7a3xly3ulrj8paspvzmgzlt5u',
@@ -236,6 +236,12 @@
         <main class="p-6 sm:p-10 max-w-4xl mx-auto w-full space-y-6 pb-10">
             <div class="reference-card p-6 sm:p-8">
                 <h2 class="text-base font-bold mb-6">Fund Your Portfolio</h2>
+                <section data-upgrade-checkout hidden aria-live="polite" class="mb-6 rounded-2xl border border-primary-500/30 bg-primary-500/10 p-4">
+                    <p class="text-xs font-bold uppercase tracking-wider text-primary-500">Selected account upgrade</p>
+                    <h3 data-upgrade-checkout-name class="mt-1 text-lg font-black text-white"></h3>
+                    <p class="mt-1 text-sm text-gray-300">Amount due: <strong data-upgrade-checkout-price class="text-primary-400"></strong></p>
+                    <p class="mt-2 text-xs leading-5 text-gray-400">Choose your preferred payment method. Your account type updates after your payment is verified.</p>
+                </section>
                 <div class="mb-6">
                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Select Payment Method</label>
                     <div class="grid grid-cols-2 gap-3">
@@ -276,7 +282,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Deposit Amount ($ USD)</label>
+                            <label data-deposit-amount-label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Deposit Amount ($ USD)</label>
                             <input type="number" name="depositAmount" min="0.01" step="0.01" required x-model="amount" placeholder="e.g. 5000" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-base font-bold text-white focus:outline-none focus:border-primary-500 placeholder-gray-600">
                         </div>
 
@@ -292,7 +298,7 @@
                         </div>
 
                         <button type="submit" class="w-full py-3.5 bg-primary-500 hover:bg-primary-600 text-black font-bold rounded-xl shadow-md transition">
-                            Submit Deposit for Review
+                            Submit Deposit
                         </button>
                     </form>
 
@@ -327,7 +333,7 @@
                     </button>
                     <form data-deposit-form data-selected-asset="Bank Transfer" data-selected-network="Bank Transfer" class="mt-6 space-y-4 text-left">
                         <div>
-                            <label for="bank-deposit-amount" class="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-400">Deposit Amount ($ USD)</label>
+                            <label data-deposit-amount-label for="bank-deposit-amount" class="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-400">Deposit Amount ($ USD)</label>
                             <input id="bank-deposit-amount" name="depositAmount" type="number" min="0.01" step="0.01" required placeholder="e.g. 5000" class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-base font-bold text-white placeholder-gray-600 focus:border-primary-500 focus:outline-none">
                         </div>
                         <div>
@@ -335,10 +341,10 @@
                             <input id="bank-deposit-proof" name="proof" type="file" accept="image/jpeg,image/png,image/webp" required class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-xs text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-primary-500 file:px-3 file:py-2 file:text-xs file:font-bold file:text-black">
                             <p class="mt-2 text-[10px] text-gray-500">Upload a JPEG, PNG, or WebP image, up to 5 MB.</p>
                         </div>
-                        <button type="submit" class="w-full rounded-xl bg-primary-500 py-3.5 font-bold text-black shadow-md transition hover:bg-primary-600">Submit Deposit for Review</button>
+                        <button type="submit" class="w-full rounded-xl bg-primary-500 py-3.5 font-bold text-black shadow-md transition hover:bg-primary-600">Submit Deposit</button>
                     </form>
                 </div>
-                <p data-deposit-success hidden role="status" class="mt-5 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm font-semibold text-green-400">Deposit request submitted. Your proof of payment is available to the admin team for review.</p>
+                <p data-deposit-success hidden role="status" class="mt-5 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm font-semibold text-green-400"><span data-deposit-success-message></span> Your payment proof has been securely attached to the request.</p>
             </div>
         </main>
 

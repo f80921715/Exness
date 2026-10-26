@@ -14,6 +14,7 @@
         users: [],
         transactions: [],
         deposits: [],
+        pendingDeposits: [],
         withdrawals: [],
         selectedUserId: null,
         selectedUser: null,
@@ -145,6 +146,20 @@
             return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border border-purple-500/20">Admin</span>';
         }
         return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">User</span>';
+    }
+
+    function getAccountTierBadgeHTML(accountTier) {
+        const tiers = {
+            bronze: ['🥉 Bronze', 'border-amber-700/30 bg-amber-700/10 text-amber-700 dark:text-amber-300'],
+            silver: ['🥈 Silver', 'border-slate-400/30 bg-slate-400/10 text-slate-600 dark:text-slate-300'],
+            gold: ['🥇 Gold', 'border-yellow-500/30 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300'],
+            diamond: ['💎 Diamond', 'border-cyan-500/30 bg-cyan-500/10 text-cyan-700 dark:text-cyan-300'],
+            vip: ['👑 VIP', 'border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-300']
+        };
+        const tier = tiers[String(accountTier || '').trim().toLowerCase()];
+        return tier
+            ? `<span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${tier[1]}">${tier[0]}</span>`
+            : '<span class="text-[10px] text-gray-400">No upgrade</span>';
     }
 
     function getStatusBadgeHTML(status) {
@@ -328,6 +343,20 @@
                 adminState.withdrawals = withdrawals || [];
             }
 
+            const { data: pendingDeposits, error: depositsError } = await client
+                .from('deposits')
+                .select('id, user_id, amount, asset, network, address, txid, upgrade_tier, created_at, status, profiles(full_name, email, username, currency)')
+                .eq('status', 'pending')
+                .order('created_at', { ascending: true });
+
+            if (depositsError) {
+                console.error('[Admin] Pending deposits could not be loaded:', depositsError);
+                adminState.pendingDeposits = [];
+                showAdminToast('Unable to load pending deposits: ' + depositsError.message, 'error');
+            } else {
+                adminState.pendingDeposits = pendingDeposits || [];
+            }
+
             calculateMetrics();
             renderAdminDashboard();
 
@@ -381,7 +410,9 @@
         });
 
         const pendingWithdrawalCount = document.querySelector('[data-metric-pending-withdrawals]');
-        if (pendingWithdrawalCount) pendingWithdrawalCount.textContent = `${adminState.metrics.pendingWithdrawals} pending`;
+        if (pendingWithdrawalCount) {
+            pendingWithdrawalCount.textContent = `${adminState.pendingDeposits.length} deposits · ${adminState.metrics.pendingWithdrawals} withdrawals pending`;
+        }
         renderPendingWithdrawals();
         renderUsersDirectory();
         renderUsersTable();
@@ -414,10 +445,30 @@
             }, Math.max(0, nextOtpExpiry - Date.now() + 25));
         }
 
-        if (adminState.withdrawals.length === 0 && activeOtpUsers.length === 0) {
-            container.innerHTML = '<p class="admin-withdrawal-empty">No pending withdrawals.</p>';
+        if (adminState.pendingDeposits.length === 0 && adminState.withdrawals.length === 0 && activeOtpUsers.length === 0) {
+            container.innerHTML = '<p class="admin-withdrawal-empty">No pending deposits or withdrawals.</p>';
             return;
         }
+
+        const depositRows = adminState.pendingDeposits.map((deposit) => {
+            const userName = deposit.profiles?.full_name || deposit.profiles?.username || deposit.profiles?.email || 'Account holder';
+            const currency = getUserCurrency(adminState.users.find((user) => user.id === deposit.user_id) || deposit.profiles);
+            return `
+                <article class="admin-withdrawal-row">
+                    <div class="admin-withdrawal-copy">
+                        <div class="admin-withdrawal-heading">
+                            <strong>${escapeHtml(userName)}</strong>
+                            <time datetime="${escapeHtml(deposit.created_at || '')}">${escapeHtml(formatDateTime(deposit.created_at))}</time>
+                        </div>
+                        <p><span>${deposit.upgrade_tier ? `${escapeHtml(deposit.upgrade_tier.toUpperCase())} upgrade payment` : 'Deposit'} · ${escapeHtml(deposit.asset || 'USDT')} · ${escapeHtml(deposit.network || 'Network')}</span><span aria-hidden="true">·</span><span>${escapeHtml(deposit.txid || 'No transaction hash')}</span></p>
+                    </div>
+                    <strong class="admin-withdrawal-amount">${formatCurrency(deposit.amount, currency)}</strong>
+                    <div class="admin-withdrawal-actions">
+                        <button type="button" data-approve-deposit="${escapeHtml(deposit.id)}">Approve</button>
+                        <button type="button" data-reject-deposit="${escapeHtml(deposit.id)}">Reject</button>
+                    </div>
+                </article>`;
+        }).join('');
 
         const otpRows = activeOtpUsers.map((user) => {
             const otp = user.activeWithdrawalOtp;
@@ -457,7 +508,14 @@
                     </div>
                 </article>`;
         }).join('');
-        container.innerHTML = `${otpRows}${withdrawalRows}`;
+        container.innerHTML = `${depositRows}${otpRows}${withdrawalRows}`;
+
+        container.querySelectorAll('[data-approve-deposit]').forEach((button) => {
+            button.addEventListener('click', () => window.brokerAdmin.approveDeposit(button.dataset.approveDeposit));
+        });
+        container.querySelectorAll('[data-reject-deposit]').forEach((button) => {
+            button.addEventListener('click', () => window.brokerAdmin.rejectDeposit(button.dataset.rejectDeposit));
+        });
 
         container.querySelectorAll('[data-copy-withdrawal-otp]').forEach((button) => {
             button.addEventListener('click', async () => {
@@ -552,6 +610,7 @@
                             </div>
                             <div class="admin-user-badges">
                                 <span class="admin-user-badge-pill"><i data-lucide="globe"></i> ${escapeHtml(country)} · ${escapeHtml(currency)}</span>
+                                ${getAccountTierBadgeHTML(u.account_tier)}
                                 ${getRoleBadgeHTML(u.role)}
                                 ${getStatusBadgeHTML(u.status)}
                             </div>
@@ -718,6 +777,7 @@
                         <div>
                             <h3 class="text-base font-black text-gray-900 dark:text-white">${escapeHtml(getUserDisplayName(user))}</h3>
                             <p class="text-xs text-gray-500">${escapeHtml(user.email || 'No email on file')}</p>
+                            <div class="mt-2">${getAccountTierBadgeHTML(user.account_tier)}</div>
                         </div>
                     </div>
 
@@ -752,6 +812,7 @@
                         <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Supabase User Profile</p>
                         <div class="space-y-2 text-xs text-gray-600 dark:text-gray-300">
                             <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Full Name</span><span class="font-semibold text-gray-900 dark:text-white">${escapeHtml(user.full_name || 'Not provided')}</span></div>
+                            <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Account Upgrade</span><span>${getAccountTierBadgeHTML(user.account_tier)}</span></div>
                             <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Email Address</span><span class="font-semibold text-gray-900 dark:text-white break-all">${escapeHtml(user.email || 'Not provided')}</span></div>
                             <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Phone Number</span><span class="font-semibold text-gray-900 dark:text-white font-mono">${escapeHtml(user.phone || 'Not stored')}</span></div>
                             <div class="flex justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-800"><span>Country & Currency</span><span class="font-semibold text-gray-900 dark:text-white">${escapeHtml(user.country || 'Global')} (${escapeHtml(userCurrency)})</span></div>
@@ -1236,6 +1297,7 @@
                             </div>
                             <div>
                                 <div class="font-bold text-xs text-gray-900 dark:text-white">${escapeHtml(u.full_name || 'Investor')}</div>
+                                <div class="mt-1">${getAccountTierBadgeHTML(u.account_tier)}</div>
                                 <div class="text-[11px] text-gray-400 font-mono">${escapeHtml(u.email || '—')}</div>
                             </div>
                         </button>
@@ -1733,9 +1795,61 @@
             if (saved) fundForm.reset();
         });
 
-        document.querySelector('[data-admin-plan-form]')?.addEventListener('submit', (event) => {
+        document.querySelector('[data-admin-plan-form]')?.addEventListener('submit', async (event) => {
             event.preventDefault();
-            showAdminToast('Plan updates are not configured in the database.', 'error');
+            const planForm = event.currentTarget;
+            const formData = new FormData(planForm);
+            const userId = String(formData.get('user') || '');
+            const submittedTier = String(formData.get('plan') || '').trim().toLowerCase();
+            const supportedTiers = ['bronze', 'silver', 'gold', 'diamond', 'vip'];
+            if (!userId || (submittedTier !== 'none' && !supportedTiers.includes(submittedTier))) {
+                showAdminToast('Select a user and a valid account tier.', 'error');
+                return;
+            }
+
+            const user = adminState.users.find((record) => record.id === userId);
+            if (!user) {
+                showAdminToast('That user could not be found. Refresh the admin page and try again.', 'error');
+                return;
+            }
+
+            const nextTier = submittedTier === 'none' ? null : submittedTier;
+            const submitButton = planForm.querySelector('button[type="submit"]');
+            if (submitButton) submitButton.disabled = true;
+            try {
+                const { data, error } = await client
+                    .from('profiles')
+                    .update({ account_tier: nextTier, updated_at: new Date().toISOString() })
+                    .eq('id', userId)
+                    .select('*')
+                    .maybeSingle();
+                if (error) throw error;
+                if (!data) throw new Error('No account was updated. Refresh the admin page and try again.');
+
+                adminState.users = adminState.users.map((record) => record.id === userId ? { ...record, ...data } : record);
+                adminState.selectedUser = adminState.selectedUserId === userId
+                    ? { ...adminState.selectedUser, ...data }
+                    : adminState.selectedUser;
+                const previousTier = user.account_tier || 'none';
+                const tierLabel = nextTier ? nextTier.toUpperCase() : 'No upgrade';
+                await recordAdminAction(
+                    adminState.currentUser.id,
+                    'updated account tier',
+                    userId,
+                    `Admin changed ${user.email || 'user account'} account tier from ${String(previousTier).toUpperCase()} to ${tierLabel}.`
+                );
+
+                renderUsersDirectory();
+                renderUsersTable();
+                renderUserDetailsPanel();
+                showAdminToast(`Account tier updated to ${tierLabel}.`);
+                planForm.reset();
+            } catch (error) {
+                console.error('[Admin] Account tier update failed:', error);
+                showAdminToast(error.message || 'Unable to update this account tier.', 'error');
+            } finally {
+                if (submitButton) submitButton.disabled = false;
+            }
         });
 
         document.querySelector('[data-admin-wallet-form]')?.addEventListener('submit', (event) => {

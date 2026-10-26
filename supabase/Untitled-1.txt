@@ -1,0 +1,2 @@
+SUPABASE_URL=https://pevioptoprclqpzooniv.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_T0GfBIifcVR9ZmDIe64LtA_l7xUXS5M

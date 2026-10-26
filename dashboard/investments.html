@@ -29,7 +29,7 @@
     <script defer src="../assets/js/alpine.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="../assets/js/supabase-client.js" defer></script>
-    <script src="../assets/js/supabase-dashboard.js" defer></script>
+    <script src="../assets/js/supabase-dashboard.js?v=private-payment-choice-copy-20261026" defer></script>
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('theme', {
@@ -147,105 +147,46 @@
             </div>
         </header>
 
-<main class="p-6 sm:p-8 space-y-8 flex-1">
-            <!-- Active Subscribed Plan Details -->
-            <div data-active-plan-card hidden class="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-800">
-                    <div>
-                        <span class="text-xs font-bold text-amber-500 bg-amber-500/20 px-2.5 py-0.5 rounded-full uppercase">Currently Active</span>
-                        <h2 data-plan-name class="text-xl font-black mt-1">Gold 50% High-Yield Strategy</h2>
-                    </div>
-                    <div class="text-right">
-                        <div data-plan-profit class="text-sm font-bold text-green-500">+$0.00 Earned</div>
-                        <div class="text-xs text-gray-400">Capital: <strong data-plan-capital class="text-gray-900 dark:text-white">$0.00</strong></div>
-                    </div>
+<main class="flex-1 space-y-8 p-6 sm:p-8">
+            <section class="mx-auto max-w-5xl">
+                <div class="mb-7 text-center">
+                    <span class="text-xs font-bold uppercase tracking-[0.2em] text-primary-500">Account membership</span>
+                    <h1 class="mt-2 text-2xl font-black text-gray-900 dark:text-white sm:text-3xl">Available Account Upgrade Plans</h1>
+                    <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-gray-500">Choose your account tier to continue to secure payment.</p>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-center text-xs">
-                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
-                        <div class="text-gray-400">Daily Return Rate</div>
-                        <div data-plan-daily-payout class="text-base font-bold text-gray-900 dark:text-white mt-0.5">+2.38% / day</div>
-                    </div>
-                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
-                        <div class="text-gray-400">Strategy Status</div>
-                        <div class="text-base font-bold text-green-500 mt-0.5">Active & Accruing</div>
-                    </div>
-                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
-                        <div class="text-gray-400">Next Payout</div>
-                        <div class="text-base font-bold text-primary-500 mt-0.5">Today, 00:00 UTC</div>
-                    </div>
-                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
-                        <div class="text-gray-400">Principal Status</div>
-                        <div class="text-base font-bold text-green-500 mt-0.5">100% Protected</div>
-                    </div>
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <article class="flex flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-[#141414]">
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Silver</div>
+                        <h2 class="mt-3 text-2xl font-black text-gray-900 dark:text-white">R1,200</h2>
+                        <p class="mt-2 flex-1 text-xs leading-5 text-gray-500">Silver account upgrade. Your tier updates once your payment is verified.</p>
+                        <a href="deposit.html?upgrade=silver" class="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-gray-100 px-4 py-3 text-xs font-bold text-gray-900 transition hover:bg-primary-500 dark:bg-gray-800 dark:text-white dark:hover:bg-primary-500">Choose Silver</a>
+                    </article>
+
+                    <article class="flex flex-col rounded-2xl border border-yellow-500/30 bg-white p-6 shadow-sm dark:bg-[#141414]">
+                        <div class="text-xs font-bold uppercase tracking-wider text-yellow-600 dark:text-yellow-400">Gold</div>
+                        <h2 class="mt-3 text-2xl font-black text-gray-900 dark:text-white">R1,800</h2>
+                        <p class="mt-2 flex-1 text-xs leading-5 text-gray-500">Gold account upgrade. Your tier updates once your payment is verified.</p>
+                        <a href="deposit.html?upgrade=gold" class="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-gray-100 px-4 py-3 text-xs font-bold text-gray-900 transition hover:bg-primary-500 dark:bg-gray-800 dark:text-white dark:hover:bg-primary-500">Choose Gold</a>
+                    </article>
+
+                    <article class="flex flex-col rounded-2xl border border-cyan-500/30 bg-white p-6 shadow-sm dark:bg-[#141414]">
+                        <div class="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">Diamond</div>
+                        <h2 class="mt-3 text-2xl font-black text-gray-900 dark:text-white">R2,500</h2>
+                        <p class="mt-2 flex-1 text-xs leading-5 text-gray-500">Diamond account upgrade. Your tier updates once your payment is verified.</p>
+                        <a href="deposit.html?upgrade=diamond" class="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-gray-100 px-4 py-3 text-xs font-bold text-gray-900 transition hover:bg-primary-500 dark:bg-gray-800 dark:text-white dark:hover:bg-primary-500">Choose Diamond</a>
+                    </article>
+
+                    <article class="flex flex-col rounded-2xl border border-purple-500/30 bg-white p-6 shadow-sm dark:bg-[#141414]">
+                        <div class="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">VIP</div>
+                        <h2 class="mt-3 text-2xl font-black text-gray-900 dark:text-white">R3,050</h2>
+                        <p class="mt-2 flex-1 text-xs leading-5 text-gray-500">VIP account upgrade. Your tier updates once your payment is verified.</p>
+                        <a href="deposit.html?upgrade=vip" class="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-primary-500 px-4 py-3 text-xs font-bold text-black transition hover:bg-primary-600">Choose VIP</a>
+                    </article>
                 </div>
-            </div>
 
-            <div data-no-plan-card class="rounded-2xl border border-gray-200 bg-white p-10 text-center shadow-sm dark:border-gray-800 dark:bg-[#141414]">
-                <i data-lucide="pie-chart" class="mx-auto mb-4 h-10 w-10 text-gray-400"></i>
-                <h2 class="text-lg font-bold">No active investments</h2>
-                <p class="mt-2 text-sm text-gray-500">Subscribe to any strategy below to start earning automated daily yields.</p>
-            </div>
-
-            <!-- Available Packages Grid -->
-            <div>
-                <h3 class="text-lg font-bold mb-4">Subscribe to Additional Tier</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    
-                    <!-- Starter -->
-                    <div class="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                        <div>
-                            <span class="text-xs font-bold text-gray-400 uppercase">Starter Arbitrage</span>
-                            <div class="text-2xl font-black mt-2">15% ROI</div>
-                            <div class="text-xs text-gray-500">7 Days Duration</div>
-                            <div class="my-4 border-t border-b border-gray-100 dark:border-gray-800 py-3 space-y-2 text-xs">
-                                <div class="flex justify-between"><span>Min Deposit:</span> <strong>$500</strong></div>
-                                <div class="flex justify-between"><span>Max Deposit:</span> <strong>$4,999</strong></div>
-                                <div class="flex justify-between"><span>Payout:</span> <strong>Daily Compounding</strong></div>
-                            </div>
-                        </div>
-                        <button type="button" data-subscribe-plan data-plan-name="Starter Arbitrage" data-plan-capital="500" data-plan-rate="2.14" class="w-full py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-primary-500 hover:text-white rounded-xl text-xs font-bold transition">
-                            Invest $500 From Balance
-                        </button>
-                    </div>
-
-                    <!-- Silver -->
-                    <div class="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                        <div>
-                            <span class="text-xs font-bold text-blue-400 uppercase">Silver Strategy</span>
-                            <div class="text-2xl font-black mt-2">30% ROI</div>
-                            <div class="text-xs text-gray-500">14 Days Duration</div>
-                            <div class="my-4 border-t border-b border-gray-100 dark:border-gray-800 py-3 space-y-2 text-xs">
-                                <div class="flex justify-between"><span>Min Deposit:</span> <strong>$5,000</strong></div>
-                                <div class="flex justify-between"><span>Max Deposit:</span> <strong>$19,999</strong></div>
-                                <div class="flex justify-between"><span>Payout:</span> <strong>Daily Compounding</strong></div>
-                            </div>
-                        </div>
-                        <button type="button" data-subscribe-plan data-plan-name="Silver Strategy" data-plan-capital="5000" data-plan-rate="2.14" class="w-full py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-primary-500 hover:text-white rounded-xl text-xs font-bold transition">
-                            Invest $5,000 From Balance
-                        </button>
-                    </div>
-
-                    <!-- Prime -->
-                    <div class="bg-white dark:bg-[#141414] border-2 border-primary-500 rounded-2xl p-6 shadow-xl flex flex-col justify-between relative">
-                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-500 text-white text-[10px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full">VIP Allocation</span>
-                        <div>
-                            <span class="text-xs font-bold text-primary-400 uppercase">Prime Strategy</span>
-                            <div class="text-2xl font-black mt-2">85% ROI</div>
-                            <div class="text-xs text-gray-500">30 Days Duration</div>
-                            <div class="my-4 border-t border-b border-gray-100 dark:border-gray-800 py-3 space-y-2 text-xs">
-                                <div class="flex justify-between"><span>Min Deposit:</span> <strong>$50,000+</strong></div>
-                                <div class="flex justify-between"><span>Signal Access:</span> <strong class="text-green-500">Professional</strong></div>
-                                <div class="flex justify-between"><span>Personal Broker:</span> <strong class="text-primary-500">24/7 Support</strong></div>
-                            </div>
-                        </div>
-                        <button type="button" data-subscribe-plan data-plan-name="Prime Strategy" data-plan-capital="50000" data-plan-rate="2.83" class="w-full py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl text-xs font-bold transition">
-                            Join Prime Plan ($50,000)
-                        </button>
-                    </div>
-
-                </div>
-            </div>
+                <p class="mt-6 text-center text-xs leading-5 text-gray-500">Upgrade activation is subject to verification of your payment. The plan price is shown in South African rand (ZAR).</p>
+            </section>
         </main>
 
         <!-- Mobile Bottom Nav -->

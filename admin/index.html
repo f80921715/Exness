@@ -55,7 +55,7 @@
     <!-- Supabase Client & Admin Logic -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="../assets/js/supabase-client.js" defer></script>
-    <script src="../assets/js/supabase-admin.js" defer></script>
+    <script src="../assets/js/supabase-admin.js?v=pending-deposits-20261026" defer></script>
 
     <!-- App Styles -->
     <link rel="stylesheet" href="../assets/css/style.css?v=admin-withdrawal-queue-20261003-2">
@@ -200,12 +200,12 @@
             <section class="admin-form-card admin-pending-withdrawals">
                 <div class="admin-form-heading admin-withdrawals-heading">
                     <div>
-                        <h2>Pending withdrawals</h2>
+                        <h2>Pending deposits and withdrawals</h2>
                     </div>
                     <span class="admin-pending-count" data-metric-pending-withdrawals>0 pending</span>
                 </div>
                 <div class="admin-withdrawal-list" data-admin-pending-withdrawals aria-live="polite">
-                    <p class="admin-withdrawal-empty">Loading pending withdrawals...</p>
+                    <p class="admin-withdrawal-empty">Loading pending deposits and withdrawals...</p>
                 </div>
             </section>
         </main>
@@ -415,7 +415,8 @@
                     <label for="client-plan">Select Plan</label>
                     <select id="client-plan" name="plan" required>
                         <option value="">Select an Option from List</option>
-                        <option>BRONZE</option><option>SILVER</option><option>GOLD</option><option>DIAMOND</option><option>VIP</option>
+                        <option value="none">No upgrade</option>
+                        <option value="bronze">BRONZE</option><option value="silver">SILVER</option><option value="gold">GOLD</option><option value="diamond">DIAMOND</option><option value="vip">VIP</option>
                     </select>
                     <div class="admin-form-actions"><button type="submit">Save Changes</button></div>
                 </form>

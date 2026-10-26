@@ -46,6 +46,12 @@
     );
     const DASHBOARD_LANGUAGE_STORAGE_PREFIX = 'dashboard-language:';
     const EXCHANGE_RATE_CACHE_KEY = 'dashboard-usd-exchange-rates-v1';
+    const ACCOUNT_UPGRADE_PLANS = {
+        silver: { name: 'Silver', priceZar: 1200 },
+        gold: { name: 'Gold', priceZar: 1800 },
+        diamond: { name: 'Diamond', priceZar: 2500 },
+        vip: { name: 'VIP', priceZar: 3050 }
+    };
     const DASHBOARD_TRANSLATIONS = {
         en: {
             'nav.dashboard': 'Dashboard',
@@ -324,6 +330,8 @@
     // In-memory account store for active user
     let currentAccountData = null;
     let currentUser = null;
+    let currentAccountTier = '';
+    let accountTierLoadError = false;
     let saveTimeout = null;
     let accountSuspended = false;
     let accountTopUpRequired = false;
@@ -572,7 +580,7 @@
         showToast: showAppleToast,
 
         // 1. DEPOSIT
-        async deposit({ amount, asset, network, address, txid, proofFile }) {
+        async deposit({ amount, asset, network, address, txid, proofFile, upgradeTier }) {
             if (accountSuspended && !accountTopUpRequired) {
                 showAppleToast('Your account is suspended and cannot make deposits.', 'error');
                 return false;
@@ -605,6 +613,11 @@
             const transactionId = txid || ('TX-' + Math.floor(1000000 + Math.random() * 9000000));
             const depositAsset = asset || 'USDT';
             const depositNetwork = network || 'TRC-20';
+            const normalizedUpgradeTier = String(upgradeTier || '').trim().toLowerCase();
+            if (normalizedUpgradeTier && !ACCOUNT_UPGRADE_PLANS[normalizedUpgradeTier]) {
+                showAppleToast('Select a valid account upgrade plan.', 'error');
+                return false;
+            }
             let savedDeposit;
             let proofPath;
             let proofUploaded = false;
@@ -628,7 +641,8 @@
                     address: address || '',
                     amount: num,
                     proof_path: proofPath,
-                    status: 'pending'
+                    status: 'pending',
+                    upgrade_tier: normalizedUpgradeTier || null
                 }).select('id, created_at').single();
                 if (error) throw error;
                 savedDeposit = data;
@@ -646,7 +660,7 @@
                     }
                 }
                 console.error('[Dashboard] Deposit request could not be saved:', error);
-                showAppleToast(error.message || 'Unable to submit deposit for review.', 'error');
+                showAppleToast(error.message || 'Unable to submit deposit request.', 'error');
                 return false;
             }
 
@@ -677,8 +691,10 @@
 
             currentAccountData.notifications.unshift({
                 id: 'notif_' + Date.now(),
-                title: 'Deposit Pending Review',
-                detail: `Your deposit request of ${formatUSD(num)} via ${depositRecord.asset} is under admin review and will be credited once approved.`,
+                title: normalizedUpgradeTier ? `${ACCOUNT_UPGRADE_PLANS[normalizedUpgradeTier].name} Upgrade Processing` : 'Deposit Processing',
+                detail: normalizedUpgradeTier
+                    ? `Your ${ACCOUNT_UPGRADE_PLANS[normalizedUpgradeTier].name} account upgrade payment is being verified. Your tier updates when verification is complete.`
+                    : `Your deposit request of ${formatUSD(num)} via ${depositRecord.asset} is being processed and will be credited when verification is complete.`,
                 icon: 'download',
                 time: 'Just now',
                 unread: true
@@ -699,7 +715,9 @@
 
             persistAccountData();
             hydrateUI();
-            showAppleToast(`Deposit request of ${formatUSD(num)} submitted for review.`);
+            showAppleToast(normalizedUpgradeTier
+                ? `${ACCOUNT_UPGRADE_PLANS[normalizedUpgradeTier].name} upgrade payment submitted successfully.`
+                : `Deposit request of ${formatUSD(num)} submitted successfully.`);
             return true;
         },
 
@@ -751,7 +769,7 @@
                 savedWithdrawal = data;
             } catch (error) {
                 console.error('[Dashboard] Withdrawal request could not be saved:', error);
-                showAppleToast(error.message || 'Unable to submit withdrawal for approval.', 'error');
+                showAppleToast(error.message || 'Unable to submit withdrawal request.', 'error');
                 return false;
             }
 
@@ -784,7 +802,7 @@
             currentAccountData.notifications.unshift({
                 id: 'notif_' + Date.now(),
                 title: 'Withdrawal Request Submitted',
-                detail: `${formatUSD(net)} is awaiting approval and will be dispatched after review.`,
+                detail: `${formatUSD(net)} is being processed and will be dispatched when processing is complete.`,
                 icon: 'upload',
                 time: 'Just now',
                 unread: true
@@ -808,7 +826,7 @@
 
             persistAccountData();
             hydrateUI();
-            showAppleToast(`Withdrawal request of ${formatUSD(usdAmount)} submitted for approval.`);
+            showAppleToast(`Withdrawal request of ${formatUSD(usdAmount)} submitted successfully.`);
             return true;
         },
 
@@ -1067,6 +1085,34 @@
             else el.textContent = username;
         });
         document.querySelectorAll('[data-auth-username-label]').forEach((el) => { el.textContent = username; });
+        document.querySelectorAll('[data-auth-account-tier]').forEach((el) => {
+            const tier = String(currentAccountTier || '').trim().toLowerCase();
+            const tierDetails = {
+                bronze: { label: '🥉 Bronze', classes: 'text-amber-700 dark:text-amber-300' },
+                silver: { label: '🥈 Silver', classes: 'text-slate-600 dark:text-slate-300' },
+                gold: { label: '🥇 Gold', classes: 'text-yellow-700 dark:text-yellow-300' },
+                diamond: { label: '💎 Diamond', classes: 'text-cyan-700 dark:text-cyan-300' },
+                vip: { label: '👑 VIP', classes: 'text-purple-700 dark:text-purple-300' }
+            }[tier];
+            el.hidden = !tierDetails;
+            if (tierDetails) {
+                el.textContent = tierDetails.label;
+                if (el.closest('.reference-user-bar')) {
+                    el.className = `ml-auto shrink-0 text-xs font-black uppercase tracking-wider ${tierDetails.classes}`;
+                } else {
+                    el.className = `absolute right-6 top-6 text-xs font-black uppercase tracking-wider ${tierDetails.classes}`;
+                }
+            }
+        });
+        document.querySelectorAll('[data-auth-account-tier-empty]').forEach((el) => {
+            const hasTier = Boolean(String(currentAccountTier || '').trim());
+            el.hidden = hasTier;
+            if (!hasTier) {
+                el.textContent = accountTierLoadError
+                    ? 'Account type could not be loaded. Please refresh or contact support.'
+                    : 'No upgrade tier assigned';
+            }
+        });
         document.querySelectorAll('[data-auth-email]').forEach((el) => {
             if ('value' in el) el.value = currentUser.email || '';
             else el.textContent = currentUser.email || '';
@@ -2113,6 +2159,33 @@
 
     // Setup forms across dashboard
     function setupPageForms() {
+        const requestedUpgradeTier = new URLSearchParams(window.location.search).get('upgrade')?.trim().toLowerCase();
+        const upgradePlan = ACCOUNT_UPGRADE_PLANS[requestedUpgradeTier];
+        if (upgradePlan) {
+            const checkout = document.querySelector('[data-upgrade-checkout]');
+            const planName = document.querySelector('[data-upgrade-checkout-name]');
+            const planPrice = document.querySelector('[data-upgrade-checkout-price]');
+            if (checkout && planName && planPrice) {
+                checkout.hidden = false;
+                planName.textContent = `${upgradePlan.name} Account Upgrade`;
+                planPrice.textContent = `R${upgradePlan.priceZar.toLocaleString('en-ZA')}`;
+            }
+            document.querySelectorAll('[data-deposit-amount-label]').forEach((label) => {
+                label.textContent = 'Upgrade Payment Amount (ZAR)';
+            });
+            document.querySelectorAll('[data-deposit-form]').forEach((form) => {
+                form.dataset.upgradeTier = requestedUpgradeTier;
+                form.dataset.selectedAsset = `Account Upgrade - ${upgradePlan.name}`;
+                form.dataset.selectedNetwork = form.dataset.selectedNetwork === 'Bank Transfer' ? 'Bank Transfer' : 'Customer-selected crypto';
+                const input = form.querySelector('[name="depositAmount"]');
+                if (input) {
+                    input.value = String(upgradePlan.priceZar);
+                    input.readOnly = true;
+                    input.setAttribute('aria-label', `${upgradePlan.name} upgrade price in South African rand`);
+                }
+            });
+        }
+
         // 1. DEPOSIT PAGE
         document.querySelectorAll('[data-deposit-form]').forEach((depositForm) => {
             depositForm.addEventListener('submit', async (e) => {
@@ -2123,13 +2196,24 @@
                 const asset = depositForm.dataset.selectedAsset || 'USDT';
                 const network = depositForm.dataset.selectedNetwork || 'TRC-20';
                 const address = depositForm.dataset.selectedAddress || '';
-                const amount = amountInput ? amountInput.value : 0;
+                const enteredAmount = Number(amountInput?.value) || 0;
+                let amount = enteredAmount;
+                const upgradeTier = depositForm.dataset.upgradeTier || '';
+                if (upgradeTier) {
+                    await loadUsdExchangeRates();
+                    const zarPerUsd = Number(usdExchangeRates.ZAR);
+                    if (!Number.isFinite(zarPerUsd) || zarPerUsd <= 0) {
+                        showAppleToast('The ZAR exchange rate is unavailable. Please try again shortly.', 'error');
+                        return;
+                    }
+                    amount = Math.round((enteredAmount / zarPerUsd + Number.EPSILON) * 100) / 100;
+                }
                 const proofFile = depositForm.querySelector('[name="proof"]')?.files?.[0];
                 const txid = String(depositForm.querySelector('[name="txid"]')?.value || '').trim();
 
                 if (submitButton) submitButton.disabled = true;
                 try {
-                    if (await brokerAccount.deposit({ amount, asset, network, address, txid, proofFile })) {
+                    if (await brokerAccount.deposit({ amount, asset, network, address, txid, proofFile, upgradeTier })) {
                         if (amountInput) {
                             amountInput.value = '';
                             amountInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -2140,6 +2224,20 @@
                         if (proofInput) proofInput.value = '';
                         const successBox = document.querySelector('[data-deposit-success]');
                         if (successBox) {
+                            const amountLabel = upgradeTier
+                                ? `R${enteredAmount.toLocaleString('en-ZA')}`
+                                : new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: 'USD',
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }).format(enteredAmount);
+                            const message = successBox.querySelector('[data-deposit-success-message]');
+                            if (message) {
+                                message.textContent = upgradeTier
+                                    ? `Your ${amountLabel} ${ACCOUNT_UPGRADE_PLANS[upgradeTier].name} upgrade payment request was submitted successfully. Your account type updates when payment verification is complete.`
+                                    : `Your ${amountLabel} deposit request was submitted successfully. It will be added to your available balance when payment verification is complete.`;
+                            }
                             successBox.hidden = false;
                             setTimeout(() => successBox.hidden = true, 5000);
                         }
@@ -2504,10 +2602,10 @@
 
         const normalizedDecision = String(decision || '').toLowerCase();
         const approved = normalizedDecision === 'approved' || normalizedDecision === 'confirmed' || normalizedDecision === 'processed';
-        const title = approved ? `${type.charAt(0).toUpperCase() + type.slice(1)} approved` : `${type.charAt(0).toUpperCase() + type.slice(1)} declined`;
+        const title = approved ? `${type.charAt(0).toUpperCase() + type.slice(1)} processed` : `${type.charAt(0).toUpperCase() + type.slice(1)} not completed`;
         const detail = approved
-            ? `Your ${type} has been approved.`
-            : `Your ${type} has been declined.`;
+            ? `Your ${type} of ${formatUSD(amount)} has been processed.`
+            : `Your ${type} of ${formatUSD(amount)} could not be completed.`;
 
         const existing = (currentAccountData.notifications || []).some((item) => item.sourceId === sourceId);
         if (existing) return;
@@ -2571,11 +2669,13 @@
         try {
             const { data: profile, error: profileErr } = await client
                 .from('profiles')
-                .select('balance, bonus_balance, status, total_withdrawn, active_invest, total_profit, updated_at')
+                .select('balance, bonus_balance, status, account_tier, total_withdrawn, active_invest, total_profit, updated_at')
                 .eq('id', currentUser.id)
                 .maybeSingle();
 
             if (!profileErr && profile) {
+                currentAccountTier = profile.account_tier || '';
+                accountTierLoadError = false;
                 const latestBalance = Number(profile.balance) || 0;
                 if (Number(currentAccountData?.balance || 0) !== latestBalance) {
                     currentAccountData.balance = latestBalance;
@@ -2645,9 +2745,9 @@
                     const previousStatus = String(previous.status || '').toLowerCase();
                     if (previousStatus !== currentStatus && previousStatus === 'pending') {
                         if (currentStatus === 'confirmed' || currentStatus === 'processed') {
-                            pushAdminDecisionNotification('deposit', Number(deposit.amount) || 0, 'approved', `deposit:${deposit.id}`);
+                            pushAdminDecisionNotification('deposit', Number(deposit.amount) || 0, 'approved', `deposit:${deposit.id}`, false);
                         } else if (currentStatus === 'rejected') {
-                            pushAdminDecisionNotification('deposit', Number(deposit.amount) || 0, 'declined', `deposit:${deposit.id}`);
+                            pushAdminDecisionNotification('deposit', Number(deposit.amount) || 0, 'declined', `deposit:${deposit.id}`, false);
                         }
                     }
                 });
@@ -2721,17 +2821,23 @@
         try {
             const { data: profileData, error: profileError } = await client
                 .from('profiles')
-                .select('status, role')
+                .select('status, role, account_tier')
                 .eq('id', currentUser.id)
                 .maybeSingle();
 
-            if (!profileError && profileData) {
+            if (profileError) {
+                accountTierLoadError = true;
+                console.error('[Dashboard] Account type could not be loaded:', profileError);
+            } else if (profileData) {
                 accountSuspended = String(profileData.status || 'active').toLowerCase() === 'suspended';
                 accountTopUpRequired = String(profileData.status || 'active').toLowerCase() === 'topup_required';
+                currentAccountTier = profileData.account_tier || '';
+                accountTierLoadError = false;
                 accountTopUpRequired = String(profileData.status || 'active').toLowerCase() === 'topup_required';
             }
         } catch (statusErr) {
-            console.warn('Suspension status lookup failed:', statusErr);
+            accountTierLoadError = true;
+            console.error('[Dashboard] Account profile could not be loaded:', statusErr);
         }
 
         // Load and sync user account data
@@ -2758,15 +2864,21 @@
             try {
                 const { data: profileData, error: profileError } = await client
                     .from('profiles')
-                    .select('status, role')
+                    .select('status, role, account_tier')
                     .eq('id', currentUser.id)
                     .maybeSingle();
 
-                if (!profileError && profileData) {
+                if (profileError) {
+                    accountTierLoadError = true;
+                    console.error('[Dashboard] Account type could not be loaded:', profileError);
+                } else if (profileData) {
                     accountSuspended = String(profileData.status || 'active').toLowerCase() === 'suspended';
+                    currentAccountTier = profileData.account_tier || '';
+                    accountTierLoadError = false;
                 }
             } catch (statusErr) {
-                console.warn('Suspension status lookup failed:', statusErr);
+                accountTierLoadError = true;
+                console.error('[Dashboard] Account profile could not be loaded:', statusErr);
             }
 
             loadAccountData(session.user);
